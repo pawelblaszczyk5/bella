@@ -1,0 +1,40 @@
+# cspell:ignore esbuild, unrs, jotai, nuqs, xyflow
+packages:
+  - apps/*
+  - packages/*
+  - tooling/*
+
+allowUnusedPatches: false
+
+catalog:
+  "@types/node": ^24.2.0
+  eslint: ^9.32.0
+  babel-plugin-react-compiler: 19.1.0-rc.2
+  typescript: ^5.9.2
+  vite: ^7.0.6
+  vite-plugin-inspect: ^11.3.2
+  "@vitejs/plugin-react": ^4.7.0
+  "@types/react": ^19.1.9
+  "@types/react-dom": ^19.1.7
+  "@stylexjs/babel-plugin": ^0.15.2
+  "@stylexjs/postcss-plugin": ^0.15.2
+  "@stylexjs/stylex": ^0.15.2
+  react: 0.0.0-experimental-bdb4a96f-20250801
+  react-dom: 0.0.0-experimental-bdb4a96f-20250801
+  "@vitejs/plugin-rsc": https://pkg.pr.new/vitejs/vite-plugin-react/@vitejs/plugin-rsc-experimental@49d4197
+
+onlyBuiltDependencies:
+  - esbuild
+  - unrs-resolver
+
+overrides:
+  eslint-import-resolver-typescript>eslint-plugin-import: "-"
+  vite: "npm:rolldown-vite@latest"
+
+engineStrict: true
+packageManagerStrictVersion: true
+saveWorkspaceProtocol: true
+linkWorkspacePackages: true
+managePackageManagerVersions: false
+verifyDepsBeforeRun: "error"
+strictDepBuilds: true

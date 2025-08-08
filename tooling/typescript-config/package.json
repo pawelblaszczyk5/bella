@@ -1,0 +1,10 @@
+{
+	"name": "@bella/typescript-config",
+	"description": "Shared TypeScript config",
+	"files": [
+		"node-build.json",
+		"dom-build.json",
+		"node-no-build.json",
+		"dom-no-build.json"
+	]
+}

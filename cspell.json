@@ -1,0 +1,11 @@
+{
+	"$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+	"version": "0.2",
+	"import": ["@cspell/dict-pl_pl/cspell-ext.json"],
+	"ignorePaths": ["pnpm-lock.yaml", "cspell.json", "**.svg", ".git/", ".gitignore", ".vscode/", "LICENSE.md"],
+	"dictionaries": ["lorem-ipsum"],
+	"useGitignore": true,
+	"words": ["codeowner", "lingui", "rolldown", "stylex", "stylexjs", "typecheck", "vite", "vitejs"],
+	"enableGlobDot": true,
+	"ignoreWords": ["pawelblaszczyk", "predev", "taze", "tseslint"]
+}
