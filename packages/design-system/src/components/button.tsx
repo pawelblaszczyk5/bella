@@ -7,7 +7,7 @@ const styles = stylex.create({ root: { backgroundColor: color.primary } });
 export const Button = () => (
 	<button
 		onClick={() => {
-			// eslint-disable-next-line no-alert -- temporary for testing client boundaries
+			// eslint-disable-next-line no-alert -- temporary for testing
 			alert("Hello world");
 		}}
 		type="button"
