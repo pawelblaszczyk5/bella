@@ -16,7 +16,11 @@
 	},
 	"dependencies": {
 		"@bella/design-system": "workspace:*",
+		"@bella/cluster-api": "workspace:*",
 		"@bella/stylex": "workspace:*",
+		"effect": "catalog:",
+		"@effect/platform": "catalog:",
+		"@effect/platform-node": "catalog:",
 		"@tanstack/react-router": "^1.131.2",
 		"@tanstack/react-start": "^1.131.2",
 		"react": "catalog:",
