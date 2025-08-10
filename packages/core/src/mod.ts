@@ -141,14 +141,16 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					Effect.gen(function* () {
 						const stream = AiLanguageModel.streamText({
 							prompt: [AiInput.UserMessage.make({ parts: [AiInput.TextPart.make({ text: userMessageTextContent })] })],
-						}).pipe(Stream.tapBoth({ onFailure: Effect.log, onSuccess: Effect.log }));
+						});
 
 						const messagePartIdRef = yield* Ref.make<Option.Option<TextMessagePartModel["id"]>>(Option.none());
 
 						yield* Stream.runForEach(
 							stream,
 							Effect.fn(function* (response) {
-								const partTextContent = response.text;
+								if (response.text.length === 0) {
+									return;
+								}
 
 								const messagePartId = yield* Ref.get(messagePartIdRef);
 
@@ -160,21 +162,26 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 											createdAt: undefined,
 											id: messagePartId,
 											messageId: assistantMessageId,
-											textContent: partTextContent,
+											textContent: response.text,
 											type: "text",
 										});
 
 										yield* Ref.set(messagePartIdRef, Option.some(messagePartId));
 									}),
 									onSome: Effect.fn(function* (id) {
-										yield* updateTextMessagePartWithNewContent({ id, textContent: partTextContent });
+										yield* updateTextMessagePartWithNewContent({ id, textContent: response.text });
 									}),
 								});
 							}),
 						);
 
 						yield* completeMessage({ id: assistantMessageId });
-					}).pipe(Effect.provide(AiModel), Effect.catchAll(Effect.log)),
+					}).pipe(
+						Effect.provide(AiModel),
+						Effect.provideService(GoogleAiLanguageModel.Config, {
+							generationConfig: { thinkingConfig: { includeThoughts: true } },
+						}),
+					),
 				);
 
 				return result;
