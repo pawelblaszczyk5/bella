@@ -12,6 +12,7 @@
 		"clean": "find . -type d \\( -name \".turbo\" -o -name \"node_modules\" -o -name \"dist\" \\) -prune -exec rm -rf {} +",
 		"predev": "turbo run build --filter=\"./{packages,tooling}/*\"",
 		"dev": "turbo watch dev --experimental-write-cache",
+		"dev:packages": "turbo watch dev --filter=\"./packages/*\"",
 		"format": "prettier \".\" --check",
 		"format:fix": "prettier \".\" --write",
 		"lint": "turbo run lint",
