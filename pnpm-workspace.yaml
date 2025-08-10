@@ -1,4 +1,4 @@
-# cspell:ignore esbuild, unrs, jotai, nuqs, xyflow
+# cspell:ignore esbuild, msgpackr, unrs
 
 packages:
   - apps/*
@@ -8,6 +8,13 @@ packages:
 allowUnusedPatches: false
 
 catalog:
+  "@effect/cluster": ^0.47.0
+  "@effect/platform": ^0.90.1
+  "@effect/platform-node": ^0.95.0
+  "@effect/rpc": ^0.68.3
+  "@effect/sql": ^0.44.1
+  "@effect/sql-pg": ^0.45.0
+  "@effect/workflow": ^0.8.3
   "@stylexjs/babel-plugin": ^0.15.2
   "@stylexjs/postcss-plugin": ^0.15.2
   "@stylexjs/stylex": ^0.15.2
@@ -16,15 +23,19 @@ catalog:
   "@types/react-dom": ^19.1.7
   "@vitejs/plugin-react": ^5.0.0
   babel-plugin-react-compiler: 19.1.0-rc.2
+  effect: ^3.17.7
   eslint: ^9.33.0
   react: 0.0.0-experimental-be11cb5c-20250804
   react-dom: 0.0.0-experimental-be11cb5c-20250804
+  tsx: ^4.20.3
   typescript: ^5.9.2
   vite: ^7.1.1
+  wait-on: ^8.0.4
 
 onlyBuiltDependencies:
   - "@parcel/watcher"
   - esbuild
+  - msgpackr-extract
   - unrs-resolver
 
 overrides:
@@ -32,9 +43,9 @@ overrides:
   vite: npm:rolldown-vite@latest
 
 engineStrict: true
-packageManagerStrictVersion: true
-saveWorkspaceProtocol: true
 linkWorkspacePackages: true
 managePackageManagerVersions: false
-verifyDepsBeforeRun: "error"
+packageManagerStrictVersion: true
+saveWorkspaceProtocol: true
 strictDepBuilds: true
+verifyDepsBeforeRun: error

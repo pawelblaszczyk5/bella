@@ -5,7 +5,7 @@
 	"ignorePaths": ["pnpm-lock.yaml", "cspell.json", "**.svg", ".git/", ".gitignore", ".vscode/", "LICENSE.md"],
 	"dictionaries": ["lorem-ipsum"],
 	"useGitignore": true,
-	"words": ["codeowner", "lingui", "rolldown", "stylex", "stylexjs", "typecheck", "vite", "vitejs"],
+	"words": ["codeowner", "electricsql", "lingui", "rolldown", "stylex", "stylexjs", "typecheck", "vite", "vitejs"],
 	"enableGlobDot": true,
-	"ignoreWords": ["pawelblaszczyk", "predev", "taze", "tseslint"]
+	"ignoreWords": ["caddyfile", "pawelblaszczyk", "predev", "taze", "tseslint"]
 }

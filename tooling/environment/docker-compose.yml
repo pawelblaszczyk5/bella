@@ -1,5 +1,7 @@
 name: "bella"
 
+# cspell:ignore initdb, tmpfs, sslmode
+
 services:
   postgres:
     image: postgres:17.5-alpine

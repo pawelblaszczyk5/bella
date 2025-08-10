@@ -1,0 +1,35 @@
+{
+	"name": "@bella/cluster-shard-manager",
+	"description": "Cluster shard manager",
+	"sideEffects": false,
+	"type": "module",
+	"imports": {
+		"#src/*": "./src/*"
+	},
+	"scripts": {
+		"dev": "wait-on tcp:54321 && node --env-file=.env --import=tsx --watch ./src/mod.ts",
+		"lint": "eslint",
+		"lint:fix": "eslint --fix",
+		"preview": "node --import=tsx --watch ./src/mod.ts",
+		"typecheck": "tsc --build --noEmit"
+	},
+	"dependencies": {
+		"@bella/cluster-storage": "workspace:*",
+		"@effect/cluster": "catalog:",
+		"@effect/platform": "catalog:",
+		"@effect/platform-node": "catalog:",
+		"@effect/rpc": "catalog:",
+		"@effect/sql": "catalog:",
+		"@effect/sql-pg": "catalog:",
+		"@effect/workflow": "catalog:",
+		"effect": "catalog:",
+		"tsx": "catalog:"
+	},
+	"devDependencies": {
+		"@bella/eslint-config": "workspace:*",
+		"@bella/typescript-config": "workspace:*",
+		"@types/node": "catalog:",
+		"eslint": "catalog:",
+		"wait-on": "catalog:"
+	}
+}

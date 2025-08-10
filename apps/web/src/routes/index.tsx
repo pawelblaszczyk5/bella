@@ -26,4 +26,4 @@ const Home = () => {
 	);
 };
 
-export const Route = createFileRoute("/")({ component: Home, loader: async () => Math.random() });
+export const Route = createFileRoute("/")({ component: Home, loader: () => Math.random() });
