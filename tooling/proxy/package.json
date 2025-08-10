@@ -1,0 +1,9 @@
+{
+	"name": "@bella/proxy",
+	"description": "Proxy for local development with HTTPS and http2",
+	"type": "module",
+	"scripts": {
+		"dev": "caddy run -c Caddyfile.dev",
+		"preview": "caddy run -c Caddyfile.preview"
+	}
+}

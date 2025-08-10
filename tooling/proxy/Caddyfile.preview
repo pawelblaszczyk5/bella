@@ -1,0 +1,4 @@
+bella-preview.localhost {
+    reverse_proxy localhost:3000
+    encode gzip
+}

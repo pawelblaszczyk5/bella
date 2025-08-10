@@ -1,0 +1,4 @@
+bella-dev.localhost {
+    reverse_proxy localhost:5821
+    encode gzip
+}

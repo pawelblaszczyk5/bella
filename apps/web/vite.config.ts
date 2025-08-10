@@ -76,5 +76,6 @@ export default defineConfig((environment) => {
 			react({ babel: getBabelConfig(isDevelopment) }),
 			disableReactCompilerInSsrContext(),
 		],
+		server: { host: true, port: 5_821, strictPort: true },
 	};
 });
