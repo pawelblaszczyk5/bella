@@ -1,0 +1,10 @@
+{
+	"$schema": "../../node_modules/turbo/schema.json",
+	"extends": ["//"],
+	"tasks": {
+		"dev": { "persistent": true },
+		"build": { "outputs": [".nitro/**", ".output/**", ".tanstack/start/**"] },
+		"preview": { "persistent": true },
+		"typecheck": { "outputs": ["node_modules/.cache/tsbuildinfo/"] }
+	}
+}

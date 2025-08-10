@@ -1,0 +1,1 @@
+{ "extends": "@bella/typescript-config/node-no-build", "include": ["vite.config.ts"] }

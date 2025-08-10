@@ -1,0 +1,40 @@
+{
+	"name": "@bella/web",
+	"description": "Web app",
+	"sideEffects": false,
+	"type": "module",
+	"imports": {
+		"#src/*": "./src/*"
+	},
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite dev",
+		"lint": "eslint",
+		"lint:fix": "eslint --fix",
+		"preview": "node .output/server/index.mjs",
+		"typecheck": "tsc --build --noEmit"
+	},
+	"dependencies": {
+		"@bella/design-system": "workspace:*",
+		"@bella/stylex": "workspace:*",
+		"@tanstack/react-router": "^1.131.2",
+		"@tanstack/react-start": "^1.131.2",
+		"react": "catalog:",
+		"react-dom": "catalog:"
+	},
+	"devDependencies": {
+		"@babel/plugin-syntax-jsx": "^7.27.1",
+		"@babel/preset-typescript": "^7.27.1",
+		"@bella/eslint-config": "workspace:*",
+		"@bella/typescript-config": "workspace:*",
+		"@stylexjs/babel-plugin": "catalog:",
+		"@stylexjs/postcss-plugin": "catalog:",
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
+		"babel-plugin-react-compiler": "catalog:",
+		"eslint": "catalog:",
+		"vite": "catalog:"
+	}
+}
