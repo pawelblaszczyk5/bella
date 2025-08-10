@@ -15,14 +15,18 @@
 		"typecheck": "tsc --build --noEmit"
 	},
 	"dependencies": {
-		"@bella/design-system": "workspace:*",
 		"@bella/cluster-api": "workspace:*",
+		"@bella/core": "workspace:*",
+		"@bella/design-system": "workspace:*",
 		"@bella/stylex": "workspace:*",
-		"effect": "catalog:",
 		"@effect/platform": "catalog:",
 		"@effect/platform-node": "catalog:",
+		"@standard-schema/spec": "^1.0.0",
+		"@tanstack/electric-db-collection": "^0.1.1",
+		"@tanstack/react-db": "^0.1.1",
 		"@tanstack/react-router": "^1.131.2",
 		"@tanstack/react-start": "^1.131.2",
+		"effect": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:"
 	},

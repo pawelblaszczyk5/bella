@@ -1,0 +1,40 @@
+{
+	"name": "@bella/core",
+	"description": "Core business logic services",
+	"sideEffects": false,
+	"type": "module",
+	"imports": {
+		"#src/*": "./dist/src/*"
+	},
+	"exports": {
+		".": {
+			"default": "./dist/src/mod.js",
+			"types": "./dist/src/mod.d.ts"
+		},
+		"./schema": {
+			"default": "./dist/src/database/schema.js",
+			"types": "./dist/src/database/schema.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc --noCheck",
+		"dev": "tsc --noCheck",
+		"lint": "eslint",
+		"lint:fix": "eslint --fix",
+		"typecheck": "tsc --build --noEmit"
+	},
+	"dependencies": {
+		"@effect/experimental": "catalog:",
+		"@effect/platform": "catalog:",
+		"@effect/platform-node": "catalog:",
+		"@effect/sql": "catalog:",
+		"@effect/sql-pg": "catalog:",
+		"effect": "catalog:"
+	},
+	"devDependencies": {
+		"@bella/eslint-config": "workspace:*",
+		"@bella/typescript-config": "workspace:*",
+		"eslint": "catalog:",
+		"typescript": "catalog:"
+	}
+}

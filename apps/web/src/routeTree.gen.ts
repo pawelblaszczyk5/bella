@@ -8,11 +8,16 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createServerRootRoute } from '@tanstack/react-start/server'
+
 import { Route as rootRouteImport } from './routes/__root.tsx'
 import { Route as AppRouteImport } from './routes/app.tsx'
 import { Route as IndexRouteImport } from './routes/index.tsx'
 import { Route as AppIndexRouteImport } from './routes/app.index.tsx'
 import { Route as AppExampleRouteImport } from './routes/app.example.tsx'
+import { ServerRoute as ApiTodosServerRouteImport } from './routes/api.todos.ts'
+
+const rootServerRouteImport = createServerRootRoute()
 
 const AppRoute = AppRouteImport.update({
   id: '/app',
@@ -33,6 +38,11 @@ const AppExampleRoute = AppExampleRouteImport.update({
   id: '/example',
   path: '/example',
   getParentRoute: () => AppRoute,
+} as any)
+const ApiTodosServerRoute = ApiTodosServerRouteImport.update({
+  id: '/api/todos',
+  path: '/api/todos',
+  getParentRoute: () => rootServerRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -64,6 +74,27 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+}
+export interface FileServerRoutesByFullPath {
+  '/api/todos': typeof ApiTodosServerRoute
+}
+export interface FileServerRoutesByTo {
+  '/api/todos': typeof ApiTodosServerRoute
+}
+export interface FileServerRoutesById {
+  __root__: typeof rootServerRouteImport
+  '/api/todos': typeof ApiTodosServerRoute
+}
+export interface FileServerRouteTypes {
+  fileServerRoutesByFullPath: FileServerRoutesByFullPath
+  fullPaths: '/api/todos'
+  fileServerRoutesByTo: FileServerRoutesByTo
+  to: '/api/todos'
+  id: '__root__' | '/api/todos'
+  fileServerRoutesById: FileServerRoutesById
+}
+export interface RootServerRouteChildren {
+  ApiTodosServerRoute: typeof ApiTodosServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -98,6 +129,17 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+declare module '@tanstack/react-start/server' {
+  interface ServerFileRoutesByPath {
+    '/api/todos': {
+      id: '/api/todos'
+      path: '/api/todos'
+      fullPath: '/api/todos'
+      preLoaderRoute: typeof ApiTodosServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+  }
+}
 
 interface AppRouteChildren {
   AppExampleRoute: typeof AppExampleRoute
@@ -118,3 +160,9 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+const rootServerRouteChildren: RootServerRouteChildren = {
+  ApiTodosServerRoute: ApiTodosServerRoute,
+}
+export const serverRouteTree = rootServerRouteImport
+  ._addFileChildren(rootServerRouteChildren)
+  ._addFileTypes<FileServerRouteTypes>()

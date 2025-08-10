@@ -1,0 +1,40 @@
+diff --git a/dist/esm/types.d.ts b/dist/esm/types.d.ts
+index e5e99c47ad01628185beec16809071bd70fe5888..40bc160d37e03e1ed62d3ebcb2c8995e167a5245 100644
+--- a/dist/esm/types.d.ts
++++ b/dist/esm/types.d.ts
+@@ -220,7 +220,7 @@ export type CollectionStatus =
+ export interface CollectionConfig<T extends object = Record<string, unknown>, TKey extends string | number = string | number, TSchema extends StandardSchemaV1 = StandardSchemaV1, TInsertInput extends object = T> {
+     id?: string;
+     sync: SyncConfig<T, TKey>;
+-    schema?: TSchema;
++    schema?: TSchema | undefined;
+     /**
+      * Function to extract the ID from an object
+      * This is required for update/delete operations which now only accept IDs
+@@ -302,7 +302,7 @@ export interface CollectionConfig<T extends object = Record<string, unknown>, TK
+      *   })
+      * }
+      */
+-    onInsert?: InsertMutationFn<TInsertInput, TKey>;
++    onInsert?: InsertMutationFn<TInsertInput, TKey> | undefined;
+     /**
+      * Optional asynchronous handler function called before an update operation
+      * @param params Object containing transaction and collection information
+@@ -345,7 +345,7 @@ export interface CollectionConfig<T extends object = Record<string, unknown>, TK
+      *   }
+      * }
+      */
+-    onUpdate?: UpdateMutationFn<T, TKey>;
++    onUpdate?: UpdateMutationFn<T, TKey> | undefined;
+     /**
+      * Optional asynchronous handler function called before a delete operation
+      * @param params Object containing transaction and collection information
+@@ -388,7 +388,7 @@ export interface CollectionConfig<T extends object = Record<string, unknown>, TK
+      *   }
+      * }
+      */
+-    onDelete?: DeleteMutationFn<T, TKey>;
++    onDelete?: DeleteMutationFn<T, TKey> | undefined;
+ }
+ export type ChangesPayload<T extends object = Record<string, unknown>> = Array<ChangeMessage<T>>;
+ /**

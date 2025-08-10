@@ -8,6 +8,7 @@ import { createServer } from "node:http";
 import { ClusterApi } from "@bella/cluster-api";
 import { NumberGenerator, SendEmail } from "@bella/cluster-schema";
 import { ClusterStorageLayer } from "@bella/cluster-storage";
+import { TodoService } from "@bella/core";
 
 const ClusterApiLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 	Layer.provide(HttpApiSwagger.layer({ path: "/docs" })),
@@ -63,9 +64,13 @@ const SendEmailLive = SendEmail.toLayer(
 const CronTest = ClusterCron.make({
 	cron: Cron.unsafeParse("* * * * *"),
 	execute: Effect.gen(function* () {
+		const todoService = yield* TodoService;
+
 		const now = yield* DateTime.now;
 
 		yield* Effect.log(`Running cron at ${DateTime.formatIso(now)}`);
+
+		yield* todoService.createMock();
 	}),
 	name: "CronTest",
 });
@@ -100,6 +105,6 @@ const WorkflowsLive = Layer.mergeAll(SendEmailLive);
 const EnvironmentLive = Layer.mergeAll(
 	EntitiesLive.pipe(Layer.provide(WorkflowsLive), Layer.provide(WorkflowEngineLive)),
 	ClusterApiLive.pipe(Layer.provide(WorkflowEngineLive)),
-);
+).pipe(Layer.provide(TodoService.Default));
 
 EnvironmentLive.pipe(Layer.launch, NodeRuntime.runMain);

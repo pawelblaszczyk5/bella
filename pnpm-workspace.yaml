@@ -9,6 +9,7 @@ allowUnusedPatches: false
 
 catalog:
   "@effect/cluster": ^0.47.0
+  "@effect/experimental": ^0.54.5
   "@effect/platform": ^0.90.1
   "@effect/platform-node": ^0.95.0
   "@effect/rpc": ^0.68.3
@@ -32,6 +33,12 @@ catalog:
   vite: ^7.1.1
   wait-on: ^8.0.4
 
+engineStrict: true
+
+linkWorkspacePackages: true
+
+managePackageManagerVersions: false
+
 onlyBuiltDependencies:
   - "@parcel/watcher"
   - esbuild
@@ -41,10 +48,14 @@ onlyBuiltDependencies:
 overrides:
   eslint-import-resolver-typescript>eslint-plugin-import: "-"
 
-engineStrict: true
-linkWorkspacePackages: true
-managePackageManagerVersions: false
 packageManagerStrictVersion: true
+
+patchedDependencies:
+  "@tanstack/db": patches/@tanstack__db.patch
+  "@tanstack/electric-db-collection": patches/@tanstack__electric-db-collection.patch
+
 saveWorkspaceProtocol: true
+
 strictDepBuilds: true
+
 verifyDepsBeforeRun: error

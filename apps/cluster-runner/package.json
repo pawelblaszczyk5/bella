@@ -17,6 +17,7 @@
 		"@bella/cluster-api": "workspace:*",
 		"@bella/cluster-schema": "workspace:*",
 		"@bella/cluster-storage": "workspace:*",
+		"@bella/core": "workspace:*",
 		"@effect/cluster": "catalog:",
 		"@effect/platform": "catalog:",
 		"@effect/platform-node": "catalog:",

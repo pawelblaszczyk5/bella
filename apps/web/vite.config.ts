@@ -17,7 +17,6 @@ const typedStylexPlugin = stylexPlugin as (options: {
 
 const getBabelConfig = (isDevelopment: boolean) => ({
 	plugins: [
-		["babel-plugin-react-compiler", {}],
 		["@babel/plugin-syntax-jsx", {}],
 		[
 			"@stylexjs/babel-plugin",

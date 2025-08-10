@@ -244,6 +244,8 @@ export default tseslint.config(
 					allowList: {
 						args: true,
 						rel: true,
+						fn: true,
+						Fn: true,
 						Params: true,
 						params: true,
 						mod: true,
