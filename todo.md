@@ -1,3 +1,1 @@
-- Add secret to Electric
 - Make Tanstack DB collections dynamic
-- Report issues to Tanstack DB
