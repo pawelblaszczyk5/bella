@@ -40,7 +40,6 @@ onlyBuiltDependencies:
 
 overrides:
   eslint-import-resolver-typescript>eslint-plugin-import: "-"
-  vite: npm:rolldown-vite@latest
 
 engineStrict: true
 linkWorkspacePackages: true
