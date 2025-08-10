@@ -1,29 +1,10 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-import { Button } from "@bella/design-system/components/button";
-import stylex from "@bella/stylex";
+const Home = () => (
+	<>
+		<title>Home | Bella</title>
+		<h1>Example home screen that's SSR!</h1>
+	</>
+);
 
-const styles = stylex.create({ root: { backgroundColor: "violet" } });
-
-const Home = () => {
-	const router = useRouter();
-	const state = Route.useLoaderData();
-
-	return (
-		<>
-			<title>Test</title>
-			<button
-				onClick={() => {
-					void router.invalidate();
-				}}
-				type="button"
-				{...stylex.props(styles.root)}
-			>
-				Add 1 to {state}?
-			</button>
-			<Button />
-		</>
-	);
-};
-
-export const Route = createFileRoute("/")({ component: Home, loader: () => Math.random() });
+export const Route = createFileRoute("/")({ component: Home });
