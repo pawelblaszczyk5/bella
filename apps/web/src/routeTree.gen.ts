@@ -15,7 +15,9 @@ import { Route as AppRouteImport } from './routes/app.tsx'
 import { Route as IndexRouteImport } from './routes/index.tsx'
 import { Route as AppIndexRouteImport } from './routes/app.index.tsx'
 import { Route as AppExampleRouteImport } from './routes/app.example.tsx'
-import { ServerRoute as ApiTodosServerRouteImport } from './routes/api.todos.ts'
+import { ServerRoute as ApiMessagesServerRouteImport } from './routes/api.messages.ts'
+import { ServerRoute as ApiMessagePartsServerRouteImport } from './routes/api.message-parts.ts'
+import { ServerRoute as ApiConversationsServerRouteImport } from './routes/api.conversations.ts'
 
 const rootServerRouteImport = createServerRootRoute()
 
@@ -39,9 +41,19 @@ const AppExampleRoute = AppExampleRouteImport.update({
   path: '/example',
   getParentRoute: () => AppRoute,
 } as any)
-const ApiTodosServerRoute = ApiTodosServerRouteImport.update({
-  id: '/api/todos',
-  path: '/api/todos',
+const ApiMessagesServerRoute = ApiMessagesServerRouteImport.update({
+  id: '/api/messages',
+  path: '/api/messages',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const ApiMessagePartsServerRoute = ApiMessagePartsServerRouteImport.update({
+  id: '/api/message-parts',
+  path: '/api/message-parts',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const ApiConversationsServerRoute = ApiConversationsServerRouteImport.update({
+  id: '/api/conversations',
+  path: '/api/conversations',
   getParentRoute: () => rootServerRouteImport,
 } as any)
 
@@ -76,25 +88,33 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
 }
 export interface FileServerRoutesByFullPath {
-  '/api/todos': typeof ApiTodosServerRoute
+  '/api/conversations': typeof ApiConversationsServerRoute
+  '/api/message-parts': typeof ApiMessagePartsServerRoute
+  '/api/messages': typeof ApiMessagesServerRoute
 }
 export interface FileServerRoutesByTo {
-  '/api/todos': typeof ApiTodosServerRoute
+  '/api/conversations': typeof ApiConversationsServerRoute
+  '/api/message-parts': typeof ApiMessagePartsServerRoute
+  '/api/messages': typeof ApiMessagesServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
-  '/api/todos': typeof ApiTodosServerRoute
+  '/api/conversations': typeof ApiConversationsServerRoute
+  '/api/message-parts': typeof ApiMessagePartsServerRoute
+  '/api/messages': typeof ApiMessagesServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/todos'
+  fullPaths: '/api/conversations' | '/api/message-parts' | '/api/messages'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/todos'
-  id: '__root__' | '/api/todos'
+  to: '/api/conversations' | '/api/message-parts' | '/api/messages'
+  id: '__root__' | '/api/conversations' | '/api/message-parts' | '/api/messages'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
-  ApiTodosServerRoute: typeof ApiTodosServerRoute
+  ApiConversationsServerRoute: typeof ApiConversationsServerRoute
+  ApiMessagePartsServerRoute: typeof ApiMessagePartsServerRoute
+  ApiMessagesServerRoute: typeof ApiMessagesServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -131,11 +151,25 @@ declare module '@tanstack/react-router' {
 }
 declare module '@tanstack/react-start/server' {
   interface ServerFileRoutesByPath {
-    '/api/todos': {
-      id: '/api/todos'
-      path: '/api/todos'
-      fullPath: '/api/todos'
-      preLoaderRoute: typeof ApiTodosServerRouteImport
+    '/api/messages': {
+      id: '/api/messages'
+      path: '/api/messages'
+      fullPath: '/api/messages'
+      preLoaderRoute: typeof ApiMessagesServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/api/message-parts': {
+      id: '/api/message-parts'
+      path: '/api/message-parts'
+      fullPath: '/api/message-parts'
+      preLoaderRoute: typeof ApiMessagePartsServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/api/conversations': {
+      id: '/api/conversations'
+      path: '/api/conversations'
+      fullPath: '/api/conversations'
+      preLoaderRoute: typeof ApiConversationsServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
   }
@@ -161,7 +195,9 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 const rootServerRouteChildren: RootServerRouteChildren = {
-  ApiTodosServerRoute: ApiTodosServerRoute,
+  ApiConversationsServerRoute: ApiConversationsServerRoute,
+  ApiMessagePartsServerRoute: ApiMessagePartsServerRoute,
+  ApiMessagesServerRoute: ApiMessagesServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)

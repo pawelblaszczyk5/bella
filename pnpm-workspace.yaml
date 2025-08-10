@@ -8,6 +8,8 @@ packages:
 allowUnusedPatches: false
 
 catalog:
+  "@effect/ai": ^0.25.2
+  "@effect/ai-google": ^0.4.0
   "@effect/cluster": ^0.47.0
   "@effect/experimental": ^0.54.5
   "@effect/platform": ^0.90.1
@@ -53,6 +55,7 @@ packageManagerStrictVersion: true
 patchedDependencies:
   "@tanstack/db": patches/@tanstack__db.patch
   "@tanstack/electric-db-collection": patches/@tanstack__electric-db-collection.patch
+  prettier-plugin-sql@0.19.2: patches/prettier-plugin-sql.patch
 
 saveWorkspaceProtocol: true
 

@@ -7,9 +7,11 @@ Copyright (c) 2025 Shu Ding
 
 /* eslint-disable fp/no-loops -- that's how it's supposed to be */
 
-import { assert } from "#src/lib/assert.js";
+import { assert } from "@bella/assert";
 
 const SALT = "custom-salt-for-id-generation";
+
+const STEP = 2;
 
 const DEFAULT_ID_LENGTH = 16;
 
@@ -92,26 +94,16 @@ const sha1 = async (text: string) => {
 	return arrayBufferToHex(hashBuffer);
 };
 
-export const createId = async ({ approximateLength = DEFAULT_ID_LENGTH, salt = SALT, step = 2 } = {}) => {
-	if (approximateLength <= 0) {
-		throw new Error("ID length must be a positive integer");
-	}
-	if (approximateLength > MAX_ID_LENGTH) {
-		throw new Error(`ID length exceeds maximum of ${MAX_ID_LENGTH.toString()} characters`);
-	}
-	if (step <= 1) {
-		throw new Error("Step must be at least 2");
-	}
+export const generateId = async () => {
+	const hexLength = calculateHexLength(DEFAULT_ID_LENGTH);
 
-	const hexLength = calculateHexLength(approximateLength);
-
-	if (step > hexLength - 1) {
+	if (STEP > hexLength - 1) {
 		throw new Error(`Step cannot be greater than the data length: ${(hexLength - 1).toString()}`);
 	}
 
-	const hexToken = generateRandomHexToken(Math.ceil((hexLength * (step - 1)) / step));
+	const hexToken = generateRandomHexToken(Math.ceil((hexLength * (STEP - 1)) / STEP));
 
-	const hexHash = await sha1(salt + hexToken);
+	const hexHash = await sha1(SALT + hexToken);
 
 	let hexId = "";
 
@@ -119,7 +111,7 @@ export const createId = async ({ approximateLength = DEFAULT_ID_LENGTH, salt = S
 	let hashIndex = 0;
 
 	for (let index = 0; index < hexLength; index += 1) {
-		if ((index + 1) % step === 0) {
+		if ((index + 1) % STEP === 0) {
 			const newChar = hexHash[hashIndex];
 
 			assert(newChar, "Char must exist here");
@@ -139,7 +131,7 @@ export const createId = async ({ approximateLength = DEFAULT_ID_LENGTH, salt = S
 	return hexToCustomAlphabet(hexId);
 };
 
-export const verifyId = async (id: string, { salt = SALT, step = 2 } = {}) => {
+export const verifyId = async (id: string) => {
 	if (!id || id.length > MAX_ID_LENGTH) {
 		return false;
 	}
@@ -153,7 +145,7 @@ export const verifyId = async (id: string, { salt = SALT, step = 2 } = {}) => {
 
 		// eslint-disable-next-line @typescript-eslint/no-misused-spread -- that string contains only spreadable characters
 		[...hexId].forEach((char, index) => {
-			if ((index + 1) % step === 0) {
+			if ((index + 1) % STEP === 0) {
 				extractedHexHash += char;
 			} else {
 				extractedHexToken += char;
@@ -164,7 +156,7 @@ export const verifyId = async (id: string, { salt = SALT, step = 2 } = {}) => {
 			return false;
 		}
 
-		const expectedHexValue = await sha1(salt + extractedHexToken);
+		const expectedHexValue = await sha1(SALT + extractedHexToken);
 
 		return expectedHexValue.startsWith(extractedHexHash);
 	} catch {

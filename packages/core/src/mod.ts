@@ -1,31 +1,184 @@
+import { AiInput, AiLanguageModel } from "@effect/ai";
+import { GoogleAiClient, GoogleAiLanguageModel } from "@effect/ai-google";
+import { FetchHttpClient } from "@effect/platform";
 import { SqlSchema } from "@effect/sql";
 import { PgClient } from "@effect/sql-pg";
-import { DateTime, Effect } from "effect";
+import { Config, Effect, Layer, Option, Ref, Schema, Stream } from "effect";
+
+import { IdGenerator } from "@bella/id-generator/effect";
 
 import { DatabaseDefault } from "#src/database/mod.js";
-import { TodoModel } from "#src/database/schema.js";
+import {
+	ConversationModel,
+	MessageModel,
+	MessagePartModel,
+	TextMessagePartModel,
+	TransactionId,
+} from "#src/database/schema.js";
 
-export class TodoService extends Effect.Service<TodoService>()("@bella/core/TodoService", {
-	dependencies: [DatabaseDefault],
+const AiModel = GoogleAiLanguageModel.layer({ model: "gemini-2.5-flash" }).pipe(
+	Layer.provide(GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") })),
+	Layer.provide(FetchHttpClient.layer),
+);
+
+export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
+	dependencies: [DatabaseDefault, IdGenerator.Default],
 	effect: Effect.gen(function* () {
 		const sql = yield* PgClient.PgClient;
 
-		const insertTodo = SqlSchema.void({
+		const idGenerator = yield* IdGenerator;
+
+		const insertConversation = SqlSchema.void({
 			execute: (request) => sql`
 				INSERT INTO
-				${sql("todo")} ${sql.insert(request)};
+					${sql("conversation")} ${sql.insert(request)};
 			`,
-			Request: TodoModel.insert,
+			Request: ConversationModel.insert,
+		});
+
+		const insertMessage = SqlSchema.void({
+			execute: (request) => sql`
+				INSERT INTO
+					${sql("message")} ${sql.insert(request)};
+			`,
+			Request: MessageModel.insert,
+		});
+
+		const insertMessagePart = SqlSchema.void({
+			execute: (request) => sql`
+				INSERT INTO
+					${sql("messagePart")} ${sql.insert(request)};
+			`,
+			Request: MessagePartModel.insert,
+		});
+
+		const updateTextMessagePartWithNewContent = SqlSchema.void({
+			execute: (request) => sql`
+				UPDATE ${sql("messagePart")}
+				SET
+					${sql("textContent")} = ${sql("textContent")} || ${request.textContent}
+				WHERE
+					${sql("id")} = ${request.id};
+			`,
+			Request: TextMessagePartModel.update.pick("id", "textContent"),
+		});
+
+		const completeMessage = SqlSchema.void({
+			execute: (request) => sql`
+				UPDATE ${sql("message")}
+				SET
+					${sql.update({ status: "COMPLETED" })}
+				WHERE
+					${sql("id")} = ${request.id};
+			`,
+			Request: MessageModel.select.pick("id"),
+		});
+
+		const getTransactionId = SqlSchema.single({
+			// cspell:ignore xact
+			execute: () => sql`
+				SELECT
+					PG_CURRENT_XACT_ID()::XID::TEXT AS ${sql("transactionId")}
+			`,
+
+			Request: Schema.Void,
+			Result: Schema.Struct({ transactionId: TransactionId }),
 		});
 
 		return {
-			createMock: Effect.fn("TodoService/createMock")(function* () {
-				const now = yield* DateTime.now;
+			startNewConversation: Effect.fn("Bella/startNewConversation")(function* ({
+				assistantMessageId,
+				conversationId,
+				title,
+				userMessageId,
+				userMessageTextContent,
+				userTextMessagePartId,
+			}: {
+				assistantMessageId: MessageModel["id"];
+				conversationId: ConversationModel["id"];
+				title: ConversationModel["title"];
+				userMessageId: MessageModel["id"];
+				userMessageTextContent: TextMessagePartModel["textContent"];
+				userTextMessagePartId: TextMessagePartModel["id"];
+			}) {
+				const result = yield* Effect.gen(function* () {
+					yield* insertConversation({
+						createdAt: undefined,
+						deletedAt: Option.none(),
+						id: conversationId,
+						title,
+						updatedAt: undefined,
+					});
 
-				const id = TodoModel.fields.id.make(crypto.randomUUID().slice(0, 24));
+					yield* insertMessage({
+						conversationId,
+						createdAt: undefined,
+						id: userMessageId,
+						role: "USER",
+						status: "COMPLETED",
+					});
 
-				yield* insertTodo({ completed: false, id, text: `Lorem ipsum ${now.pipe(DateTime.formatIso)}` });
-			}),
+					yield* insertMessagePart({
+						createdAt: undefined,
+						id: userTextMessagePartId,
+						messageId: userMessageId,
+						textContent: userMessageTextContent,
+						type: "text",
+					});
+
+					yield* insertMessage({
+						conversationId,
+						createdAt: undefined,
+						id: assistantMessageId,
+						role: "ASSISTANT",
+						status: "IN_PROGRESS",
+					});
+
+					return yield* getTransactionId();
+				}).pipe(sql.withTransaction);
+
+				yield* Effect.forkDaemon(
+					Effect.gen(function* () {
+						const stream = AiLanguageModel.streamText({
+							prompt: [AiInput.UserMessage.make({ parts: [AiInput.TextPart.make({ text: userMessageTextContent })] })],
+						}).pipe(Stream.tapBoth({ onFailure: Effect.log, onSuccess: Effect.log }));
+
+						const messagePartIdRef = yield* Ref.make<Option.Option<TextMessagePartModel["id"]>>(Option.none());
+
+						yield* Stream.runForEach(
+							stream,
+							Effect.fn(function* (response) {
+								const partTextContent = response.text;
+
+								const messagePartId = yield* Ref.get(messagePartIdRef);
+
+								yield* Option.match(messagePartId, {
+									onNone: Effect.fn(function* () {
+										const messagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
+
+										yield* insertMessagePart({
+											createdAt: undefined,
+											id: messagePartId,
+											messageId: assistantMessageId,
+											textContent: partTextContent,
+											type: "text",
+										});
+
+										yield* Ref.set(messagePartIdRef, Option.some(messagePartId));
+									}),
+									onSome: Effect.fn(function* (id) {
+										yield* updateTextMessagePartWithNewContent({ id, textContent: partTextContent });
+									}),
+								});
+							}),
+						);
+
+						yield* completeMessage({ id: assistantMessageId });
+					}).pipe(Effect.provide(AiModel), Effect.catchAll(Effect.log)),
+				);
+
+				return result;
+			}, Effect.orDie),
 		};
 	}),
 }) {}

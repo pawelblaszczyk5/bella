@@ -1,6 +1,6 @@
 {
-	"name": "@bella/core",
-	"description": "Core business logic services",
+	"name": "@bella/assert",
+	"description": "Assert utility function",
 	"sideEffects": false,
 	"type": "module",
 	"imports": {
@@ -10,10 +10,6 @@
 		".": {
 			"default": "./dist/src/mod.js",
 			"types": "./dist/src/mod.d.ts"
-		},
-		"./database-schema": {
-			"default": "./dist/src/database/schema.js",
-			"types": "./dist/src/database/schema.d.ts"
 		}
 	},
 	"scripts": {
@@ -22,17 +18,6 @@
 		"lint": "eslint",
 		"lint:fix": "eslint --fix",
 		"typecheck": "tsc --build --noEmit"
-	},
-	"dependencies": {
-		"@bella/id-generator": "workspace:*",
-		"@effect/ai": "^0.25.2",
-		"@effect/ai-google": "^0.4.0",
-		"@effect/experimental": "catalog:",
-		"@effect/platform": "catalog:",
-		"@effect/platform-node": "catalog:",
-		"@effect/sql": "catalog:",
-		"@effect/sql-pg": "catalog:",
-		"effect": "catalog:"
 	},
 	"devDependencies": {
 		"@bella/eslint-config": "workspace:*",

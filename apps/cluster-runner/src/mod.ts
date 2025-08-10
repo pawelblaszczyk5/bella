@@ -1,21 +1,20 @@
-import { ClusterCron, ClusterWorkflowEngine, EntityProxyServer, RunnerAddress } from "@effect/cluster";
+import { ClusterWorkflowEngine, Entity, EntityProxyServer, RunnerAddress } from "@effect/cluster";
 import { HttpApiBuilder, HttpApiSwagger, HttpMiddleware } from "@effect/platform";
 import { NodeClusterRunnerSocket, NodeHttpServer, NodeRuntime } from "@effect/platform-node";
-import { Activity, DurableClock, WorkflowProxyServer } from "@effect/workflow";
-import { Config, Cron, DateTime, Duration, Effect, Layer, Option, Random, Schema } from "effect";
+import { Config, Effect, Layer, Option, Random } from "effect";
 import { createServer } from "node:http";
 
 import { ClusterApi } from "@bella/cluster-api";
-import { NumberGenerator, SendEmail } from "@bella/cluster-schema";
+import { Conversation } from "@bella/cluster-schema";
 import { ClusterStorageLayer } from "@bella/cluster-storage";
-import { TodoService } from "@bella/core";
+import { Bella } from "@bella/core";
+import { ConversationModel } from "@bella/core/database-schema";
 
 const ClusterApiLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 	Layer.provide(HttpApiSwagger.layer({ path: "/docs" })),
 	Layer.provide(
 		HttpApiBuilder.api(ClusterApi).pipe(
-			Layer.provide(EntityProxyServer.layerHttpApi(ClusterApi, "number-generator", NumberGenerator)),
-			Layer.provide(WorkflowProxyServer.layerHttpApi(ClusterApi, "workflow", [SendEmail])),
+			Layer.provide(EntityProxyServer.layerHttpApi(ClusterApi, "conversation", Conversation)),
 		),
 	),
 	Layer.provide(
@@ -29,51 +28,32 @@ const ClusterApiLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 	),
 );
 
-const NumberGeneratorLive = NumberGenerator.toLayer(
+const ConversationLive = Conversation.toLayer(
 	Effect.gen(function* () {
+		const bella = yield* Bella;
+
+		const entityAddress = yield* Entity.CurrentAddress;
+		const conversationId = ConversationModel.fields.id.make(entityAddress.entityId);
+
 		return {
-			Get: Effect.fn("NumberGenerator/Get")(function* () {
+			Continue: Effect.fn("Conversation/Continue")(function* () {
 				return yield* Random.nextIntBetween(10, 50);
+			}),
+			Start: Effect.fn("Conversation/Start")(function* (envelope) {
+				const result = yield* bella.startNewConversation({
+					assistantMessageId: envelope.payload.assistantMessageId,
+					conversationId,
+					title: envelope.payload.title,
+					userMessageId: envelope.payload.userMessageId,
+					userMessageTextContent: envelope.payload.userMessageTextContent,
+					userTextMessagePartId: envelope.payload.userTextMessagePartId,
+				});
+
+				return result.transactionId;
 			}),
 		};
 	}),
 );
-
-const SendEmailLive = SendEmail.toLayer(
-	Effect.fn(function* (payload) {
-		yield* Activity.make({
-			error: Schema.Never,
-			execute: Effect.gen(function* () {
-				yield* Effect.log(`Sending email to ${payload.to}, awaiting delivery`);
-			}),
-			name: "TriggerSend",
-		});
-
-		yield* DurableClock.sleep({ duration: Duration.minutes(1), name: "AwaitDelivery" });
-
-		yield* Activity.make({
-			error: Schema.Never,
-			execute: Effect.gen(function* () {
-				yield* Effect.log(`Email is confirmed to be delivered to ${payload.to} by now`);
-			}),
-			name: "NotifyBeingDelivered",
-		});
-	}),
-);
-
-const CronTest = ClusterCron.make({
-	cron: Cron.unsafeParse("* * * * *"),
-	execute: Effect.gen(function* () {
-		const todoService = yield* TodoService;
-
-		const now = yield* DateTime.now;
-
-		yield* Effect.log(`Running cron at ${DateTime.formatIso(now)}`);
-
-		yield* todoService.createMock();
-	}),
-	name: "CronTest",
-});
 
 const WorkflowEngineLive = ClusterWorkflowEngine.layer.pipe(
 	Layer.provideMerge(
@@ -98,13 +78,13 @@ const WorkflowEngineLive = ClusterWorkflowEngine.layer.pipe(
 	Layer.provideMerge(ClusterStorageLayer),
 );
 
-const EntitiesLive = Layer.mergeAll(NumberGeneratorLive, CronTest);
+const EntitiesLive = Layer.mergeAll(ConversationLive);
 
-const WorkflowsLive = Layer.mergeAll(SendEmailLive);
+const WorkflowsLive = Layer.empty;
 
 const EnvironmentLive = Layer.mergeAll(
 	EntitiesLive.pipe(Layer.provide(WorkflowsLive), Layer.provide(WorkflowEngineLive)),
 	ClusterApiLive.pipe(Layer.provide(WorkflowEngineLive)),
-).pipe(Layer.provide(TodoService.Default));
+).pipe(Layer.provide(Bella.Default));
 
 EnvironmentLive.pipe(Layer.launch, NodeRuntime.runMain);

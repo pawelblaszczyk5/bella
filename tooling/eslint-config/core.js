@@ -243,6 +243,7 @@ export default tseslint.config(
 				{
 					allowList: {
 						args: true,
+						ctx: true,
 						rel: true,
 						fn: true,
 						Fn: true,
@@ -255,6 +256,7 @@ export default tseslint.config(
 						Props: true,
 						src: true,
 						ref: true,
+						Ref: true,
 					},
 					checkProperties: true,
 					checkShorthandProperties: true,

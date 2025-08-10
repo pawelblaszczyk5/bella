@@ -1,6 +1,6 @@
 import { NodeContext } from "@effect/platform-node";
 import { PgClient, PgMigrator } from "@effect/sql-pg";
-import { Config, Effect, Layer, String } from "effect";
+import { Config, Effect, Layer } from "effect";
 
 import { allMigrations } from "#src/database/migrations/mod.js";
 
@@ -13,15 +13,7 @@ const DATABASE = Config.string("POSTGRES_DATABASE");
 const PgConfig = Config.all([HOST, USERNAME, PASSWORD, PORT, DATABASE]).pipe(
 	Config.map(
 		([host, username, password, port, database]) =>
-			({
-				database,
-				host,
-				password,
-				port,
-				transformQueryNames: String.camelToSnake,
-				transformResultNames: String.snakeToCamel,
-				username,
-			}) satisfies PgClient.PgClientConfig,
+			({ database, host, password, port, username }) satisfies PgClient.PgClientConfig,
 	),
 );
 

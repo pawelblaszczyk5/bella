@@ -1,14 +1,18 @@
 import { Entity } from "@effect/cluster";
 import { Rpc } from "@effect/rpc";
-import { Workflow } from "@effect/workflow";
-import { Schema } from "effect";
 
-export const NumberGenerator = Entity.make("NumberGenerator", [Rpc.make("Get", { success: Schema.Int })]);
+import { ConversationModel, MessageModel, TextMessagePartModel, TransactionId } from "@bella/core/database-schema";
 
-export const SendEmail = Workflow.make({
-	error: Schema.Never,
-	idempotencyKey: ({ id }) => id,
-	name: "SendEmail",
-	payload: { id: Schema.String, to: Schema.String },
-	success: Schema.Void,
-});
+export const Conversation = Entity.make("Conversation", [
+	Rpc.make("Start", {
+		payload: {
+			assistantMessageId: MessageModel.insert.fields.id,
+			title: ConversationModel.insert.fields.title,
+			userMessageId: MessageModel.insert.fields.id,
+			userMessageTextContent: TextMessagePartModel.insert.fields.textContent,
+			userTextMessagePartId: TextMessagePartModel.insert.fields.id,
+		},
+		success: TransactionId,
+	}),
+	Rpc.make("Continue", { payload: { messageTextContent: TextMessagePartModel.fields.textContent } }),
+]);

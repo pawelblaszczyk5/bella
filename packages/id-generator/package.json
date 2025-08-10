@@ -1,15 +1,19 @@
 {
-	"name": "@bella/cluster-schema",
-	"description": "Schema for Cluster entities and workflows",
+	"name": "@bella/id-generator",
+	"description": "ID generator utility functions",
 	"sideEffects": false,
 	"type": "module",
 	"imports": {
 		"#src/*": "./dist/src/*"
 	},
 	"exports": {
-		".": {
-			"default": "./dist/src/mod.js",
-			"types": "./dist/src/mod.d.ts"
+		"./promise": {
+			"default": "./dist/src/promise.js",
+			"types": "./dist/src/promise.d.ts"
+		},
+		"./effect": {
+			"default": "./dist/src/effect.js",
+			"types": "./dist/src/effect.d.ts"
 		}
 	},
 	"scripts": {
@@ -20,15 +24,13 @@
 		"typecheck": "tsc --build --noEmit"
 	},
 	"dependencies": {
-		"@bella/core": "workspace:*",
-		"@effect/cluster": "catalog:",
-		"@effect/rpc": "catalog:",
-		"@effect/workflow": "catalog:",
+		"@bella/assert": "workspace:*",
 		"effect": "catalog:"
 	},
 	"devDependencies": {
 		"@bella/eslint-config": "workspace:*",
 		"@bella/typescript-config": "workspace:*",
+		"@types/node": "catalog:",
 		"eslint": "catalog:",
 		"typescript": "catalog:"
 	}

@@ -16,7 +16,7 @@ const serve = async ({ request }: { request: Request }) => {
 		}
 	});
 
-	originUrl.searchParams.set("table", "todo");
+	originUrl.searchParams.set("table", '"messagePart"');
 	originUrl.searchParams.set("secret", ELECTRIC_SECRET);
 
 	const response = await fetch(originUrl);
@@ -28,4 +28,4 @@ const serve = async ({ request }: { request: Request }) => {
 	return new Response(response.body, { headers, status: response.status, statusText: response.statusText });
 };
 
-export const ServerRoute = createServerFileRoute("/api/todos").methods({ GET: serve });
+export const ServerRoute = createServerFileRoute("/api/message-parts").methods({ GET: serve });
