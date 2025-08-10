@@ -1,0 +1,36 @@
+name: "bella"
+
+services:
+  postgres:
+    image: postgres:17.5-alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example_root_password_123
+    ports:
+      - 54321:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-postgres-databases.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh:ro
+    tmpfs:
+      - /tmp
+    command:
+      - -c
+      - listen_addresses=*
+      - -c
+      - wal_level=logical
+
+  electric:
+    image: electricsql/electric:latest
+    environment:
+      DATABASE_URL: postgresql://bella_app:example_app_password_123@postgres:5432/bella_app?sslmode=disable
+      # Not suitable for production. Only use insecure mode in development or if you've otherwise secured the Electric API.
+      # See https://electric-sql.com/docs/guides/security
+      ELECTRIC_INSECURE: true
+    ports:
+      - "30001:3000"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
