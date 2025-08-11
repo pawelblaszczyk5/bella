@@ -16,9 +16,25 @@
 			"default": "./dist/src/styles/utilities.js",
 			"types": "./dist/src/styles/utilities.d.ts"
 		},
+		"./styles/typography": {
+			"default": "./dist/src/styles/typography.js",
+			"types": "./dist/src/styles/typography.d.ts"
+		},
 		"./theme/color.stylex": {
 			"default": "./dist/src/theme/color.stylex.js",
 			"types": "./dist/src/theme/color.stylex.d.ts"
+		},
+		"./theme/radii.stylex": {
+			"default": "./dist/src/theme/radii.stylex.js",
+			"types": "./dist/src/theme/radii.stylex.d.ts"
+		},
+		"./theme/spacing.stylex": {
+			"default": "./dist/src/theme/spacing.stylex.js",
+			"types": "./dist/src/theme/spacing.stylex.d.ts"
+		},
+		"./theme/typography.stylex": {
+			"default": "./dist/src/theme/typography.stylex.js",
+			"types": "./dist/src/theme/typography.stylex.d.ts"
 		}
 	},
 	"scripts": {
