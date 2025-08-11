@@ -1,8 +1,10 @@
 import { ClusterWorkflowEngine, Entity, EntityProxyServer, RunnerAddress } from "@effect/cluster";
 import { HttpApiBuilder, HttpApiSwagger, HttpMiddleware } from "@effect/platform";
 import { NodeClusterRunnerSocket, NodeHttpServer, NodeRuntime } from "@effect/platform-node";
-import { Config, Effect, Layer, Option, Random } from "effect";
+import { Config, Effect, Layer, Match, Option, Stream } from "effect";
 import { createServer } from "node:http";
+
+import type { MessageModel } from "@bella/core/database-schema";
 
 import { ClusterApi } from "@bella/cluster-api";
 import { Conversation } from "@bella/cluster-schema";
@@ -35,15 +37,50 @@ const ConversationLive = Conversation.toLayer(
 		const entityAddress = yield* Entity.CurrentAddress;
 		const conversationId = ConversationModel.fields.id.make(entityAddress.entityId);
 
+		const handleGeneratingNewMessage = Effect.fn(function* (assistantMessageId: MessageModel["id"]) {
+			const messageStream = yield* bella.getNewMessageStream({ assistantMessageId, conversationId });
+
+			yield* Stream.runForEach(
+				messageStream,
+				Effect.fn(function* (response) {
+					yield* Effect.forEach(
+						response.parts,
+						Effect.fn(function* (part) {
+							yield* Match.value(part).pipe(
+								Match.tag("TextPart", (part) =>
+									Effect.gen(function* () {
+										yield* bella.insertAssistantTextMessagePart({ assistantMessageId, text: part.text });
+									}),
+								),
+								Match.tag("FinishPart", () =>
+									Effect.gen(function* () {
+										yield* bella.markMessageAsCompleted(assistantMessageId);
+									}),
+								),
+								Match.orElse(Effect.log),
+							);
+						}),
+					);
+				}),
+			);
+		});
+
 		return {
-			Continue: Effect.fn("Conversation/Continue")(function* () {
-				return yield* Random.nextIntBetween(10, 50);
+			Continue: Effect.fn("Conversation/Continue")(function* (envelope) {
+				const result = yield* bella
+					.continueConversation({ conversationId, userMessageText: envelope.payload.userMessageText })
+					.pipe(Effect.orDie);
+
+				yield* handleGeneratingNewMessage(result.assistantMessageId).pipe(Effect.forkDaemon);
+
+				return result.transactionId;
 			}),
 			Start: Effect.fn("Conversation/Start")(function* (envelope) {
-				const result = yield* bella.startNewConversation({
-					conversationId,
-					userMessageText: envelope.payload.userMessageText,
-				});
+				const result = yield* bella
+					.createNewConversation({ conversationId, userMessageText: envelope.payload.userMessageText })
+					.pipe(Effect.orDie);
+
+				yield* handleGeneratingNewMessage(result.assistantMessageId).pipe(Effect.forkDaemon);
 
 				return result.transactionId;
 			}),

@@ -8,5 +8,5 @@ export const Conversation = Entity.make("Conversation", [
 		payload: { userMessageText: TextMessagePartModel.fields.data.fields.text },
 		success: TransactionId,
 	}),
-	Rpc.make("Continue", { payload: { messageTextContent: TextMessagePartModel.fields.data.fields.text } }),
+	Rpc.make("Continue", { payload: { userMessageText: TextMessagePartModel.fields.data.fields.text } }),
 ]);

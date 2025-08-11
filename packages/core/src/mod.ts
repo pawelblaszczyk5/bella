@@ -1,20 +1,14 @@
 import { AiInput, AiLanguageModel } from "@effect/ai";
 import { GoogleAiClient, GoogleAiLanguageModel } from "@effect/ai-google";
 import { FetchHttpClient } from "@effect/platform";
-import { SqlSchema } from "@effect/sql";
+import { Model, SqlSchema } from "@effect/sql";
 import { PgClient } from "@effect/sql-pg";
-import { Config, Effect, Layer, Option, Ref, Schema, Stream } from "effect";
+import { Array, Config, Effect, Layer, Match, Option, Record, Schema, Stream } from "effect";
 
 import { IdGenerator } from "@bella/id-generator/effect";
 
 import { DatabaseDefault } from "#src/database/mod.js";
-import {
-	ConversationModel,
-	MessageModel,
-	MessagePartModel,
-	TextMessagePartModel,
-	TransactionId,
-} from "#src/database/schema.js";
+import { ConversationModel, MessageModel, TextMessagePartModel, TransactionId } from "#src/database/schema.js";
 
 const AiModel = GoogleAiLanguageModel.layer({ model: "gemini-2.5-flash" }).pipe(
 	Layer.provide(GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") })),
@@ -49,18 +43,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				INSERT INTO
 					${sql("messagePart")} ${sql.insert({ ...request, data: sql.json(request.data) })};
 			`,
-			Request: MessagePartModel.insert,
-		});
-
-		const updateTextMessagePartData = SqlSchema.void({
-			execute: (request) => sql`
-				UPDATE ${sql("messagePart")}
-				SET
-					${sql.update({ data: sql.json(request.data) })}
-				WHERE
-					${sql("id")} = ${request.id};
-			`,
-			Request: TextMessagePartModel.update.pick("id", "data"),
+			Request: Model.Union(TextMessagePartModel).insert,
 		});
 
 		const completeMessage = SqlSchema.void({
@@ -69,9 +52,9 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				SET
 					${sql.update({ status: "COMPLETED" })}
 				WHERE
-					${sql("id")} = ${request.id};
+					${sql("id")} = ${request};
 			`,
-			Request: MessageModel.select.pick("id"),
+			Request: MessageModel.select.fields.id,
 		});
 
 		const getTransactionId = SqlSchema.single({
@@ -80,13 +63,92 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				SELECT
 					PG_CURRENT_XACT_ID()::XID::TEXT AS ${sql("transactionId")}
 			`,
-
 			Request: Schema.Void,
 			Result: Schema.Struct({ transactionId: TransactionId }),
 		});
 
+		const findAllMessagesForConversation = SqlSchema.findAll({
+			execute: (request) => sql`
+				SELECT
+					${sql("id")},
+					${sql("role")}
+				FROM
+					${sql("message")}
+				WHERE
+					${sql("conversationId")} = ${request}
+				ORDER BY
+					${sql("createdAt")} ASC;
+			`,
+			Request: ConversationModel.select.fields.id,
+			Result: MessageModel.select.pick("id", "role"),
+		});
+
+		const findAllMessagePartsForMessages = SqlSchema.findAll({
+			execute: (request) => sql`
+				SELECT
+					${sql("id")},
+					${sql("messageId")},
+					${sql("type")},
+					${sql("data")}
+				FROM
+					${sql("messagePart")}
+				WHERE
+					${sql.in("messageId", request)}
+				ORDER BY
+					${sql("createdAt")} ASC;
+			`,
+			Request: Schema.Array(MessageModel.select.fields.id),
+			Result: Schema.Union(TextMessagePartModel.select.pick("id", "messageId", "type", "data")),
+		});
+
+		const mapMessagePart = Match.type<Omit<TextMessagePartModel, "createdAt">>().pipe(
+			Match.when({ type: "text" }, (part) => AiInput.TextPart.make({ text: part.data.text })),
+			Match.exhaustive,
+		);
+
 		return {
-			startNewConversation: Effect.fn("Bella/startNewConversation")(function* ({
+			continueConversation: Effect.fn("Bella/continueConversation")(function* ({
+				conversationId,
+				userMessageText,
+			}: {
+				conversationId: ConversationModel["id"];
+				userMessageText: TextMessagePartModel["data"]["text"];
+			}) {
+				const userMessageId = MessageModel.fields.id.make(yield* idGenerator.generate());
+				const userTextMessagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
+				const assistantMessageId = MessageModel.fields.id.make(yield* idGenerator.generate());
+
+				const result = yield* Effect.gen(function* () {
+					yield* insertMessage({
+						conversationId,
+						createdAt: undefined,
+						id: userMessageId,
+						role: "USER",
+						status: "COMPLETED",
+					});
+
+					yield* insertMessagePart({
+						createdAt: undefined,
+						data: { text: userMessageText },
+						id: userTextMessagePartId,
+						messageId: userMessageId,
+						type: "text",
+					});
+
+					yield* insertMessage({
+						conversationId,
+						createdAt: undefined,
+						id: assistantMessageId,
+						role: "ASSISTANT",
+						status: "IN_PROGRESS",
+					});
+
+					return yield* getTransactionId();
+				}).pipe(sql.withTransaction);
+
+				return { assistantMessageId, transactionId: result.transactionId };
+			}),
+			createNewConversation: Effect.fn("Bella/createNewConversation")(function* ({
 				conversationId,
 				userMessageText,
 			}: {
@@ -133,62 +195,63 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					return yield* getTransactionId();
 				}).pipe(sql.withTransaction);
 
-				yield* Effect.forkDaemon(
-					Effect.gen(function* () {
-						const stream = AiLanguageModel.streamText({
-							prompt: [AiInput.UserMessage.make({ parts: [AiInput.TextPart.make({ text: userMessageText })] })],
-						});
-
-						const messagePartIdRef = yield* Ref.make<Option.Option<TextMessagePartModel["id"]>>(Option.none());
-						const textContentRef = yield* Ref.make("");
-
-						yield* Stream.runForEach(
-							stream,
-							Effect.fn(function* (response) {
-								if (response.text.length === 0) {
-									return;
-								}
-
-								const messagePartId = yield* Ref.get(messagePartIdRef);
-
-								yield* Option.match(messagePartId, {
-									onNone: Effect.fn(function* () {
-										const messagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
-
-										yield* insertMessagePart({
-											createdAt: undefined,
-											data: { text: response.text },
-											id: messagePartId,
-											messageId: assistantMessageId,
-											type: "text",
-										});
-
-										yield* Ref.set(messagePartIdRef, Option.some(messagePartId));
-										yield* Ref.update(textContentRef, (value) => value + response.text);
-									}),
-									onSome: Effect.fn(function* (id) {
-										const accumulatedTextContent = yield* Ref.updateAndGet(
-											textContentRef,
-											(value) => value + response.text,
-										);
-
-										yield* updateTextMessagePartData({ data: { text: accumulatedTextContent }, id });
-									}),
-								});
-							}),
-						);
-
-						yield* completeMessage({ id: assistantMessageId });
-					}).pipe(
-						Effect.provide(AiModel),
-						Effect.provideService(GoogleAiLanguageModel.Config, {
-							generationConfig: { thinkingConfig: { includeThoughts: true } },
-						}),
-					),
+				return { assistantMessageId, transactionId: result.transactionId };
+			}),
+			getNewMessageStream: Effect.fn(function* ({
+				assistantMessageId,
+				conversationId,
+			}: {
+				assistantMessageId: MessageModel["id"];
+				conversationId: ConversationModel["id"];
+			}) {
+				const messages = yield* findAllMessagesForConversation(conversationId).pipe(
+					Effect.map((messages) => messages.filter((message) => message.id !== assistantMessageId)),
+				);
+				const groupedParts = yield* findAllMessagePartsForMessages(messages.map((message) => message.id)).pipe(
+					Effect.map(Array.groupBy((part) => part.messageId)),
 				);
 
-				return result;
-			}, Effect.orDie),
+				const messagesWithParts = yield* Effect.forEach(
+					messages,
+					Effect.fn(function* (message) {
+						const partsForThisMessage = yield* Record.get(groupedParts, message.id);
+
+						return { id: message.id, parts: partsForThisMessage, role: message.role };
+					}),
+				);
+
+				const stream = AiLanguageModel.streamText({
+					prompt: messagesWithParts.map((message) => {
+						if (message.role === "USER") {
+							return AiInput.UserMessage.make({ parts: Array.map(message.parts, mapMessagePart) });
+						}
+
+						return AiInput.AssistantMessage.make({ parts: Array.map(message.parts, mapMessagePart) });
+					}),
+				}).pipe(Stream.provideLayer(AiModel));
+
+				return stream;
+			}),
+			insertAssistantTextMessagePart: Effect.fn(function* ({
+				assistantMessageId,
+				text,
+			}: {
+				assistantMessageId: MessageModel["id"];
+				text: TextMessagePartModel["data"]["text"];
+			}) {
+				const assistantTextMessagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
+
+				yield* insertMessagePart({
+					createdAt: undefined,
+					data: { text },
+					id: assistantTextMessagePartId,
+					messageId: assistantMessageId,
+					type: "text",
+				});
+			}),
+			markMessageAsCompleted: Effect.fn(function* (assistantMessageId: MessageModel["id"]) {
+				yield* completeMessage(assistantMessageId);
+			}),
 		};
 	}),
 }) {}
