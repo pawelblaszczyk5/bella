@@ -52,10 +52,7 @@ const BaseMessagePartShape = Schema.Struct({
 
 const TextMessagePartShape = Schema.extend(
 	BaseMessagePartShape,
-	Schema.Struct({
-		textContent: TextMessagePartModel.select.fields.textContent,
-		type: TextMessagePartModel.select.fields.type,
-	}),
+	Schema.Struct({ data: TextMessagePartModel.select.fields.data, type: TextMessagePartModel.select.fields.type }),
 );
 
 export const messagePartsCollection = createCollection(

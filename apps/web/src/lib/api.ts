@@ -22,7 +22,7 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 				conversationId: ConversationModel["id"];
 				title: ConversationModel["title"];
 				userMessageId: MessageModel["id"];
-				userMessageTextContent: TextMessagePartModel["textContent"];
+				userMessageTextContent: TextMessagePartModel["data"]["textContent"];
 				userTextMessagePartId: TextMessagePartModel["id"];
 			}) {
 				const transactionId = yield* clusterHttpClient.conversation.Start({
@@ -46,7 +46,7 @@ export const startNewConversation = createServerFn({ method: "POST" })
 				conversationId: ConversationModel.insert.fields.id,
 				title: ConversationModel.insert.fields.title,
 				userMessageId: MessageModel.insert.fields.id,
-				userMessageTextContent: TextMessagePartModel.insert.fields.textContent,
+				userMessageTextContent: TextMessagePartModel.insert.fields.data.fields.textContent,
 				userTextMessagePartId: TextMessagePartModel.insert.fields.id,
 			}),
 		),

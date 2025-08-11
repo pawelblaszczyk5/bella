@@ -41,7 +41,7 @@ const AppIndexRoute = () => {
 				Start conversation test
 			</button>
 			{messageParts.map((messagePart) => (
-				<p key={messagePart.id}>{messagePart.textContent}</p>
+				<p key={messagePart.id}>{messagePart.data.textContent}</p>
 			))}
 		</>
 	);

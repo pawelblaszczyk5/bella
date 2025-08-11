@@ -9,10 +9,10 @@ export const Conversation = Entity.make("Conversation", [
 			assistantMessageId: MessageModel.insert.fields.id,
 			title: ConversationModel.insert.fields.title,
 			userMessageId: MessageModel.insert.fields.id,
-			userMessageTextContent: TextMessagePartModel.insert.fields.textContent,
+			userMessageTextContent: TextMessagePartModel.insert.fields.data.fields.textContent,
 			userTextMessagePartId: TextMessagePartModel.insert.fields.id,
 		},
 		success: TransactionId,
 	}),
-	Rpc.make("Continue", { payload: { messageTextContent: TextMessagePartModel.fields.textContent } }),
+	Rpc.make("Continue", { payload: { messageTextContent: TextMessagePartModel.fields.data.fields.textContent } }),
 ]);

@@ -33,7 +33,7 @@ const migration = Effect.gen(function* () {
 			${sql("id")} VARCHAR(24) PRIMARY KEY,
 			${sql("messageId")} VARCHAR(24) NOT NULL,
 			${sql("type")} TEXT NOT NULL,
-			${sql("textContent")} TEXT NULL,
+			${sql("data")} JSONB NOT NULL,
 			FOREIGN KEY (${sql("messageId")}) REFERENCES ${sql("message")} (${sql("id")})
 		);
 	`;

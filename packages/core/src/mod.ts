@@ -47,20 +47,20 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 		const insertMessagePart = SqlSchema.void({
 			execute: (request) => sql`
 				INSERT INTO
-					${sql("messagePart")} ${sql.insert(request)};
+					${sql("messagePart")} ${sql.insert({ ...request, data: sql.json(request.data) })};
 			`,
 			Request: MessagePartModel.insert,
 		});
 
-		const updateTextMessagePartWithNewContent = SqlSchema.void({
+		const updateTextMessagePartData = SqlSchema.void({
 			execute: (request) => sql`
 				UPDATE ${sql("messagePart")}
 				SET
-					${sql("textContent")} = ${sql("textContent")} || ${request.textContent}
+					${sql.update({ data: sql.json(request.data) })}
 				WHERE
 					${sql("id")} = ${request.id};
 			`,
-			Request: TextMessagePartModel.update.pick("id", "textContent"),
+			Request: TextMessagePartModel.update.pick("id", "data"),
 		});
 
 		const completeMessage = SqlSchema.void({
@@ -98,7 +98,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				conversationId: ConversationModel["id"];
 				title: ConversationModel["title"];
 				userMessageId: MessageModel["id"];
-				userMessageTextContent: TextMessagePartModel["textContent"];
+				userMessageTextContent: TextMessagePartModel["data"]["textContent"];
 				userTextMessagePartId: TextMessagePartModel["id"];
 			}) {
 				const result = yield* Effect.gen(function* () {
@@ -120,9 +120,9 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 					yield* insertMessagePart({
 						createdAt: undefined,
+						data: { textContent: userMessageTextContent },
 						id: userTextMessagePartId,
 						messageId: userMessageId,
-						textContent: userMessageTextContent,
 						type: "text",
 					});
 
@@ -144,6 +144,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 						});
 
 						const messagePartIdRef = yield* Ref.make<Option.Option<TextMessagePartModel["id"]>>(Option.none());
+						const textContentRef = yield* Ref.make("");
 
 						yield* Stream.runForEach(
 							stream,
@@ -160,16 +161,19 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 										yield* insertMessagePart({
 											createdAt: undefined,
+											data: { textContent: response.text },
 											id: messagePartId,
 											messageId: assistantMessageId,
-											textContent: response.text,
 											type: "text",
 										});
 
 										yield* Ref.set(messagePartIdRef, Option.some(messagePartId));
+										yield* Ref.update(textContentRef, (value) => value + response.text);
 									}),
 									onSome: Effect.fn(function* (id) {
-										yield* updateTextMessagePartWithNewContent({ id, textContent: response.text });
+										const accumulatedTextContent = yield* Ref.updateAndGet(textContentRef, (value) => value + response.text);
+
+										yield* updateTextMessagePartData({ data: { textContent: accumulatedTextContent }, id });
 									}),
 								});
 							}),

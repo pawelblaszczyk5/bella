@@ -29,6 +29,10 @@ const BaseMessagePartFields = {
 
 export class TextMessagePartModel extends Model.Class<TextMessagePartModel>(
 	"@bella/core/database/schema/TextMessagePartModel",
-)({ ...BaseMessagePartFields, textContent: Schema.NonEmptyString, type: Schema.Literal("text") }) {}
+)({
+	...BaseMessagePartFields,
+	data: Schema.Struct({ textContent: Schema.NonEmptyString }),
+	type: Schema.Literal("text"),
+}) {}
 
 export const MessagePartModel = Model.Union(TextMessagePartModel);
