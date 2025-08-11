@@ -29,3 +29,18 @@ export const mauve = stylex.defineVars({
 	"11": stylex.types.color("oklch(0.505 0.0158 295)"),
 	"12": stylex.types.color("oklch(0.2445 0.0134 298.46)"),
 });
+
+export const cyan = stylex.defineVars({
+	"1": stylex.types.color("oklch(0.9921 0.0035 219.53)"),
+	"2": stylex.types.color("oklch(0.9794 0.0086 205.9)"),
+	"3": stylex.types.color("oklch(0.9586 0.0263 202.56)"),
+	"4": stylex.types.color("oklch(0.9321 0.0409 205.98)"),
+	"5": stylex.types.color("oklch(0.9004 0.0539 206.45)"),
+	"6": stylex.types.color("oklch(0.8579 0.0659 208.14)"),
+	"7": stylex.types.color("oklch(0.8045 0.0816 209.7)"),
+	"8": stylex.types.color("oklch(0.7276 0.1102 211.93)"),
+	"9": stylex.types.color("oklch(0.66 0.1217 221.74)"),
+	"10": stylex.types.color("oklch(0.627 0.1143 221.5)"),
+	"11": stylex.types.color("oklch(0.547 0.0966 220.75)"),
+	"12": stylex.types.color("oklch(0.3314 0.0527 218.83)"),
+});
