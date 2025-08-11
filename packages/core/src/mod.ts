@@ -87,26 +87,22 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 		return {
 			startNewConversation: Effect.fn("Bella/startNewConversation")(function* ({
-				assistantMessageId,
 				conversationId,
-				title,
-				userMessageId,
-				userMessageTextContent,
-				userTextMessagePartId,
+				userMessageText,
 			}: {
-				assistantMessageId: MessageModel["id"];
 				conversationId: ConversationModel["id"];
-				title: ConversationModel["title"];
-				userMessageId: MessageModel["id"];
-				userMessageTextContent: TextMessagePartModel["data"]["textContent"];
-				userTextMessagePartId: TextMessagePartModel["id"];
+				userMessageText: TextMessagePartModel["data"]["text"];
 			}) {
+				const userMessageId = MessageModel.fields.id.make(yield* idGenerator.generate());
+				const userTextMessagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
+				const assistantMessageId = MessageModel.fields.id.make(yield* idGenerator.generate());
+
 				const result = yield* Effect.gen(function* () {
 					yield* insertConversation({
 						createdAt: undefined,
 						deletedAt: Option.none(),
 						id: conversationId,
-						title,
+						title: "Example title",
 						updatedAt: undefined,
 					});
 
@@ -120,7 +116,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 					yield* insertMessagePart({
 						createdAt: undefined,
-						data: { textContent: userMessageTextContent },
+						data: { text: userMessageText },
 						id: userTextMessagePartId,
 						messageId: userMessageId,
 						type: "text",
@@ -140,7 +136,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				yield* Effect.forkDaemon(
 					Effect.gen(function* () {
 						const stream = AiLanguageModel.streamText({
-							prompt: [AiInput.UserMessage.make({ parts: [AiInput.TextPart.make({ text: userMessageTextContent })] })],
+							prompt: [AiInput.UserMessage.make({ parts: [AiInput.TextPart.make({ text: userMessageText })] })],
 						});
 
 						const messagePartIdRef = yield* Ref.make<Option.Option<TextMessagePartModel["id"]>>(Option.none());
@@ -161,7 +157,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 										yield* insertMessagePart({
 											createdAt: undefined,
-											data: { textContent: response.text },
+											data: { text: response.text },
 											id: messagePartId,
 											messageId: assistantMessageId,
 											type: "text",
@@ -171,9 +167,12 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 										yield* Ref.update(textContentRef, (value) => value + response.text);
 									}),
 									onSome: Effect.fn(function* (id) {
-										const accumulatedTextContent = yield* Ref.updateAndGet(textContentRef, (value) => value + response.text);
+										const accumulatedTextContent = yield* Ref.updateAndGet(
+											textContentRef,
+											(value) => value + response.text,
+										);
 
-										yield* updateTextMessagePartData({ data: { textContent: accumulatedTextContent }, id });
+										yield* updateTextMessagePartData({ data: { text: accumulatedTextContent }, id });
 									}),
 								});
 							}),

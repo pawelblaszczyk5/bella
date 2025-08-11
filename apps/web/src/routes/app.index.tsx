@@ -19,20 +19,13 @@ const AppIndexRoute = () => {
 			<p>Test lorem ipsum</p>
 			<button
 				onClick={async () => {
-					const assistantMessageId = await generateId();
-					const userMessageId = await generateId();
 					const conversationId = await generateId();
-					const userTextMessagePartId = await generateId();
 
 					void startNewConversation({
 						data: {
-							assistantMessageId,
 							conversationId,
-							title: "Example title",
-							userMessageId,
-							userMessageTextContent:
+							userMessageText:
 								"Hello, write me a super long poem about horses writing React and considering switching to Svelte",
-							userTextMessagePartId,
 						},
 					});
 				}}
@@ -41,7 +34,7 @@ const AppIndexRoute = () => {
 				Start conversation test
 			</button>
 			{messageParts.map((messagePart) => (
-				<p key={messagePart.id}>{messagePart.data.textContent}</p>
+				<p key={messagePart.id}>{messagePart.data.text}</p>
 			))}
 		</>
 	);

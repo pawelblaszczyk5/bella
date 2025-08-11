@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { Config, Effect, Layer, ManagedRuntime, Schema } from "effect";
 
 import { ClusterApi } from "@bella/cluster-api";
-import { ConversationModel, MessageModel, TextMessagePartModel } from "@bella/core/database-schema";
+import { ConversationModel, TextMessagePartModel } from "@bella/core/database-schema";
 import { IdGenerator } from "@bella/id-generator/effect";
 
 class Api extends Effect.Service<Api>()("@bella/web/Api", {
@@ -18,12 +18,8 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 				conversationId,
 				...payload
 			}: {
-				assistantMessageId: MessageModel["id"];
 				conversationId: ConversationModel["id"];
-				title: ConversationModel["title"];
-				userMessageId: MessageModel["id"];
-				userMessageTextContent: TextMessagePartModel["data"]["textContent"];
-				userTextMessagePartId: TextMessagePartModel["id"];
+				userMessageText: TextMessagePartModel["data"]["text"];
 			}) {
 				const transactionId = yield* clusterHttpClient.conversation.Start({
 					path: { entityId: conversationId },
@@ -42,12 +38,8 @@ export const startNewConversation = createServerFn({ method: "POST" })
 	.validator(
 		Schema.standardSchemaV1(
 			Schema.Struct({
-				assistantMessageId: MessageModel.insert.fields.id,
 				conversationId: ConversationModel.insert.fields.id,
-				title: ConversationModel.insert.fields.title,
-				userMessageId: MessageModel.insert.fields.id,
-				userMessageTextContent: TextMessagePartModel.insert.fields.data.fields.textContent,
-				userTextMessagePartId: TextMessagePartModel.insert.fields.id,
+				userMessageText: TextMessagePartModel.insert.fields.data.fields.text,
 			}),
 		),
 	)

@@ -41,12 +41,8 @@ const ConversationLive = Conversation.toLayer(
 			}),
 			Start: Effect.fn("Conversation/Start")(function* (envelope) {
 				const result = yield* bella.startNewConversation({
-					assistantMessageId: envelope.payload.assistantMessageId,
 					conversationId,
-					title: envelope.payload.title,
-					userMessageId: envelope.payload.userMessageId,
-					userMessageTextContent: envelope.payload.userMessageTextContent,
-					userTextMessagePartId: envelope.payload.userTextMessagePartId,
+					userMessageText: envelope.payload.userMessageText,
 				});
 
 				return result.transactionId;
