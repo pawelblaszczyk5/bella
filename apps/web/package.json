@@ -31,7 +31,12 @@
 		"effect": "catalog:",
 		"react": "catalog:",
 		"react-aria-components": "^1.11.0",
-		"react-dom": "catalog:"
+		"react-dom": "catalog:",
+		"react-refractor": "^4.0.0",
+		"refractor": "^5.0.0",
+		"rehype-raw": "^7.0.0",
+		"remark-gfm": "^4.0.1",
+		"react-markdown": "^10.1.0"
 	},
 	"devDependencies": {
 		"@babel/plugin-syntax-jsx": "^7.27.1",

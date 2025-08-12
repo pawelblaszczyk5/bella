@@ -6,6 +6,7 @@ import { assert } from "@bella/assert";
 import type { MessageShape } from "#src/lib/collections.js";
 
 import { Composer } from "#src/components/composer.js";
+import { Markdown } from "#src/components/markdown.js";
 import {
 	conversationsCollection,
 	ConversationShape,
@@ -33,7 +34,13 @@ const Message = ({ id }: Readonly<{ id: MessageShape["id"] }>) => {
 		[message.id],
 	);
 
-	return messageParts.map((messagePart) => <p key={messagePart.id}>{messagePart.data.text}</p>);
+	const content = messageParts.map((messagePart) => messagePart.data.text).join("");
+
+	if (message.role === "USER") {
+		return content;
+	}
+
+	return <Markdown>{content}</Markdown>;
 };
 
 const AppExampleRoute = () => {
