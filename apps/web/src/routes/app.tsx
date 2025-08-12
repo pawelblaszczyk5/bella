@@ -22,8 +22,13 @@ const styles = stylex.create({
 		paddingBlock: spacing[1],
 		paddingInline: spacing[3],
 	},
-	conversationSectionTitle: { fontWeight: fontWeight.medium },
-	conversationsSection: { display: "flex", flexDirection: "column", gap: spacing[3] },
+	conversationSectionTitle: {
+		backgroundColor: mauve[1],
+		fontWeight: fontWeight.medium,
+		insetBlockStart: 0,
+		position: "sticky",
+	},
+	conversationsSection: { display: "flex", flexDirection: "column", gap: spacing[3], overflowY: "auto" },
 	heading: {
 		alignItems: "center",
 		color: violet[12],
@@ -31,7 +36,7 @@ const styles = stylex.create({
 		fontWeight: fontWeight.semibold,
 		gap: spacing[3],
 	},
-	main: { padding: spacing[6] },
+	main: { blockSize: "100vh", contain: "strict", isolation: "isolate", overflowY: "auto", padding: spacing[6] },
 	mainLink: {
 		alignItems: "center",
 		borderRadius: radii[3],
@@ -53,26 +58,19 @@ const styles = stylex.create({
 		paddingBlock: spacing[4],
 	},
 	nav: {
+		blockSize: "100vh",
 		borderColor: mauve[6],
 		borderInlineEndWidth: 1,
 		borderStyle: "solid",
-		display: "flex",
-		flexDirection: "column",
+		display: "grid",
 		gap: spacing[6],
-		height: "100%",
+		gridTemplateRows: "auto auto minmax(0, 1fr)",
 		paddingBlock: spacing[5],
 		paddingInline: spacing[6],
 	},
 	navList: { display: "flex", flexDirection: "column" },
 	navListElement: { display: "contents" },
-	root: {
-		backgroundColor: mauve[1],
-		color: mauve[12],
-		display: "grid",
-		gridTemplateColumns: "240px minmax(0, 1fr)",
-		height: "100dvh",
-		width: "100dvw",
-	},
+	root: { backgroundColor: mauve[1], color: mauve[12], display: "grid", gridTemplateColumns: "240px minmax(0, 1fr)" },
 });
 
 const AppLayoutRoute = () => {
