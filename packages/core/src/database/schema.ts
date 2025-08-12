@@ -1,7 +1,7 @@
 import { Model } from "@effect/sql";
 import { Schema } from "effect";
 
-export const TransactionId = Schema.String.pipe(Schema.brand("TransactionId"));
+export const TransactionId = Schema.NumberFromString;
 
 export const Id = Schema.String.pipe(Schema.length(16));
 
