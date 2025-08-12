@@ -108,37 +108,43 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 		return {
 			continueConversation: Effect.fn("Bella/continueConversation")(function* ({
+				assistantMessage,
 				conversationId,
-				userMessageText,
+				userMessage,
 			}: {
+				assistantMessage: { id: MessageModel["id"] };
 				conversationId: ConversationModel["id"];
-				userMessageText: TextMessagePartModel["data"]["text"];
+				userMessage: {
+					id: MessageModel["id"];
+					parts: ReadonlyArray<Pick<TextMessagePartModel, "data" | "id" | "type">>;
+				};
 			}) {
-				const userMessageId = MessageModel.fields.id.make(yield* idGenerator.generate());
-				const userTextMessagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
-				const assistantMessageId = MessageModel.fields.id.make(yield* idGenerator.generate());
-
 				const result = yield* Effect.gen(function* () {
 					yield* insertMessage({
 						conversationId,
 						createdAt: undefined,
-						id: userMessageId,
+						id: userMessage.id,
 						role: "USER",
 						status: "COMPLETED",
 					});
 
-					yield* insertMessagePart({
-						createdAt: undefined,
-						data: { text: userMessageText },
-						id: userTextMessagePartId,
-						messageId: userMessageId,
-						type: "text",
-					});
+					yield* Effect.forEach(
+						userMessage.parts,
+						Effect.fn(function* (messagePart) {
+							yield* insertMessagePart({
+								createdAt: undefined,
+								data: messagePart.data,
+								id: messagePart.id,
+								messageId: userMessage.id,
+								type: messagePart.type,
+							});
+						}),
+					);
 
 					yield* insertMessage({
 						conversationId,
 						createdAt: undefined,
-						id: assistantMessageId,
+						id: assistantMessage.id,
 						role: "ASSISTANT",
 						status: "IN_PROGRESS",
 					});
@@ -146,19 +152,20 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					return yield* getTransactionId();
 				}).pipe(sql.withTransaction);
 
-				return { assistantMessageId, transactionId: result.transactionId };
+				return result.transactionId;
 			}),
 			createNewConversation: Effect.fn("Bella/createNewConversation")(function* ({
+				assistantMessage,
 				conversationId,
-				userMessageText,
+				userMessage,
 			}: {
+				assistantMessage: { id: MessageModel["id"] };
 				conversationId: ConversationModel["id"];
-				userMessageText: TextMessagePartModel["data"]["text"];
+				userMessage: {
+					id: MessageModel["id"];
+					parts: ReadonlyArray<Pick<TextMessagePartModel, "data" | "id" | "type">>;
+				};
 			}) {
-				const userMessageId = MessageModel.fields.id.make(yield* idGenerator.generate());
-				const userTextMessagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
-				const assistantMessageId = MessageModel.fields.id.make(yield* idGenerator.generate());
-
 				const result = yield* Effect.gen(function* () {
 					yield* insertConversation({
 						createdAt: undefined,
@@ -171,23 +178,28 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					yield* insertMessage({
 						conversationId,
 						createdAt: undefined,
-						id: userMessageId,
+						id: userMessage.id,
 						role: "USER",
 						status: "COMPLETED",
 					});
 
-					yield* insertMessagePart({
-						createdAt: undefined,
-						data: { text: userMessageText },
-						id: userTextMessagePartId,
-						messageId: userMessageId,
-						type: "text",
-					});
+					yield* Effect.forEach(
+						userMessage.parts,
+						Effect.fn(function* (messagePart) {
+							yield* insertMessagePart({
+								createdAt: undefined,
+								data: messagePart.data,
+								id: messagePart.id,
+								messageId: userMessage.id,
+								type: messagePart.type,
+							});
+						}),
+					);
 
 					yield* insertMessage({
 						conversationId,
 						createdAt: undefined,
-						id: assistantMessageId,
+						id: assistantMessage.id,
 						role: "ASSISTANT",
 						status: "IN_PROGRESS",
 					});
@@ -195,7 +207,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					return yield* getTransactionId();
 				}).pipe(sql.withTransaction);
 
-				return { assistantMessageId, transactionId: result.transactionId };
+				return result.transactionId;
 			}),
 			getNewMessageStream: Effect.fn(function* ({
 				assistantMessageId,

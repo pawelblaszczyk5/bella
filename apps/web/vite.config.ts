@@ -1,6 +1,7 @@
 import type { ViteReactPluginApi } from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 
+import optimizeLocales from "@react-aria/optimize-locales-plugin";
 // @ts-expect-error - untyped module
 import stylexPlugin from "@stylexjs/postcss-plugin";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
@@ -60,6 +61,7 @@ export default defineConfig((environment) => {
 	const isDevelopment = environment.command === "serve";
 
 	return {
+		build: { assetsInlineLimit: 0 },
 		css: {
 			postcss: {
 				plugins: [
@@ -72,6 +74,7 @@ export default defineConfig((environment) => {
 			},
 		},
 		plugins: [
+			{ ...optimizeLocales.vite({ locales: ["en-US"] }), enforce: "pre" },
 			tanstackStart({ customViteReactPlugin: true, tsr: { addExtensions: true } }),
 			react({ babel: getBabelConfig(isDevelopment) }),
 			disableReactCompilerInSsrContext(),

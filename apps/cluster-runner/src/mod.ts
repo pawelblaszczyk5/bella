@@ -57,7 +57,7 @@ const ConversationLive = Conversation.toLayer(
 										yield* bella.markMessageAsCompleted(assistantMessageId);
 									}),
 								),
-								Match.orElse(Effect.log),
+								Match.orElse(() => Effect.void),
 							);
 						}),
 					);
@@ -67,22 +67,30 @@ const ConversationLive = Conversation.toLayer(
 
 		return {
 			Continue: Effect.fn("Conversation/Continue")(function* (envelope) {
-				const result = yield* bella
-					.continueConversation({ conversationId, userMessageText: envelope.payload.userMessageText })
+				const transactionId = yield* bella
+					.continueConversation({
+						assistantMessage: envelope.payload.assistantMessage,
+						conversationId,
+						userMessage: envelope.payload.userMessage,
+					})
 					.pipe(Effect.orDie);
 
-				yield* handleGeneratingNewMessage(result.assistantMessageId).pipe(Effect.forkDaemon);
+				yield* handleGeneratingNewMessage(envelope.payload.assistantMessage.id).pipe(Effect.forkDaemon);
 
-				return result.transactionId;
+				return transactionId;
 			}),
 			Start: Effect.fn("Conversation/Start")(function* (envelope) {
-				const result = yield* bella
-					.createNewConversation({ conversationId, userMessageText: envelope.payload.userMessageText })
+				const transactionId = yield* bella
+					.createNewConversation({
+						assistantMessage: envelope.payload.assistantMessage,
+						conversationId,
+						userMessage: envelope.payload.userMessage,
+					})
 					.pipe(Effect.orDie);
 
-				yield* handleGeneratingNewMessage(result.assistantMessageId).pipe(Effect.forkDaemon);
+				yield* handleGeneratingNewMessage(envelope.payload.assistantMessage.id).pipe(Effect.forkDaemon);
 
-				return result.transactionId;
+				return transactionId;
 			}),
 		};
 	}),

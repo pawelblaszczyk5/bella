@@ -14,7 +14,7 @@ import { Route as rootRouteImport } from './routes/__root.tsx'
 import { Route as AppRouteImport } from './routes/app.tsx'
 import { Route as IndexRouteImport } from './routes/index.tsx'
 import { Route as AppIndexRouteImport } from './routes/app.index.tsx'
-import { Route as AppExampleRouteImport } from './routes/app.example.tsx'
+import { Route as AppConversationIdRouteImport } from './routes/app.$conversation-id.tsx'
 import { ServerRoute as ApiMessagesServerRouteImport } from './routes/api.messages.ts'
 import { ServerRoute as ApiMessagePartsServerRouteImport } from './routes/api.message-parts.ts'
 import { ServerRoute as ApiConversationsServerRouteImport } from './routes/api.conversations.ts'
@@ -36,9 +36,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppExampleRoute = AppExampleRouteImport.update({
-  id: '/example',
-  path: '/example',
+const AppConversationIdRoute = AppConversationIdRouteImport.update({
+  id: '/$conversation-id',
+  path: '/$conversation-id',
   getParentRoute: () => AppRoute,
 } as any)
 const ApiMessagesServerRoute = ApiMessagesServerRouteImport.update({
@@ -60,27 +60,27 @@ const ApiConversationsServerRoute = ApiConversationsServerRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/app/example': typeof AppExampleRoute
+  '/app/$conversation-id': typeof AppConversationIdRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app/example': typeof AppExampleRoute
+  '/app/$conversation-id': typeof AppConversationIdRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
-  '/app/example': typeof AppExampleRoute
+  '/app/$conversation-id': typeof AppConversationIdRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/app/example' | '/app/'
+  fullPaths: '/' | '/app' | '/app/$conversation-id' | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app/example' | '/app'
-  id: '__root__' | '/' | '/app' | '/app/example' | '/app/'
+  to: '/' | '/app/$conversation-id' | '/app'
+  id: '__root__' | '/' | '/app' | '/app/$conversation-id' | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -140,11 +140,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/example': {
-      id: '/app/example'
-      path: '/example'
-      fullPath: '/app/example'
-      preLoaderRoute: typeof AppExampleRouteImport
+    '/app/$conversation-id': {
+      id: '/app/$conversation-id'
+      path: '/$conversation-id'
+      fullPath: '/app/$conversation-id'
+      preLoaderRoute: typeof AppConversationIdRouteImport
       parentRoute: typeof AppRoute
     }
   }
@@ -176,12 +176,12 @@ declare module '@tanstack/react-start/server' {
 }
 
 interface AppRouteChildren {
-  AppExampleRoute: typeof AppExampleRoute
+  AppConversationIdRoute: typeof AppConversationIdRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppExampleRoute: AppExampleRoute,
+  AppConversationIdRoute: AppConversationIdRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

@@ -1,10 +1,146 @@
+import { useLiveQuery } from "@tanstack/react-db";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
-const AppLayoutRoute = () => (
-	<div>
-		<h1>AppLayout</h1>
-		<Outlet />
-	</div>
-);
+import { typography } from "@bella/design-system/styles/typography";
+import { ring } from "@bella/design-system/styles/utilities";
+import { mauve, violet } from "@bella/design-system/theme/color.stylex";
+import { radii } from "@bella/design-system/theme/radii.stylex";
+import { spacing } from "@bella/design-system/theme/spacing.stylex";
+import { fontWeight } from "@bella/design-system/theme/typography.stylex";
+import stylex from "@bella/stylex";
 
-export const Route = createFileRoute("/app")({ component: AppLayoutRoute, ssr: false });
+import { conversationsCollection, messagePartsCollection, messagesCollection } from "#src/lib/collections.js";
+import { Icon } from "#src/lib/icon.js";
+import { Link } from "#src/lib/link.js";
+
+const styles = stylex.create({
+	conversationLink: {
+		backgroundColor: { ":is([data-current])": violet[5], default: null },
+		borderRadius: radii[3],
+		fontWeight: { ":is([data-current])": fontWeight.medium, default: null },
+		marginInline: `calc(-1 * ${spacing[3]})`,
+		paddingBlock: spacing[1],
+		paddingInline: spacing[3],
+	},
+	conversationSectionTitle: { fontWeight: fontWeight.medium },
+	conversationsSection: { display: "flex", flexDirection: "column", gap: spacing[3] },
+	heading: {
+		alignItems: "center",
+		color: violet[12],
+		display: "flex",
+		fontWeight: fontWeight.semibold,
+		gap: spacing[3],
+	},
+	main: { padding: spacing[6] },
+	mainLink: {
+		alignItems: "center",
+		borderRadius: radii[3],
+		color: { ":is([data-current])": violet[12], default: null },
+		display: "flex",
+		fontWeight: { ":is([data-current])": fontWeight.semibold, default: null },
+		gap: spacing[2],
+		marginInline: `calc(-1 * ${spacing[3]})`,
+		paddingBlock: spacing[2],
+		paddingInline: spacing[3],
+	},
+	mainLinks: {
+		borderBlockEndWidth: 1,
+		borderBlockStartWidth: 1,
+		borderColor: mauve[6],
+		borderStyle: "solid",
+		display: "flex",
+		flexDirection: "column",
+		paddingBlock: spacing[4],
+	},
+	nav: {
+		borderColor: mauve[6],
+		borderInlineEndWidth: 1,
+		borderStyle: "solid",
+		display: "flex",
+		flexDirection: "column",
+		gap: spacing[6],
+		height: "100%",
+		paddingBlock: spacing[5],
+		paddingInline: spacing[6],
+	},
+	navList: { display: "flex", flexDirection: "column" },
+	navListElement: { display: "contents" },
+	root: {
+		backgroundColor: mauve[1],
+		color: mauve[12],
+		display: "grid",
+		gridTemplateColumns: "240px minmax(0, 1fr)",
+		height: "100dvh",
+		width: "100dvw",
+	},
+});
+
+const AppLayoutRoute = () => {
+	const { data: conversations } = useLiveQuery((q) =>
+		q
+			.from({ conversationsCollection })
+			.orderBy(({ conversationsCollection }) => conversationsCollection.updatedAt.epochMillis, "desc"),
+	);
+
+	return (
+		<div {...stylex.props(styles.root)}>
+			<nav {...stylex.props(styles.nav)}>
+				<h1 {...stylex.props(styles.heading, typography[8])}>
+					Bella <Icon name="24-shell" />
+				</h1>
+				<div {...stylex.props(styles.mainLinks)}>
+					<Link
+						activeOptions={{ exact: true }}
+						to="/app"
+						{...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}
+					>
+						<Icon name="24-home" />
+						Home
+					</Link>
+					<Link
+						activeOptions={{ exact: true }}
+						// @ts-expect-error -- purposefully broken link for now
+						to="/todo"
+						{...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}
+					>
+						<Icon name="24-todo" />
+						Todos
+					</Link>
+				</div>
+				<div {...stylex.props(styles.conversationsSection)}>
+					<p {...stylex.props(styles.conversationSectionTitle, typography[4])}>Conversations</p>
+					<ul {...stylex.props(styles.navList)}>
+						{conversations.map((conversation) => (
+							<li key={conversation.id} {...stylex.props(styles.navListElement)}>
+								<Link
+									params={{ "conversation-id": conversation.id }}
+									to="/app/$conversation-id"
+									{...stylex.props(styles.conversationLink, ring.focusVisible)}
+								>
+									{conversation.title}
+								</Link>
+							</li>
+						))}
+					</ul>
+				</div>
+			</nav>
+			<main {...stylex.props(styles.main)}>
+				<Outlet />
+			</main>
+		</div>
+	);
+};
+
+export const Route = createFileRoute("/app")({
+	component: AppLayoutRoute,
+	gcTime: 0,
+	loader: async () => {
+		await Promise.all([
+			conversationsCollection.preload(),
+			messagesCollection.preload(),
+			messagePartsCollection.preload(),
+		]);
+	},
+	shouldReload: false,
+	ssr: false,
+});

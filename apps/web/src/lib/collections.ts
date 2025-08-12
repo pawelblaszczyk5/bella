@@ -4,13 +4,15 @@ import { DateTime, Schema } from "effect";
 
 import { ConversationModel, MessageModel, TextMessagePartModel } from "@bella/core/database-schema";
 
-const ConversationShape = Schema.Struct({
+export const ConversationShape = Schema.Struct({
 	createdAt: Schema.DateTimeUtcFromSelf,
 	deletedAt: Schema.NullOr(Schema.DateTimeUtcFromSelf),
 	id: ConversationModel.select.fields.id,
 	title: ConversationModel.select.fields.title,
 	updatedAt: Schema.DateTimeUtcFromSelf,
 });
+
+export type ConversationShape = Schema.Schema.Type<typeof ConversationShape>;
 
 export const conversationsCollection = createCollection(
 	electricCollectionOptions({
@@ -24,13 +26,15 @@ export const conversationsCollection = createCollection(
 	}),
 );
 
-const MessageShape = Schema.Struct({
+export const MessageShape = Schema.Struct({
 	conversationId: ConversationShape.fields.id,
 	createdAt: Schema.DateTimeUtcFromSelf,
 	id: MessageModel.select.fields.id,
 	role: MessageModel.select.fields.role,
 	status: MessageModel.select.fields.status,
 });
+
+export type MessageShape = Schema.Schema.Type<typeof MessageShape>;
 
 export const messagesCollection = createCollection(
 	electricCollectionOptions({
@@ -50,10 +54,13 @@ const BaseMessagePartShape = Schema.Struct({
 	messageId: MessageShape.fields.id,
 });
 
-const TextMessagePartShape = Schema.extend(
-	BaseMessagePartShape,
-	Schema.Struct({ data: TextMessagePartModel.select.fields.data, type: TextMessagePartModel.select.fields.type }),
-);
+export const TextMessagePartShape = Schema.Struct({
+	...BaseMessagePartShape.fields,
+	data: TextMessagePartModel.select.fields.data,
+	type: TextMessagePartModel.select.fields.type,
+});
+
+export type TextMessagePartShape = Schema.Schema.Type<typeof TextMessagePartShape>;
 
 export const messagePartsCollection = createCollection(
 	electricCollectionOptions({

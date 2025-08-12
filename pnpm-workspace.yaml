@@ -49,6 +49,8 @@ onlyBuiltDependencies:
 
 overrides:
   eslint-import-resolver-typescript>eslint-plugin-import: "-"
+  react: "catalog:"
+  react-dom: "catalog:"
 
 packageManagerStrictVersion: true
 
