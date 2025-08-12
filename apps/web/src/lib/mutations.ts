@@ -97,7 +97,6 @@ export const useContinueConversation = () => {
 			const transactionId = await continueConversationProcedure({ data });
 
 			await Promise.all([
-				conversationsCollection.utils.awaitTxId(transactionId),
 				messagesCollection.utils.awaitTxId(transactionId),
 				messagePartsCollection.utils.awaitTxId(transactionId),
 			]);
