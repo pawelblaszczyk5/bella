@@ -4,6 +4,7 @@ import { Form, Label, TextArea, TextField } from "react-aria-components";
 import { assert } from "@bella/assert";
 import { accessibility, ring } from "@bella/design-system/styles/utilities";
 import { mauve } from "@bella/design-system/theme/color.stylex";
+import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import stylex from "@bella/stylex";
 
@@ -12,6 +13,7 @@ import type { TextMessagePartShape } from "#src/lib/collections.js";
 const styles = stylex.create({
 	textarea: {
 		borderColor: mauve[7],
+		borderRadius: radii[3],
 		borderStyle: "solid",
 		borderWidth: 1,
 		inlineSize: 680,

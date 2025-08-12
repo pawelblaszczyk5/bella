@@ -8,10 +8,6 @@
 	},
 	"exports": {
 		"./css-reset": "./src/css-reset.css",
-		"./components/button": {
-			"default": "./dist/src/components/button.jsx",
-			"types": "./dist/src/components/button.d.ts"
-		},
 		"./styles/utilities": {
 			"default": "./dist/src/styles/utilities.js",
 			"types": "./dist/src/styles/utilities.d.ts"

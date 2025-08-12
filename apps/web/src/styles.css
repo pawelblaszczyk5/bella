@@ -57,6 +57,8 @@
 		color: #ac9739;
 	}
 
+	/* cspell:ignore atrule */
+
 	.token.statement,
 	.token.regex,
 	.token.atrule {
