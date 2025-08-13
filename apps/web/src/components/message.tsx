@@ -14,7 +14,7 @@ import { messagePartsCollection, messagesCollection } from "#src/lib/collections
 const styles = stylex.create({
 	assistantMessage: { alignSelf: "flex-start" },
 	assistantMessageThinking: { color: mauve[11] },
-	base: { borderRadius: radii[4], paddingBlock: spacing[4], paddingInline: spacing[6] },
+	base: { borderRadius: radii[5], maxInlineSize: "90%", paddingBlock: spacing[4], paddingInline: spacing[6] },
 	userMessage: { alignSelf: "flex-end", backgroundColor: violet[2] },
 });
 
