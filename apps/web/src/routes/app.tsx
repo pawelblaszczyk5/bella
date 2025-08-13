@@ -110,6 +110,15 @@ const AppLayoutRoute = () => {
 						<Icon name="24-todo" />
 						Todos
 					</Link>
+					<Link
+						activeOptions={{ exact: true }}
+						// @ts-expect-error -- purposefully broken link for now
+						to="/judgments"
+						{...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}
+					>
+						<Icon name="24-hammer" />
+						Judgments
+					</Link>
 				</div>
 				<div {...stylex.props(styles.conversationsSection)}>
 					<p {...stylex.props(styles.conversationSectionTitle, typography[4])}>Conversations</p>
