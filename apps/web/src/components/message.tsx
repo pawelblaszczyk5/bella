@@ -1,7 +1,7 @@
 import { eq, useLiveQuery } from "@tanstack/react-db";
 
 import { assert } from "@bella/assert";
-import { violet } from "@bella/design-system/theme/color.stylex";
+import { mauve, violet } from "@bella/design-system/theme/color.stylex";
 import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import stylex from "@bella/stylex";
@@ -13,6 +13,7 @@ import { messagePartsCollection, messagesCollection } from "#src/lib/collections
 
 const styles = stylex.create({
 	assistantMessage: { alignSelf: "flex-start" },
+	assistantMessageThinking: { color: mauve[11] },
 	base: { borderRadius: radii[4], paddingBlock: spacing[4], paddingInline: spacing[6] },
 	userMessage: { alignSelf: "flex-end", backgroundColor: violet[2] },
 });
@@ -29,6 +30,12 @@ const AssistantMessage = ({
 	messageParts,
 }: Readonly<{ message: AssistantMessageShape; messageParts: Array<TextMessagePartShape> }>) => {
 	const content = messageParts.map((messagePart) => messagePart.data.text).join("");
+
+	if (messageParts.length === 0) {
+		return (
+			<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageThinking)}>Thinking 🤔</div>
+		);
+	}
 
 	return (
 		<div {...stylex.props(styles.base, styles.assistantMessage)}>
