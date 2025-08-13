@@ -13,20 +13,34 @@ export class ConversationModel extends Model.Class<ConversationModel>("@bella/co
 	updatedAt: Model.DateTimeUpdateFromDate,
 }) {}
 
-export class MessageModel extends Model.Class<MessageModel>("@bella/core/database/schema/MessageModel")({
-	conversationId: ConversationModel.fields.id,
-	createdAt: Model.DateTimeInsertFromDate,
-	id: Model.GeneratedByApp(Id.pipe(Schema.brand("MessageId"))),
-	role: Schema.Literal("ASSISTANT", "USER"),
+const BaseMessageFields = { conversationId: ConversationModel.fields.id, createdAt: Model.DateTimeInsertFromDate };
+
+export class UserMessageModel extends Model.Class<UserMessageModel>("@bella/core/database/schema/UserMessageModel")({
+	...BaseMessageFields,
+	id: Model.GeneratedByApp(Id.pipe(Schema.brand("UserMessageId"))),
+	role: Schema.Literal("USER"),
+	status: Schema.Literal("COMPLETED"),
+}) {}
+
+export class AssistantMessageModel extends Model.Class<AssistantMessageModel>(
+	"@bella/core/database/schema/AssistantMessageModel",
+)({
+	...BaseMessageFields,
+	id: Model.GeneratedByApp(Id.pipe(Schema.brand("AssistantMessageId"))),
+	role: Schema.Literal("ASSISTANT"),
 	status: Schema.Literal("IN_PROGRESS", "COMPLETED"),
 }) {}
 
-const BaseMessagePartFields = {
-	createdAt: Model.DateTimeInsertFromDate,
-	id: Model.GeneratedByApp(Id.pipe(Schema.brand("MessagePartId"))),
-	messageId: MessageModel.fields.id,
-};
+const BaseMessagePartFields = { createdAt: Model.DateTimeInsertFromDate };
+
+const SharedMessageId = Schema.Union(UserMessageModel.fields.id, AssistantMessageModel.fields.id);
 
 export class TextMessagePartModel extends Model.Class<TextMessagePartModel>(
 	"@bella/core/database/schema/TextMessagePartModel",
-)({ ...BaseMessagePartFields, data: Schema.Struct({ text: Schema.NonEmptyString }), type: Schema.Literal("text") }) {}
+)({
+	...BaseMessagePartFields,
+	data: Schema.Struct({ text: Schema.NonEmptyString }),
+	id: Model.GeneratedByApp(Id.pipe(Schema.brand("TextMessagePartId"))),
+	messageId: SharedMessageId,
+	type: Schema.Literal("text"),
+}) {}

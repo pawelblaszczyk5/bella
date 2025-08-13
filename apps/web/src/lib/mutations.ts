@@ -6,12 +6,13 @@ import type { ConversationActionData } from "#src/lib/api.js";
 
 import { continueConversationProcedure, startNewConversationProcedure } from "#src/lib/api.js";
 import {
+	AssistantMessageShape,
 	conversationsCollection,
 	ConversationShape,
 	messagePartsCollection,
 	messagesCollection,
-	MessageShape,
 	TextMessagePartShape,
+	UserMessageShape,
 } from "#src/lib/collections.js";
 import { generateId } from "#src/lib/id-pool.js";
 
@@ -69,8 +70,8 @@ export const useStartNewConversation = () => {
 
 	const handler = (userMessageText: TextMessagePartShape["data"]["text"]) => {
 		const conversationId = ConversationShape.fields.id.make(generateId());
-		const userMessageId = MessageShape.fields.id.make(generateId());
-		const assistantMessageId = MessageShape.fields.id.make(generateId());
+		const userMessageId = UserMessageShape.fields.id.make(generateId());
+		const assistantMessageId = AssistantMessageShape.fields.id.make(generateId());
 		const userMessageTextPartId = TextMessagePartShape.fields.id.make(generateId());
 
 		const transaction = action({
@@ -136,8 +137,8 @@ export const useContinueConversation = () => {
 		conversationId: ConversationShape["id"];
 		userMessageText: TextMessagePartShape["data"]["text"];
 	}) => {
-		const userMessageId = MessageShape.fields.id.make(generateId());
-		const assistantMessageId = MessageShape.fields.id.make(generateId());
+		const userMessageId = UserMessageShape.fields.id.make(generateId());
+		const assistantMessageId = AssistantMessageShape.fields.id.make(generateId());
 		const userMessageTextPartId = TextMessagePartShape.fields.id.make(generateId());
 
 		const transaction = action({

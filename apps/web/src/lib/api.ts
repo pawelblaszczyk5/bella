@@ -3,23 +3,20 @@ import { createServerFn } from "@tanstack/react-start";
 import { Config, Effect, Layer, ManagedRuntime, Schema, Struct } from "effect";
 
 import { ClusterApi } from "@bella/cluster-api";
-import { ConversationModel, MessageModel, TextMessagePartModel } from "@bella/core/database-schema";
+import {
+	AssistantMessageModel,
+	ConversationModel,
+	TextMessagePartModel,
+	UserMessageModel,
+} from "@bella/core/database-schema";
 import { IdGenerator } from "@bella/id-generator/effect";
 
 const UserMessage = Schema.Struct({
-	id: MessageModel.insert.fields.id,
-	parts: Schema.Array(
-		Schema.Union(
-			Schema.Struct({
-				data: TextMessagePartModel.insert.fields.data,
-				id: TextMessagePartModel.insert.fields.id,
-				type: TextMessagePartModel.insert.fields.type,
-			}),
-		),
-	),
+	id: UserMessageModel.insert.fields.id,
+	parts: Schema.Array(Schema.Union(TextMessagePartModel.insert.pick("id", "type", "data"))),
 });
 
-const AssistantMessage = Schema.Struct({ id: MessageModel.insert.fields.id });
+const AssistantMessage = Schema.Struct({ id: AssistantMessageModel.insert.fields.id });
 
 export const ConversationActionData = Schema.Struct({
 	assistantMessage: AssistantMessage,

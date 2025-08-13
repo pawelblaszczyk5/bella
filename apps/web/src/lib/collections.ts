@@ -2,7 +2,12 @@ import { electricCollectionOptions } from "@tanstack/electric-db-collection";
 import { createCollection } from "@tanstack/react-db";
 import { DateTime, Schema } from "effect";
 
-import { ConversationModel, MessageModel, TextMessagePartModel } from "@bella/core/database-schema";
+import {
+	AssistantMessageModel,
+	ConversationModel,
+	TextMessagePartModel,
+	UserMessageModel,
+} from "@bella/core/database-schema";
 
 export const ConversationShape = Schema.Struct({
 	createdAt: Schema.DateTimeUtcFromSelf,
@@ -26,21 +31,31 @@ export const conversationsCollection = createCollection(
 	}),
 );
 
-export const MessageShape = Schema.Struct({
-	conversationId: ConversationShape.fields.id,
-	createdAt: Schema.DateTimeUtcFromSelf,
-	id: MessageModel.select.fields.id,
-	role: MessageModel.select.fields.role,
-	status: MessageModel.select.fields.status,
+const BaseMessageShapeFields = { conversationId: ConversationShape.fields.id, createdAt: Schema.DateTimeUtcFromSelf };
+
+export const AssistantMessageShape = Schema.Struct({
+	...BaseMessageShapeFields,
+	id: AssistantMessageModel.select.fields.id,
+	role: AssistantMessageModel.select.fields.role,
+	status: AssistantMessageModel.select.fields.status,
 });
 
-export type MessageShape = Schema.Schema.Type<typeof MessageShape>;
+export type AssistantMessageShape = Schema.Schema.Type<typeof AssistantMessageShape>;
+
+export const UserMessageShape = Schema.Struct({
+	...BaseMessageShapeFields,
+	id: UserMessageModel.select.fields.id,
+	role: UserMessageModel.select.fields.role,
+	status: UserMessageModel.select.fields.status,
+});
+
+export type UserMessageShape = Schema.Schema.Type<typeof UserMessageShape>;
 
 export const messagesCollection = createCollection(
 	electricCollectionOptions({
 		getKey: (message) => message.id,
 		id: "messages",
-		schema: Schema.standardSchemaV1(MessageShape),
+		schema: Schema.standardSchemaV1(Schema.Union(AssistantMessageShape, UserMessageShape)),
 		shapeOptions: {
 			parser: { timestamptz: (date: string) => DateTime.unsafeMake(date) },
 			url: new URL("/api/messages", import.meta.env.VITE_WEB_BASE_URL).toString(),
@@ -48,15 +63,13 @@ export const messagesCollection = createCollection(
 	}),
 );
 
-const BaseMessagePartShape = Schema.Struct({
-	createdAt: Schema.DateTimeUtcFromSelf,
-	id: TextMessagePartModel.select.fields.id,
-	messageId: MessageShape.fields.id,
-});
+const BaseMessagePartShapeFields = { createdAt: Schema.DateTimeUtcFromSelf };
 
 export const TextMessagePartShape = Schema.Struct({
-	...BaseMessagePartShape.fields,
+	...BaseMessagePartShapeFields,
 	data: TextMessagePartModel.select.fields.data,
+	id: TextMessagePartModel.select.fields.id,
+	messageId: TextMessagePartModel.select.fields.messageId,
 	type: TextMessagePartModel.select.fields.type,
 });
 

@@ -8,7 +8,13 @@ import { Array, Config, Effect, Layer, Match, Option, Record, Schema, Stream } f
 import { IdGenerator } from "@bella/id-generator/effect";
 
 import { DatabaseDefault } from "#src/database/mod.js";
-import { ConversationModel, MessageModel, TextMessagePartModel, TransactionId } from "#src/database/schema.js";
+import {
+	AssistantMessageModel,
+	ConversationModel,
+	TextMessagePartModel,
+	TransactionId,
+	UserMessageModel,
+} from "#src/database/schema.js";
 
 const AiModel = GoogleAiLanguageModel.layer({ model: "gemini-2.5-flash" }).pipe(
 	Layer.provide(GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") })),
@@ -35,7 +41,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				INSERT INTO
 					${sql("message")} ${sql.insert(request)};
 			`,
-			Request: MessageModel.insert,
+			Request: Model.Union(UserMessageModel, AssistantMessageModel).insert,
 		});
 
 		const insertMessagePart = SqlSchema.void({
@@ -54,7 +60,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				WHERE
 					${sql("id")} = ${request};
 			`,
-			Request: MessageModel.select.fields.id,
+			Request: AssistantMessageModel.select.fields.id,
 		});
 
 		const getTransactionId = SqlSchema.single({
@@ -80,7 +86,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					${sql("createdAt")} ASC;
 			`,
 			Request: ConversationModel.select.fields.id,
-			Result: MessageModel.select.pick("id", "role"),
+			Result: Schema.Union(AssistantMessageModel.select.pick("id", "role"), UserMessageModel.select.pick("id", "role")),
 		});
 
 		const findAllMessagePartsForMessages = SqlSchema.findAll({
@@ -97,7 +103,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				ORDER BY
 					${sql("createdAt")} ASC;
 			`,
-			Request: Schema.Array(MessageModel.select.fields.id),
+			Request: Schema.Array(Schema.Union(AssistantMessageModel.select.fields.id, UserMessageModel.select.fields.id)),
 			Result: Schema.Union(TextMessagePartModel.select.pick("id", "messageId", "type", "data")),
 		});
 
@@ -112,10 +118,10 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				conversationId,
 				userMessage,
 			}: {
-				assistantMessage: { id: MessageModel["id"] };
+				assistantMessage: { id: AssistantMessageModel["id"] };
 				conversationId: ConversationModel["id"];
 				userMessage: {
-					id: MessageModel["id"];
+					id: UserMessageModel["id"];
 					parts: ReadonlyArray<Pick<TextMessagePartModel, "data" | "id" | "type">>;
 				};
 			}) {
@@ -159,10 +165,10 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				conversationId,
 				userMessage,
 			}: {
-				assistantMessage: { id: MessageModel["id"] };
+				assistantMessage: { id: AssistantMessageModel["id"] };
 				conversationId: ConversationModel["id"];
 				userMessage: {
-					id: MessageModel["id"];
+					id: UserMessageModel["id"];
 					parts: ReadonlyArray<Pick<TextMessagePartModel, "data" | "id" | "type">>;
 				};
 			}) {
@@ -213,7 +219,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				assistantMessageId,
 				conversationId,
 			}: {
-				assistantMessageId: MessageModel["id"];
+				assistantMessageId: AssistantMessageModel["id"];
 				conversationId: ConversationModel["id"];
 			}) {
 				const messages = yield* findAllMessagesForConversation(conversationId).pipe(
@@ -248,7 +254,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				assistantMessageId,
 				text,
 			}: {
-				assistantMessageId: MessageModel["id"];
+				assistantMessageId: AssistantMessageModel["id"];
 				text: TextMessagePartModel["data"]["text"];
 			}) {
 				const assistantTextMessagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
@@ -261,7 +267,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					type: "text",
 				});
 			}),
-			markMessageAsCompleted: Effect.fn(function* (assistantMessageId: MessageModel["id"]) {
+			markMessageAsCompleted: Effect.fn(function* (assistantMessageId: AssistantMessageModel["id"]) {
 				yield* completeMessage(assistantMessageId);
 			}),
 		};
