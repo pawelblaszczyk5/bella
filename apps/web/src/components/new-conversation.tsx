@@ -1,5 +1,5 @@
 import { typography } from "@bella/design-system/styles/typography";
-import { mauve, violet } from "@bella/design-system/theme/color.stylex";
+import { violet } from "@bella/design-system/theme/color.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import { fontWeight } from "@bella/design-system/theme/typography.stylex";
 import stylex from "@bella/stylex";
@@ -10,10 +10,11 @@ import { useStartNewConversation } from "#src/lib/mutations.js";
 const styles = stylex.create({
 	heading: {
 		backgroundClip: "text",
-		backgroundImage: `linear-gradient(to right, ${mauve[12]}, ${violet[11]})`,
+		backgroundImage: `linear-gradient(to right, ${violet[12]}, ${violet[11]})`,
 		color: "transparent",
 		fontWeight: fontWeight.semibold,
 	},
+	headingTypographyOverride: { lineHeight: "1.1em" },
 	root: {
 		alignItems: "center",
 		blockSize: "100%",
@@ -30,7 +31,9 @@ export const NewConversation = () => {
 
 	return (
 		<div {...stylex.props(styles.root)}>
-			<h1 {...stylex.props(styles.heading, typography[9])}>What are you up to today?</h1>
+			<h1 {...stylex.props(styles.heading, typography[9], styles.headingTypographyOverride)}>
+				What are you up to today?
+			</h1>
 			<Composer
 				isGenerationInProgress={false}
 				onStopGeneration={() => null}
