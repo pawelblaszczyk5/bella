@@ -115,9 +115,9 @@ const HighlightedCode = ({
 
 const styles = stylex.create({
 	a: { color: violet[11], fontWeight: fontWeight.medium, textDecoration: "underline", textUnderlineOffset: 2 },
-	h1: { fontWeight: fontWeight.semibold, marginBlock: spacing[5] },
-	h2: { fontWeight: fontWeight.semibold, marginBlock: spacing[4] },
-	h3: { fontWeight: fontWeight.semibold, marginBlockEnd: spacing[3], marginBlockStart: spacing[4] },
+	h1: { fontWeight: fontWeight.medium, marginBlock: spacing[5] },
+	h2: { fontWeight: fontWeight.medium, marginBlock: spacing[4] },
+	h3: { fontWeight: fontWeight.medium, marginBlockEnd: spacing[3], marginBlockStart: spacing[4] },
 	hr: { color: mauve[6], marginBlock: spacing[6] },
 	li: {
 		"::marker": { fontSize: fontSize[2] },
@@ -130,7 +130,7 @@ const styles = stylex.create({
 	p: { lineHeight: lineHeight[4], marginBlock: spacing[3] },
 	pre: { inlineSize: "100%", maxInlineSize: "100%", overflowX: "auto", overscrollBehaviorInline: "contain" },
 	preformattedProse: { whiteSpace: "pre-wrap", wordBreak: "break-word" },
-	strong: { fontWeight: fontWeight.semibold },
+	strong: { fontWeight: fontWeight.medium },
 	table: {
 		inlineSize: "100%",
 		marginBlockEnd: spacing[6],
@@ -143,7 +143,7 @@ const styles = stylex.create({
 	td: { fontSize: fontSize[2], paddingBlock: spacing[3], paddingInline: spacing[4] },
 	th: {
 		fontSize: fontSize[1],
-		fontWeight: fontWeight.semibold,
+		fontWeight: fontWeight.medium,
 		paddingBlock: spacing[3],
 		paddingInline: spacing[4],
 		textAlign: "left",

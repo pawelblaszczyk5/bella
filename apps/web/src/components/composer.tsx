@@ -1,32 +1,58 @@
 import { useRef, useState } from "react";
-import { Form, Label, TextArea, TextField } from "react-aria-components";
+import { Button, Form, Label, TextArea, TextField } from "react-aria-components";
 
 import { assert } from "@bella/assert";
 import { accessibility, ring } from "@bella/design-system/styles/utilities";
-import { mauve } from "@bella/design-system/theme/color.stylex";
+import { mauve, violet } from "@bella/design-system/theme/color.stylex";
 import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import stylex from "@bella/stylex";
 
 import type { TextMessagePartShape } from "#src/lib/collections.js";
 
+import { Icon } from "#src/lib/icon.js";
+
 const styles = stylex.create({
-	textarea: {
+	action: {
+		aspectRatio: "1/1",
+		backgroundColor: { ":is([data-hovered])": violet[4], default: violet[3] },
 		borderColor: mauve[7],
-		borderRadius: radii[3],
+		borderRadius: radii[4],
 		borderStyle: "solid",
 		borderWidth: 1,
-		inlineSize: 680,
+		display: "grid",
+		inlineSize: 48,
+		insetBlockStart: "50%",
+		insetInlineEnd: spacing[4],
+		placeItems: "center",
+		position: "absolute",
+		transform: "translateY(-50%)",
+	},
+	form: { blockSize: "fit-content", inlineSize: "fit-content", position: "relative" },
+	textarea: {
+		backgroundColor: mauve[1],
+		borderColor: mauve[7],
+		borderRadius: radii[5],
+		borderStyle: "solid",
+		borderWidth: 1,
+		inlineSize: 864,
 		maxInlineSize: "100%",
-		paddingBlock: spacing[3],
-		paddingInline: spacing[4],
+		paddingBlock: spacing[4],
+		paddingInlineEnd: `calc(${spacing[5]} + ${spacing[4]} + 48px)`,
+		paddingInlineStart: spacing[5],
 		resize: "none",
 	},
 });
 
 export const Composer = ({
+	isGenerationInProgress,
+	onStopGeneration,
 	onSubmit,
-}: Readonly<{ onSubmit: (userMessageText: TextMessagePartShape["data"]["text"]) => void }>) => {
+}: Readonly<{
+	isGenerationInProgress: boolean;
+	onStopGeneration: () => void;
+	onSubmit: (userMessageText: TextMessagePartShape["data"]["text"]) => void;
+}>) => {
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const [messageContent, setMessageContent] = useState("");
@@ -36,10 +62,15 @@ export const Composer = ({
 			onSubmit={(event) => {
 				event.preventDefault();
 
+				if (isGenerationInProgress) {
+					return;
+				}
+
 				onSubmit(messageContent);
 				setMessageContent("");
 			}}
 			ref={formRef}
+			{...stylex.props(styles.form)}
 		>
 			<TextField
 				onChange={(value) => {
@@ -60,10 +91,26 @@ export const Composer = ({
 						event.preventDefault();
 						formRef.current.requestSubmit();
 					}}
-					rows={5}
+					rows={4}
 					{...stylex.props(styles.textarea, ring.focus)}
 				/>
 			</TextField>
+			<Button
+				onPress={() => {
+					if (!isGenerationInProgress) {
+						return;
+					}
+
+					onStopGeneration();
+				}}
+				type={isGenerationInProgress ? "button" : "submit"}
+				{...stylex.props(styles.action, ring.focusVisible)}
+			>
+				<span {...stylex.props(accessibility.srOnly)}>
+					{isGenerationInProgress ? "Stop generation" : "Send message"}
+				</span>
+				<Icon name={isGenerationInProgress ? "24-unplug" : "24-send"} />
+			</Button>
 		</Form>
 	);
 };

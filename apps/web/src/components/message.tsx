@@ -1,18 +1,28 @@
 import { eq, useLiveQuery } from "@tanstack/react-db";
-import Markdown from "react-markdown";
 
 import { assert } from "@bella/assert";
+import { violet } from "@bella/design-system/theme/color.stylex";
+import { radii } from "@bella/design-system/theme/radii.stylex";
+import { spacing } from "@bella/design-system/theme/spacing.stylex";
+import stylex from "@bella/stylex";
 
 import type { AssistantMessageShape, TextMessagePartShape, UserMessageShape } from "#src/lib/collections.js";
 
+import { Markdown } from "#src/components/markdown.js";
 import { messagePartsCollection, messagesCollection } from "#src/lib/collections.js";
+
+const styles = stylex.create({
+	assistantMessage: { alignSelf: "flex-start" },
+	base: { borderRadius: radii[4], paddingBlock: spacing[4], paddingInline: spacing[6] },
+	userMessage: { alignSelf: "flex-end", backgroundColor: violet[2] },
+});
 
 const UserMessage = ({
 	messageParts,
 }: Readonly<{ message: UserMessageShape; messageParts: Array<TextMessagePartShape> }>) => {
 	const content = messageParts.map((messagePart) => messagePart.data.text).join("");
 
-	return content;
+	return <p {...stylex.props(styles.base, styles.userMessage)}>{content}</p>;
 };
 
 const AssistantMessage = ({
@@ -20,7 +30,11 @@ const AssistantMessage = ({
 }: Readonly<{ message: AssistantMessageShape; messageParts: Array<TextMessagePartShape> }>) => {
 	const content = messageParts.map((messagePart) => messagePart.data.text).join("");
 
-	return <Markdown>{content}</Markdown>;
+	return (
+		<div {...stylex.props(styles.base, styles.assistantMessage)}>
+			<Markdown>{content}</Markdown>
+		</div>
+	);
 };
 
 export const Message = ({ id }: Readonly<{ id: AssistantMessageShape["id"] | UserMessageShape["id"] }>) => {

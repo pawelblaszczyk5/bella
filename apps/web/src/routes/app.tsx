@@ -35,20 +35,14 @@ const styles = stylex.create({
 		marginInline: `calc(-1 * ${spacing[3]})`,
 		overflowY: "auto",
 	},
-	heading: {
-		alignItems: "center",
-		color: violet[12],
-		display: "flex",
-		fontWeight: fontWeight.semibold,
-		gap: spacing[3],
-	},
+	heading: { alignItems: "center", color: violet[12], display: "flex", fontWeight: fontWeight.medium, gap: spacing[3] },
 	main: { blockSize: "100vh", contain: "strict", isolation: "isolate", overflowY: "auto", padding: spacing[6] },
 	mainLink: {
 		alignItems: "center",
 		borderRadius: radii[3],
 		color: { ":is([data-current])": violet[12], default: null },
 		display: "flex",
-		fontWeight: { ":is([data-current])": fontWeight.semibold, default: null },
+		fontWeight: { ":is([data-current])": fontWeight.medium, default: null },
 		gap: spacing[2],
 		marginInline: `calc(-1 * ${spacing[3]})`,
 		paddingBlock: spacing[2],
@@ -76,7 +70,7 @@ const styles = stylex.create({
 	},
 	navList: { display: "flex", flexDirection: "column" },
 	navListElement: { display: "contents" },
-	root: { backgroundColor: mauve[1], color: mauve[12], display: "grid", gridTemplateColumns: "240px minmax(0, 1fr)" },
+	root: { backgroundColor: mauve[1], color: mauve[12], display: "grid", gridTemplateColumns: "280px minmax(0, 1fr)" },
 });
 
 const AppLayoutRoute = () => {
