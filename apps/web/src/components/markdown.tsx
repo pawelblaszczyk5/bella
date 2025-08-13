@@ -39,7 +39,7 @@ const REGISTERED_LANGUAGES = new Set(
 const highlightedCodeStyles = stylex.create({
 	content: {
 		display: "block",
-		fontSize: fontSize[2],
+		fontSize: fontSize[3],
 		hyphens: "none",
 		inlineSize: "100%",
 		maxInlineSize: "100%",
@@ -54,8 +54,8 @@ const highlightedCodeStyles = stylex.create({
 		wordSpacing: "normal",
 		wordWrap: "normal",
 	},
-	inlineCode: { fontSize: fontSize[2] },
-	languageInfo: { fontFamily: fontFamily.mono, fontSize: fontSize[2] },
+	inlineCode: { fontSize: fontSize[3] },
+	languageInfo: { fontFamily: fontFamily.mono, fontSize: fontSize[3] },
 	root: {
 		borderColor: mauve[6],
 		borderRadius: radii[4],
