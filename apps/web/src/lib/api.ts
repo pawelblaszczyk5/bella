@@ -26,6 +26,13 @@ export const ConversationActionData = Schema.Struct({
 
 export type ConversationActionData = Schema.Schema.Type<typeof ConversationActionData>;
 
+export const StopGenerationData = Schema.Struct({
+	assistantMessage: AssistantMessage,
+	conversationId: ConversationModel.insert.fields.id,
+});
+
+export type StopGenerationData = Schema.Schema.Type<typeof StopGenerationData>;
+
 class Api extends Effect.Service<Api>()("@bella/web/Api", {
 	dependencies: [FetchHttpClient.layer, IdGenerator.Default],
 	effect: Effect.gen(function* () {
@@ -70,6 +77,14 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 
 				return transactionId;
 			}),
+			stopGeneration: Effect.fn("Api/stopGeneration")(function* (stopGenerationData: StopGenerationData) {
+				const transactionId = yield* clusterHttpClient.conversation.StopGeneration({
+					path: { entityId: stopGenerationData.conversationId },
+					payload: Struct.omit(stopGenerationData, "conversationId"),
+				});
+
+				return transactionId;
+			}),
 		};
 	}),
 }) {}
@@ -98,6 +113,20 @@ export const continueConversationProcedure = createServerFn({ method: "POST" })
 				const api = yield* Api;
 
 				return yield* api.continueConversation(ctx.data);
+			}),
+		);
+
+		return value;
+	});
+
+export const stopGenerationProcedure = createServerFn({ method: "POST" })
+	.validator(Schema.standardSchemaV1(StopGenerationData))
+	.handler(async (ctx) => {
+		const value = await runtime.runPromise(
+			Effect.gen(function* () {
+				const api = yield* Api;
+
+				return yield* api.stopGeneration(ctx.data);
 			}),
 		);
 

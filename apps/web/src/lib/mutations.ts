@@ -1,10 +1,12 @@
+import type { WritableDeep } from "type-fest";
+
 import { createOptimisticAction } from "@tanstack/react-db";
 import { useNavigate } from "@tanstack/react-router";
 import { DateTime } from "effect";
 
-import type { ConversationActionData } from "#src/lib/api.js";
+import type { ConversationActionData, StopGenerationData } from "#src/lib/api.js";
 
-import { continueConversationProcedure, startNewConversationProcedure } from "#src/lib/api.js";
+import { continueConversationProcedure, startNewConversationProcedure, stopGenerationProcedure } from "#src/lib/api.js";
 import {
 	AssistantMessageShape,
 	conversationsCollection,
@@ -148,6 +150,39 @@ export const useContinueConversation = () => {
 				id: userMessageId,
 				parts: [{ data: { text: payload.userMessageText }, id: userMessageTextPartId, type: "text" }],
 			},
+		});
+
+		return transaction;
+	};
+
+	return handler;
+};
+
+// eslint-disable-next-line react-hooks-extra/no-redundant-custom-hook, react-hooks-extra/no-useless-custom-hooks -- let me live like this for now
+export const useStopGeneration = () => {
+	const action = createOptimisticAction({
+		mutationFn: async (data) => {
+			const transactionId = await stopGenerationProcedure({ data });
+
+			await messagesCollection.utils.awaitTxId(transactionId);
+		},
+		onMutate: (data: StopGenerationData) => {
+			messagesCollection.update(data.assistantMessage.id, (draft) => {
+				// NOTE this should be resolved after this https://github.com/TanStack/db/issues/407
+				const mutableDraft = draft as WritableDeep<typeof draft>;
+
+				mutableDraft.status = "COMPLETED";
+			});
+		},
+	});
+
+	const handler = (payload: {
+		assistantMessageId: AssistantMessageShape["id"];
+		conversationId: ConversationShape["id"];
+	}) => {
+		const transaction = action({
+			assistantMessage: { id: payload.assistantMessageId },
+			conversationId: payload.conversationId,
 		});
 
 		return transaction;

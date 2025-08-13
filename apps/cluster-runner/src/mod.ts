@@ -1,7 +1,7 @@
 import { ClusterWorkflowEngine, Entity, EntityProxyServer, RunnerAddress } from "@effect/cluster";
 import { HttpApiBuilder, HttpApiSwagger, HttpMiddleware } from "@effect/platform";
 import { NodeClusterRunnerSocket, NodeHttpServer, NodeRuntime } from "@effect/platform-node";
-import { Config, Effect, Layer, Match, Option, Stream } from "effect";
+import { Config, Effect, Fiber, Layer, Match, Option, Ref, Stream } from "effect";
 import { createServer } from "node:http";
 
 import type { AssistantMessageModel } from "@bella/core/database-schema";
@@ -36,6 +36,8 @@ const ConversationLive = Conversation.toLayer(
 
 		const entityAddress = yield* Entity.CurrentAddress;
 		const conversationId = ConversationModel.fields.id.make(entityAddress.entityId);
+
+		const generationFiberRef = yield* Ref.make<Option.Option<Fiber.RuntimeFiber<void, unknown>>>(Option.none());
 
 		const handleGeneratingNewMessage = Effect.fn(function* (assistantMessageId: AssistantMessageModel["id"]) {
 			const messageStream = yield* bella.getNewMessageStream({ assistantMessageId, conversationId });
@@ -77,7 +79,10 @@ const ConversationLive = Conversation.toLayer(
 					})
 					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
 
-				yield* handleGeneratingNewMessage(envelope.payload.assistantMessage.id).pipe(Effect.forkDaemon);
+				yield* handleGeneratingNewMessage(envelope.payload.assistantMessage.id).pipe(
+					Effect.forkDaemon,
+					Effect.andThen((fiber) => Ref.set(generationFiberRef, Option.some(fiber))),
+				);
 
 				return transactionId;
 			}),
@@ -90,7 +95,24 @@ const ConversationLive = Conversation.toLayer(
 					})
 					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
 
-				yield* handleGeneratingNewMessage(envelope.payload.assistantMessage.id).pipe(Effect.forkDaemon);
+				yield* handleGeneratingNewMessage(envelope.payload.assistantMessage.id).pipe(
+					Effect.forkDaemon,
+					Effect.andThen((fiber) => Ref.set(generationFiberRef, Option.some(fiber))),
+				);
+
+				return transactionId;
+			}),
+			StopGeneration: Effect.fn("Conversation/StopGeneration")(function* (envelope) {
+				const maybeFiber = yield* Ref.get(generationFiberRef);
+
+				yield* Option.match(maybeFiber, {
+					onNone: () => Effect.fail(new ConversationFlowError({ type: "STOPPING_IDLE" })),
+					onSome: (fiber) => Fiber.interrupt(fiber).pipe(Effect.andThen(Ref.set(generationFiberRef, Option.none()))),
+				});
+
+				const transactionId = yield* bella
+					.markMessageAsCompleted(envelope.payload.assistantMessage.id)
+					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
 
 				return transactionId;
 			}),

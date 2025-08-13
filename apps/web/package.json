@@ -52,6 +52,7 @@
 		"@vitejs/plugin-react": "catalog:",
 		"babel-plugin-react-compiler": "catalog:",
 		"eslint": "catalog:",
+		"type-fest": "^4.41.0",
 		"vite": "catalog:"
 	}
 }

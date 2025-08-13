@@ -9,15 +9,21 @@ import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import { fontWeight } from "@bella/design-system/theme/typography.stylex";
 import stylex from "@bella/stylex";
 
+import type { ConversationShape } from "#src/lib/collections.js";
+
 import { conversationsCollection, messagePartsCollection, messagesCollection } from "#src/lib/collections.js";
 import { Icon } from "#src/lib/icon.js";
 import { Link } from "#src/lib/link.js";
+import { useConversationState } from "#src/lib/use-conversation-state.js";
 
 const styles = stylex.create({
 	conversationLink: {
 		backgroundColor: { ":is([data-current])": violet[5], default: null },
 		borderRadius: radii[3],
+		display: "grid",
 		fontWeight: { ":is([data-current])": fontWeight.medium, default: null },
+		gap: spacing[2],
+		gridTemplateColumns: "minmax(0, 1fr) auto",
 		paddingBlock: spacing[1],
 		paddingInline: spacing[3],
 	},
@@ -35,7 +41,9 @@ const styles = stylex.create({
 		marginInline: `calc(-1 * ${spacing[3]})`,
 		overflowY: "auto",
 	},
+	conversationTitle: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
 	heading: { alignItems: "center", color: violet[12], display: "flex", fontWeight: fontWeight.medium, gap: spacing[3] },
+	hiddenSyncIcon: { opacity: 0 },
 	main: { blockSize: "100vh", contain: "strict", isolation: "isolate", overflowY: "auto", padding: spacing[6] },
 	mainLink: {
 		alignItems: "center",
@@ -72,6 +80,23 @@ const styles = stylex.create({
 	navListElement: { display: "contents" },
 	root: { backgroundColor: mauve[1], color: mauve[12], display: "grid", gridTemplateColumns: "280px minmax(0, 1fr)" },
 });
+
+const ConversationLink = ({ conversation }: Readonly<{ conversation: ConversationShape }>) => {
+	const conversationState = useConversationState(conversation.id);
+
+	return (
+		<li {...stylex.props(styles.navListElement)}>
+			<Link
+				params={{ "conversation-id": conversation.id }}
+				to="/app/$conversation-id"
+				{...stylex.props(styles.conversationLink, ring.focusVisible)}
+			>
+				<span {...stylex.props(styles.conversationTitle)}>{conversation.title}</span>
+				<Icon name="24-sync" {...stylex.props(conversationState === "GENERATING" ? null : styles.hiddenSyncIcon)} />
+			</Link>
+		</li>
+	);
+};
 
 const AppLayoutRoute = () => {
 	const { data: conversations } = useLiveQuery((q) =>
@@ -118,15 +143,7 @@ const AppLayoutRoute = () => {
 					<p {...stylex.props(styles.conversationSectionTitle, typography[4])}>Conversations</p>
 					<ul {...stylex.props(styles.navList)}>
 						{conversations.map((conversation) => (
-							<li key={conversation.id} {...stylex.props(styles.navListElement)}>
-								<Link
-									params={{ "conversation-id": conversation.id }}
-									to="/app/$conversation-id"
-									{...stylex.props(styles.conversationLink, ring.focusVisible)}
-								>
-									{conversation.title}
-								</Link>
-							</li>
+							<ConversationLink conversation={conversation} key={conversation.id} />
 						))}
 					</ul>
 				</div>

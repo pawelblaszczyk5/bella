@@ -9,7 +9,8 @@ import type { ConversationShape } from "#src/lib/collections.js";
 import { Composer } from "#src/components/composer.js";
 import { Message } from "#src/components/message.js";
 import { conversationsCollection, messagesCollection } from "#src/lib/collections.js";
-import { useContinueConversation } from "#src/lib/mutations.js";
+import { useContinueConversation, useStopGeneration } from "#src/lib/mutations.js";
+import { useConversationState } from "#src/lib/use-conversation-state.js";
 
 const styles = stylex.create({
 	composerContainer: { inlineSize: "max-content", insetBlockEnd: spacing[4], marginInline: "auto", position: "sticky" },
@@ -27,6 +28,7 @@ const styles = stylex.create({
 
 export const ExistingConversation = ({ conversationId }: Readonly<{ conversationId: ConversationShape["id"] }>) => {
 	const continueConversation = useContinueConversation();
+	const stopGeneration = useStopGeneration();
 
 	const { data: conversations } = useLiveQuery(
 		(q) =>
@@ -45,15 +47,15 @@ export const ExistingConversation = ({ conversationId }: Readonly<{ conversation
 			q
 				.from({ messagesCollection })
 				.where(({ messagesCollection }) => eq(messagesCollection.conversationId, conversation.id))
-				.orderBy(({ messagesCollection }) => messagesCollection.createdAt.epochMillis, "asc")
-				.select(({ messagesCollection }) => ({ id: messagesCollection.id })),
+				.orderBy(({ messagesCollection }) => messagesCollection.createdAt.epochMillis, "asc"),
 		[conversation.id],
 	);
+
+	const conversationState = useConversationState(conversation.id);
 
 	return (
 		<>
 			<title>{`${conversation.title} | Bella`}</title>
-
 			<div {...stylex.props(styles.root)}>
 				<div {...stylex.props(styles.messagesList)}>
 					{messages.map((message) => (
@@ -62,8 +64,16 @@ export const ExistingConversation = ({ conversationId }: Readonly<{ conversation
 				</div>
 				<div {...stylex.props(styles.composerContainer)}>
 					<Composer
-						isGenerationInProgress={false}
-						onStopGeneration={() => null}
+						onStopGeneration={() => {
+							const assistantMessage = messages.at(-1);
+
+							assert(assistantMessage, "Message must exist if stopping generation");
+							assert(assistantMessage.role === "ASSISTANT", "Can stop generation only if assistant message is last");
+							assert(assistantMessage.status === "IN_PROGRESS", "Can stop generation if message is already completed");
+
+							stopGeneration({ assistantMessageId: assistantMessage.id, conversationId: conversation.id });
+						}}
+						isGenerationInProgress={conversationState === "GENERATING"}
 						onSubmit={(userMessageText) => continueConversation({ conversationId: conversation.id, userMessageText })}
 					/>
 				</div>

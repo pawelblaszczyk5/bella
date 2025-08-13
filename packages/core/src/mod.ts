@@ -268,7 +268,13 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				});
 			}),
 			markMessageAsCompleted: Effect.fn(function* (assistantMessageId: AssistantMessageModel["id"]) {
-				yield* completeMessage(assistantMessageId);
+				const result = yield* Effect.gen(function* () {
+					yield* completeMessage(assistantMessageId);
+
+					return yield* getTransactionId();
+				}).pipe(sql.withTransaction);
+
+				return result.transactionId;
 			}),
 		};
 	}),

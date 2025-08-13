@@ -18,7 +18,7 @@ const AssistantMessage = Schema.Struct({ id: AssistantMessageModel.insert.fields
 
 export class ConversationFlowError extends Schema.TaggedError<ConversationFlowError>(
 	"@bella/core/ConversationFlowError",
-)("ConversationFlowError", { type: Schema.Literal("AI_PROVIDER_ERROR", "DATA_ACCESS_ERROR") }) {
+)("ConversationFlowError", { type: Schema.Literal("AI_PROVIDER_ERROR", "DATA_ACCESS_ERROR", "STOPPING_IDLE") }) {
 	override get message() {
 		return `Conversation flow failed with type "${this.type}"`;
 	}
@@ -33,6 +33,11 @@ export const Conversation = Entity.make("Conversation", [
 	Rpc.make("Continue", {
 		error: ConversationFlowError,
 		payload: { assistantMessage: AssistantMessage, userMessage: UserMessage },
+		success: TransactionId,
+	}),
+	Rpc.make("StopGeneration", {
+		error: ConversationFlowError,
+		payload: { assistantMessage: AssistantMessage },
 		success: TransactionId,
 	}),
 ]);
