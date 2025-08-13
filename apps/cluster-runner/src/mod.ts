@@ -7,7 +7,7 @@ import { createServer } from "node:http";
 import type { MessageModel } from "@bella/core/database-schema";
 
 import { ClusterApi } from "@bella/cluster-api";
-import { Conversation } from "@bella/cluster-schema";
+import { Conversation, ConversationFlowError } from "@bella/cluster-schema";
 import { ClusterStorageLayer } from "@bella/cluster-storage";
 import { Bella } from "@bella/core";
 import { ConversationModel } from "@bella/core/database-schema";
@@ -73,7 +73,7 @@ const ConversationLive = Conversation.toLayer(
 						conversationId,
 						userMessage: envelope.payload.userMessage,
 					})
-					.pipe(Effect.orDie);
+					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
 
 				yield* handleGeneratingNewMessage(envelope.payload.assistantMessage.id).pipe(Effect.forkDaemon);
 
@@ -86,7 +86,7 @@ const ConversationLive = Conversation.toLayer(
 						conversationId,
 						userMessage: envelope.payload.userMessage,
 					})
-					.pipe(Effect.orDie);
+					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
 
 				yield* handleGeneratingNewMessage(envelope.payload.assistantMessage.id).pipe(Effect.forkDaemon);
 
