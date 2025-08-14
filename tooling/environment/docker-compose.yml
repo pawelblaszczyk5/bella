@@ -23,7 +23,7 @@ services:
       - wal_level=logical
 
   electric:
-    image: electricsql/electric:latest
+    image: electricsql/electric:1.1.1
     environment:
       DATABASE_URL: postgresql://bella_app:example_app_password_123@postgres:5432/bella_app?sslmode=disable
       ELECTRIC_SECRET: example_electric_secret_123
