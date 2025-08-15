@@ -1,4 +1,4 @@
-# cspell:ignore esbuild, msgpackr, unrs
+# cspell:ignore esbuild, msgpackr, unrs, protobufjs
 
 packages:
   - apps/*
