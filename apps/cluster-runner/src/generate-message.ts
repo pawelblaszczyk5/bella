@@ -24,8 +24,6 @@ export const GenerateMessageLive = GenerateMessage.toLayer(
 		yield* Activity.make({
 			error: ConversationFlowError,
 			execute: Effect.gen(function* () {
-				yield* Effect.log(responsePlan);
-
 				const messageStream = yield* bella
 					.getNewMessageStream({ conversationId: payload.conversationId, responsePlan })
 					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
