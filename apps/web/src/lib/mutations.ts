@@ -2,7 +2,7 @@ import type { WritableDeep } from "type-fest";
 
 import { createOptimisticAction } from "@tanstack/react-db";
 import { useNavigate } from "@tanstack/react-router";
-import { DateTime } from "effect";
+import { DateTime, Duration } from "effect";
 
 import type { ConversationActionData, StopGenerationData } from "#src/lib/api.js";
 
@@ -32,25 +32,28 @@ export const useStartNewConversation = () => {
 			]);
 		},
 		onMutate: (data: ConversationActionData) => {
+			// NOTE: Not 100% sure about this approach but also not sure about alternative 🤔
+			const now = DateTime.unsafeNow();
+
 			conversationsCollection.insert({
-				createdAt: DateTime.unsafeNow(),
+				createdAt: now,
 				deletedAt: null,
 				id: data.conversationId,
 				title: "Loading..",
-				updatedAt: DateTime.unsafeNow(),
+				updatedAt: now,
 			});
 
 			messagesCollection.insert({
 				conversationId: data.conversationId,
-				createdAt: DateTime.unsafeNow(),
+				createdAt: now,
 				id: data.userMessage.id,
 				role: "USER",
 				status: "COMPLETED",
 			});
 
-			data.userMessage.parts.forEach((messagePart) => {
+			data.userMessage.parts.forEach((messagePart, index) => {
 				messagePartsCollection.insert({
-					createdAt: DateTime.unsafeNow(),
+					createdAt: now.pipe(DateTime.addDuration(Duration.millis(index))),
 					data: messagePart.data,
 					id: messagePart.id,
 					messageId: data.userMessage.id,
@@ -60,7 +63,7 @@ export const useStartNewConversation = () => {
 
 			messagesCollection.insert({
 				conversationId: data.conversationId,
-				createdAt: DateTime.unsafeNow(),
+				createdAt: now.pipe(DateTime.addDuration(Duration.millis(data.userMessage.parts.length))),
 				id: data.assistantMessage.id,
 				role: "ASSISTANT",
 				status: "IN_PROGRESS",
@@ -103,17 +106,19 @@ export const useContinueConversation = () => {
 			]);
 		},
 		onMutate: (data: ConversationActionData) => {
+			const now = DateTime.unsafeNow();
+
 			messagesCollection.insert({
 				conversationId: data.conversationId,
-				createdAt: DateTime.unsafeNow(),
+				createdAt: now,
 				id: data.userMessage.id,
 				role: "USER",
 				status: "COMPLETED",
 			});
 
-			data.userMessage.parts.forEach((messagePart) => {
+			data.userMessage.parts.forEach((messagePart, index) => {
 				messagePartsCollection.insert({
-					createdAt: DateTime.unsafeNow(),
+					createdAt: now.pipe(DateTime.addDuration(Duration.millis(index))),
 					data: messagePart.data,
 					id: messagePart.id,
 					messageId: data.userMessage.id,
@@ -123,7 +128,7 @@ export const useContinueConversation = () => {
 
 			messagesCollection.insert({
 				conversationId: data.conversationId,
-				createdAt: DateTime.unsafeNow(),
+				createdAt: now.pipe(DateTime.addDuration(Duration.millis(data.userMessage.parts.length))),
 				id: data.assistantMessage.id,
 				role: "ASSISTANT",
 				status: "IN_PROGRESS",
