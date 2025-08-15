@@ -54,6 +54,14 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 
 						return AiInput.AssistantMessage.make({ parts: Array.map(message.parts, mapMessagePart) });
 					}),
+					system: String.stripMargin(`
+						|<task>
+						|	You're a helpful assistant named Bella. Your job is to help the user as much possible.
+						|</task>
+						|<style>
+						|	Be kind and respectful, no matter what happens you're supposed to be nice for the user. Don't always agree with him, you're welcome to challenge his ideas if you have a better one. Try to answer in visually engaging way, use emojis if appropriate, but don't overused them. Structure your answer hierarchically, use headings, list, tables where necessary. 
+						|</style>
+						`),
 				}).pipe(Stream.provideLayer(GeminiFlash));
 
 				return stream;
