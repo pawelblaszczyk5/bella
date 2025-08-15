@@ -2,7 +2,7 @@ import { ClusterWorkflowEngine, Entity, EntityProxyServer, RunnerAddress } from 
 import { HttpApiBuilder, HttpApiSwagger, HttpMiddleware } from "@effect/platform";
 import { NodeClusterRunnerSocket, NodeHttpServer, NodeRuntime } from "@effect/platform-node";
 import { Activity } from "@effect/workflow";
-import { Config, Effect, Layer, Match, Option, Stream } from "effect";
+import { Config, Duration, Effect, Layer, Option, Stream } from "effect";
 import { createServer } from "node:http";
 
 import { ClusterApi } from "@bella/cluster-api";
@@ -89,55 +89,45 @@ const ConversationLive = Conversation.toLayer(
 );
 
 const GenerateMessageLive = GenerateMessage.toLayer(
-	Effect.fn(
-		function* (payload) {
-			const bella = yield* Bella;
+	Effect.fn(function* (payload) {
+		const bella = yield* Bella;
 
-			yield* Activity.make({
-				error: ConversationFlowError,
-				execute: Effect.gen(function* () {
-					const messageStream = yield* bella
-						.getNewMessageStream({
-							assistantMessageId: payload.assistantMessage.id,
-							conversationId: payload.conversationId,
-						})
-						.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
+		yield* Activity.make({
+			error: ConversationFlowError,
+			execute: Effect.gen(function* () {
+				const messageStream = yield* bella
+					.getNewMessageStream(payload.conversationId)
+					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
 
-					yield* messageStream.pipe(
-						Stream.takeUntilEffect(() => bella.checkIsMessageInterrupted(payload.assistantMessage.id)),
-						Stream.runForEach(
-							Effect.fn(function* (response) {
-								yield* Effect.forEach(
-									response.parts,
-									Effect.fn(function* (part) {
-										yield* Match.value(part).pipe(
-											Match.tag("TextPart", (part) =>
-												Effect.gen(function* () {
-													yield* bella.insertAssistantTextMessagePart({
-														assistantMessageId: payload.assistantMessage.id,
-														text: part.text,
-													});
-												}),
-											),
-											Match.tag("FinishPart", () =>
-												Effect.gen(function* () {
-													yield* bella.markMessageAsCompleted(payload.assistantMessage.id);
-												}),
-											),
-											Match.orElse(() => Effect.void),
-										);
-									}),
-								);
-							}),
-						),
-						Effect.mapError(() => new ConversationFlowError({ type: "GENERATION_ERROR" })),
-					);
-				}),
-				name: "generateAnswerContent",
-			}).pipe(GenerateMessage.withCompensation(() => Effect.log("compensating")));
-		},
-		GenerateMessage.withCompensation(() => Effect.log("compensating")),
-	),
+				const cachedIsMessageInterrupted = yield* Effect.cachedWithTTL(
+					bella.checkIsMessageInterrupted(payload.assistantMessage.id),
+					Duration.millis(50),
+				);
+
+				yield* messageStream.pipe(
+					Stream.takeUntilEffect(() => cachedIsMessageInterrupted),
+					Stream.runForEach(
+						Effect.fn(function* (response) {
+							yield* Effect.forEach(
+								response.parts,
+								Effect.fn(function* (part) {
+									const isMessageInterrupted = yield* cachedIsMessageInterrupted;
+
+									if (isMessageInterrupted) {
+										return;
+									}
+
+									yield* bella.handleStreamedPart({ assistantMessageId: payload.assistantMessage.id, part });
+								}),
+							);
+						}),
+					),
+					Effect.mapError(() => new ConversationFlowError({ type: "GENERATION_ERROR" })),
+				);
+			}),
+			name: "generateAnswerContent",
+		});
+	}),
 );
 
 const WorkflowEngineLive = ClusterWorkflowEngine.layer.pipe(

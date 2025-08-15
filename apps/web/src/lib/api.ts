@@ -59,6 +59,12 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 			continueConversation: Effect.fn("Api/startNewConversation")(function* (
 				conversationActionData: ConversationActionData,
 			) {
+				yield* Effect.annotateCurrentSpan({
+					assistantMessageId: conversationActionData.assistantMessage.id,
+					conversationId: conversationActionData.conversationId,
+					userMessageId: conversationActionData.userMessage.id,
+				});
+
 				yield* verifyConversationActionData(conversationActionData);
 
 				const transactionId = yield* clusterHttpClient.conversation.Continue({
@@ -71,6 +77,12 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 			startNewConversation: Effect.fn("Api/startNewConversation")(function* (
 				conversationActionData: ConversationActionData,
 			) {
+				yield* Effect.annotateCurrentSpan({
+					assistantMessageId: conversationActionData.assistantMessage.id,
+					conversationId: conversationActionData.conversationId,
+					userMessageId: conversationActionData.userMessage.id,
+				});
+
 				yield* verifyConversationActionData(conversationActionData);
 
 				const transactionId = yield* clusterHttpClient.conversation.Start({
@@ -81,6 +93,11 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 				return transactionId;
 			}),
 			stopGeneration: Effect.fn("Api/stopGeneration")(function* (stopGenerationData: StopGenerationData) {
+				yield* Effect.annotateCurrentSpan({
+					assistantMessageId: stopGenerationData.assistantMessage.id,
+					conversationId: stopGenerationData.conversationId,
+				});
+
 				const transactionId = yield* clusterHttpClient.conversation.StopGeneration({
 					path: { entityId: stopGenerationData.conversationId },
 					payload: Struct.omit(stopGenerationData, "conversationId"),

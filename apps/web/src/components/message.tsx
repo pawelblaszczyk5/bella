@@ -33,7 +33,7 @@ const AssistantMessage = ({
 	const content = messageParts.map((messagePart) => messagePart.data.text).join("");
 
 	if (messageParts.length === 0) {
-		if (message.status === "") {
+		if (message.status === "INTERRUPTED") {
 			return (
 				<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageStatus)}>
 					Generation stopped before could generate anything 😞
@@ -50,6 +50,11 @@ const AssistantMessage = ({
 
 	return (
 		<div {...stylex.props(styles.base, styles.assistantMessage)}>
+			{message.status === "INTERRUPTED" && (
+				<div {...stylex.props(styles.assistantMessageStatus)}>
+					Generation stopped while generating, below is partial content
+				</div>
+			)}
 			<Markdown>{content}</Markdown>
 		</div>
 	);
