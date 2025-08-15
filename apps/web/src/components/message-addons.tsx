@@ -19,12 +19,17 @@ const reasoningDisclosureStyles = stylex.create({
 	root: { paddingBlock: spacing[3] },
 	trigger: {
 		alignItems: "center",
+		backgroundColor: { ":is([data-hovered])": mauve[4], default: null },
 		borderRadius: radii[4],
 		display: "flex",
 		gap: spacing[2],
 		marginInline: `calc(-1 * ${spacing[3]})`,
 		paddingBlock: spacing[2],
 		paddingInline: spacing[3],
+		scale: { ":is([data-pressed])": 0.98, default: null },
+		transitionDuration: duration[2],
+		transitionProperty: "background-color, scale",
+		transitionTimingFunction: "ease-in-out",
 	},
 });
 
@@ -32,8 +37,8 @@ export const ReasoningDisclosure = ({ text }: Readonly<{ text: string }>) => (
 	<Disclosure {...stylex.props(reasoningDisclosureStyles.root)}>
 		{(props) => (
 			<>
-				<Heading {...stylex.props(reasoningDisclosureStyles.heading, typography[2])}>
-					<Button slot="trigger" {...stylex.props(reasoningDisclosureStyles.trigger, ring.focusVisible)}>
+				<Heading {...stylex.props(reasoningDisclosureStyles.heading)}>
+					<Button slot="trigger" {...stylex.props(reasoningDisclosureStyles.trigger, ring.focusVisible, typography[2])}>
 						<Icon
 							name="24-chevron-right"
 							{...stylex.props(

@@ -3,6 +3,7 @@ import { Button, Form, Label, TextArea, TextField } from "react-aria-components"
 
 import { assert } from "@bella/assert";
 import { accessibility, ring } from "@bella/design-system/styles/utilities";
+import { duration } from "@bella/design-system/theme/animation.stylex";
 import { mauve, violet } from "@bella/design-system/theme/color.stylex";
 import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
@@ -26,7 +27,11 @@ const styles = stylex.create({
 		insetInlineEnd: spacing[4],
 		placeItems: "center",
 		position: "absolute",
+		scale: { ":is([data-pressed])": 0.98, default: null },
 		transform: "translateY(-50%)",
+		transitionDuration: duration[2],
+		transitionProperty: "background-color, scale",
+		transitionTimingFunction: "ease-in-out",
 	},
 	form: { blockSize: "fit-content", inlineSize: "fit-content", position: "relative" },
 	textarea: {

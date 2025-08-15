@@ -3,6 +3,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 import { typography } from "@bella/design-system/styles/typography";
 import { ring } from "@bella/design-system/styles/utilities";
+import { duration } from "@bella/design-system/theme/animation.stylex";
 import { mauve, violet } from "@bella/design-system/theme/color.stylex";
 import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
@@ -18,7 +19,7 @@ import { useConversationState } from "#src/lib/use-conversation-state.js";
 
 const styles = stylex.create({
 	conversationLink: {
-		backgroundColor: { ":is([data-current])": violet[5], default: null },
+		backgroundColor: { ":is([data-current])": violet[5], ":is([data-hovered])": violet[4], default: null },
 		borderRadius: radii[3],
 		display: "grid",
 		fontWeight: { ":is([data-current])": fontWeight.medium, default: null },
@@ -26,6 +27,9 @@ const styles = stylex.create({
 		gridTemplateColumns: "minmax(0, 1fr) auto",
 		paddingBlock: spacing[1],
 		paddingInline: spacing[3],
+		transitionDuration: duration[2],
+		transitionProperty: "background-color",
+		transitionTimingFunction: "ease-in-out",
 	},
 	conversationSectionTitle: {
 		backgroundColor: mauve[1],
@@ -47,6 +51,7 @@ const styles = stylex.create({
 	main: { blockSize: "100vh", contain: "strict", isolation: "isolate", overflowY: "auto", padding: spacing[6] },
 	mainLink: {
 		alignItems: "center",
+		backgroundColor: { ":is([data-hovered])": violet[4], default: null },
 		borderRadius: radii[3],
 		color: { ":is([data-current])": violet[12], default: null },
 		display: "flex",
@@ -55,6 +60,9 @@ const styles = stylex.create({
 		marginInline: `calc(-1 * ${spacing[3]})`,
 		paddingBlock: spacing[2],
 		paddingInline: spacing[3],
+		transitionDuration: duration[2],
+		transitionProperty: "background-color",
+		transitionTimingFunction: "ease-in-out",
 	},
 	mainLinks: {
 		borderBlockEndWidth: 1,
