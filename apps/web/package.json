@@ -20,6 +20,7 @@
 		"@bella/core": "workspace:*",
 		"@bella/design-system": "workspace:*",
 		"@bella/id-generator": "workspace:*",
+		"@bella/opentelemetry": "workspace:*",
 		"@bella/stylex": "workspace:*",
 		"@effect/platform": "catalog:",
 		"@effect/platform-node": "catalog:",

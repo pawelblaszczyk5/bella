@@ -28,9 +28,21 @@ services:
       DATABASE_URL: postgresql://bella_app:example_app_password_123@postgres:5432/bella_app?sslmode=disable
       ELECTRIC_SECRET: example_electric_secret_123
     ports:
-      - "30001:3000"
+      - 30001:3000
     depends_on:
       - postgres
 
+  otel-lgtm:
+    image: grafana/otel-lgtm:0.11.7
+    ports:
+      - 43170:4317
+      - 43180:4318
+      - 30002:3000
+    environment:
+      OTEL_METRIC_EXPORT_INTERVAL: 5000
+    volumes:
+      - otel_data:/data
+
 volumes:
   postgres_data:
+  otel_data:

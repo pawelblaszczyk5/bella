@@ -215,7 +215,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 				return result.transactionId;
 			}),
-			getNewMessageStream: Effect.fn(function* ({
+			getNewMessageStream: Effect.fn("Bella/getNewMessageStream")(function* ({
 				assistantMessageId,
 				conversationId,
 			}: {
@@ -250,7 +250,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 				return stream;
 			}),
-			insertAssistantTextMessagePart: Effect.fn(function* ({
+			insertAssistantTextMessagePart: Effect.fn("Bella/insertAssistantTextMessagePart")(function* ({
 				assistantMessageId,
 				text,
 			}: {
@@ -267,7 +267,9 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					type: "text",
 				});
 			}),
-			markMessageAsCompleted: Effect.fn(function* (assistantMessageId: AssistantMessageModel["id"]) {
+			markMessageAsCompleted: Effect.fn("Bella/markMessageAsCompleted")(function* (
+				assistantMessageId: AssistantMessageModel["id"],
+			) {
 				const result = yield* Effect.gen(function* () {
 					yield* completeMessage(assistantMessageId);
 

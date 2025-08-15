@@ -10,6 +10,7 @@ import {
 	UserMessageModel,
 } from "@bella/core/database-schema";
 import { IdGenerator } from "@bella/id-generator/effect";
+import { OpentelemetryLive } from "@bella/opentelemetry";
 
 const UserMessage = Schema.Struct({
 	id: UserMessageModel.insert.fields.id,
@@ -42,7 +43,9 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 
 		const clusterHttpClient = yield* HttpApiClient.make(ClusterApi, { baseUrl: BASE_URL });
 
-		const verifyConversationActionData = Effect.fn(function* (conversationActionData: ConversationActionData) {
+		const verifyConversationActionData = Effect.fn("Api/verifyConversationActionData")(function* (
+			conversationActionData: ConversationActionData,
+		) {
 			yield* idGenerator.verify(conversationActionData.conversationId);
 			yield* idGenerator.verify(conversationActionData.assistantMessage.id);
 			yield* idGenerator.verify(conversationActionData.userMessage.id);
@@ -89,7 +92,9 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 	}),
 }) {}
 
-const runtime = ManagedRuntime.make(Layer.mergeAll(Api.Default));
+const EnvironmentLive = Layer.mergeAll(Api.Default).pipe(Layer.provide(OpentelemetryLive));
+
+const runtime = ManagedRuntime.make(EnvironmentLive);
 
 export const startNewConversationProcedure = createServerFn({ method: "POST" })
 	.validator(Schema.standardSchemaV1(ConversationActionData))

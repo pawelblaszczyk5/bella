@@ -11,6 +11,7 @@ import { Conversation, ConversationFlowError } from "@bella/cluster-schema";
 import { ClusterStorageLayer } from "@bella/cluster-storage";
 import { Bella } from "@bella/core";
 import { ConversationModel } from "@bella/core/database-schema";
+import { OpentelemetryLive } from "@bella/opentelemetry";
 
 const ClusterApiLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 	Layer.provide(HttpApiSwagger.layer({ path: "/docs" })),
@@ -51,17 +52,15 @@ const ConversationLive = Conversation.toLayer(
 							yield* Match.value(part).pipe(
 								Match.tag("TextPart", (part) =>
 									Effect.gen(function* () {
-										yield* Effect.log(part);
 										yield* bella.insertAssistantTextMessagePart({ assistantMessageId, text: part.text });
 									}),
 								),
 								Match.tag("FinishPart", () =>
 									Effect.gen(function* () {
-										yield* Effect.log(part);
 										yield* bella.markMessageAsCompleted(assistantMessageId);
 									}),
 								),
-								Match.orElse((part) => Effect.log(part)),
+								Match.orElse(() => Effect.void),
 							);
 						}),
 					);
@@ -150,6 +149,6 @@ const WorkflowsLive = Layer.empty;
 const EnvironmentLive = Layer.mergeAll(
 	EntitiesLive.pipe(Layer.provide(WorkflowsLive), Layer.provide(WorkflowEngineLive)),
 	ClusterApiLive.pipe(Layer.provide(WorkflowEngineLive)),
-).pipe(Layer.provide(Bella.Default));
+).pipe(Layer.provide(Bella.Default), Layer.provide(OpentelemetryLive));
 
 EnvironmentLive.pipe(Layer.launch, NodeRuntime.runMain);

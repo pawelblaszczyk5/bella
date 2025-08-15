@@ -1,0 +1,34 @@
+{
+	"name": "@bella/opentelemetry",
+	"description": "Shared layer between web app and cluster runners for opentelemetry spanning the whole stack",
+	"sideEffects": false,
+	"type": "module",
+	"imports": {
+		"#src/*": "./dist/src/*"
+	},
+	"exports": {
+		".": {
+			"default": "./dist/src/mod.js",
+			"types": "./dist/src/mod.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc --noCheck",
+		"dev": "tsc --noCheck",
+		"lint": "eslint",
+		"lint:fix": "eslint --fix",
+		"typecheck": "tsc --build --noEmit"
+	},
+	"dependencies": {
+		"@effect/opentelemetry": "catalog:",
+		"@effect/platform": "catalog:",
+		"@opentelemetry/sdk-trace-web": "catalog:",
+		"effect": "catalog:"
+	},
+	"devDependencies": {
+		"@bella/eslint-config": "workspace:*",
+		"@bella/typescript-config": "workspace:*",
+		"eslint": "catalog:",
+		"typescript": "catalog:"
+	}
+}
