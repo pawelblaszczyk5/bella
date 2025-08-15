@@ -13,7 +13,7 @@ import { messagePartsCollection, messagesCollection } from "#src/lib/collections
 
 const styles = stylex.create({
 	assistantMessage: { alignSelf: "flex-start" },
-	assistantMessageThinking: { color: mauve[11] },
+	assistantMessageStatus: { color: mauve[11] },
 	base: { borderRadius: radii[5], maxInlineSize: "90%", paddingBlock: spacing[4], paddingInline: spacing[6] },
 	userMessage: { alignSelf: "flex-end", backgroundColor: violet[2] },
 });
@@ -27,13 +27,24 @@ const UserMessage = ({
 };
 
 const AssistantMessage = ({
+	message,
 	messageParts,
 }: Readonly<{ message: AssistantMessageShape; messageParts: Array<TextMessagePartShape> }>) => {
 	const content = messageParts.map((messagePart) => messagePart.data.text).join("");
 
 	if (messageParts.length === 0) {
+		if (message.status === "COMPLETED") {
+			return (
+				<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageStatus)}>
+					Generation stopped before could generate anything 😞
+				</div>
+			);
+		}
+
 		return (
-			<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageThinking)}>Thinking 🤔</div>
+			<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageStatus)}>
+				Generating launching 🚀
+			</div>
 		);
 	}
 
