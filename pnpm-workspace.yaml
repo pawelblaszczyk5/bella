@@ -1,3 +1,5 @@
+# cspell:ignore esbuild, msgpackr, unrs, protobufjs
+
 packages:
   - apps/*
   - packages/*
@@ -6,26 +8,26 @@ packages:
 allowUnusedPatches: false
 
 catalog:
-  '@effect/ai': ^0.26.0
-  '@effect/ai-anthropic': ^0.16.0
-  '@effect/ai-google': ^0.5.0
-  '@effect/cluster': ^0.48.0
-  '@effect/experimental': ^0.54.6
-  '@effect/opentelemetry': ^0.56.2
-  '@effect/platform': ^0.90.3
-  '@effect/platform-node': ^0.96.0
-  '@effect/rpc': ^0.69.0
-  '@effect/sql': ^0.44.1
-  '@effect/sql-pg': ^0.45.0
-  '@effect/workflow': ^0.9.0
-  '@opentelemetry/sdk-trace-web': ^2.0.1
-  '@stylexjs/babel-plugin': ^0.15.3
-  '@stylexjs/postcss-plugin': ^0.15.3
-  '@stylexjs/stylex': ^0.15.3
-  '@types/node': ^24.3.0
-  '@types/react': ^19.1.10
-  '@types/react-dom': ^19.1.7
-  '@vitejs/plugin-react': ^5.0.0
+  "@effect/ai": ^0.26.0
+  "@effect/ai-anthropic": ^0.16.0
+  "@effect/ai-google": ^0.5.0
+  "@effect/cluster": ^0.48.0
+  "@effect/experimental": ^0.54.6
+  "@effect/opentelemetry": ^0.56.2
+  "@effect/platform": ^0.90.3
+  "@effect/platform-node": ^0.96.0
+  "@effect/rpc": ^0.69.0
+  "@effect/sql": ^0.44.1
+  "@effect/sql-pg": ^0.45.0
+  "@effect/workflow": ^0.9.0
+  "@opentelemetry/sdk-trace-web": ^2.0.1
+  "@stylexjs/babel-plugin": ^0.15.3
+  "@stylexjs/postcss-plugin": ^0.15.3
+  "@stylexjs/stylex": ^0.15.3
+  "@types/node": ^24.3.0
+  "@types/react": ^19.1.10
+  "@types/react-dom": ^19.1.7
+  "@vitejs/plugin-react": ^5.0.0
   babel-plugin-react-compiler: 19.1.0-rc.2
   effect: ^3.17.7
   eslint: ^9.33.0
@@ -43,23 +45,23 @@ linkWorkspacePackages: true
 managePackageManagerVersions: false
 
 onlyBuiltDependencies:
-  - '@parcel/watcher'
+  - "@parcel/watcher"
   - esbuild
   - msgpackr-extract
   - protobufjs
   - unrs-resolver
 
 overrides:
-  eslint-import-resolver-typescript>eslint-plugin-import: '-'
-  react: 'catalog:'
-  react-dom: 'catalog:'
+  eslint-import-resolver-typescript>eslint-plugin-import: "-"
+  react: "catalog:"
+  react-dom: "catalog:"
 
 packageManagerStrictVersion: true
 
 patchedDependencies:
-  '@effect/ai-anthropic': patches/@effect__ai-anthropic.patch
-  '@tanstack/db': patches/@tanstack__db.patch
-  '@tanstack/electric-db-collection': patches/@tanstack__electric-db-collection.patch
+  "@effect/ai-anthropic": patches/@effect__ai-anthropic.patch
+  "@tanstack/db": patches/@tanstack__db.patch
+  "@tanstack/electric-db-collection": patches/@tanstack__electric-db-collection.patch
   prettier-plugin-sql@0.19.2: patches/prettier-plugin-sql.patch
 
 saveWorkspaceProtocol: true

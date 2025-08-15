@@ -9,12 +9,13 @@ import type {
 	TextMessagePartModel,
 	UserMessageModel,
 } from "#src/database/schema.js";
+import type { ResponsePlan } from "#src/shared.js";
 
 import { Ai } from "#src/ai.js";
 import { DatabaseDefault } from "#src/database/mod.js";
-import { Repository } from "#src/repository.js";
-import { ResponseFulfillment, ResponseRefusal, type ResponsePlan } from "#src/shared.js";
 import { modelUsageTotal, responseTotal } from "#src/metrics.js";
+import { Repository } from "#src/repository.js";
+import { ResponseFulfillment, ResponseRefusal } from "#src/shared.js";
 
 export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 	dependencies: [DatabaseDefault, Repository.Default, Ai.Default],
@@ -114,18 +115,18 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				yield* Match.value(responsePlan).pipe(
 					Match.tag("ResponseFulfillment", (responseFulfillment) =>
 						Effect.annotateCurrentSpan({
-							type: responseFulfillment._tag,
-							model: responseFulfillment.model,
 							answerStyle: responseFulfillment.answerStyle,
 							language: responseFulfillment.language,
+							model: responseFulfillment.model,
 							reasoningEnabled: responseFulfillment.reasoningEnabled,
+							type: responseFulfillment._tag,
 						}),
 					),
 					Match.tag("ResponseRefusal", (responseRefusal) =>
 						Effect.annotateCurrentSpan({
-							type: responseRefusal._tag,
-							reason: responseRefusal.reason,
 							language: responseRefusal.language,
+							reason: responseRefusal.reason,
+							type: responseRefusal._tag,
 						}),
 					),
 					Match.exhaustive,
@@ -149,11 +150,11 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				const classification = yield* ai.classifyIncomingMessage(messages);
 
 				if (classification.tone === "HOSTILE") {
-					return ResponseRefusal.make({ reason: "USER_HOSTILITY", language: classification.language });
+					return ResponseRefusal.make({ language: classification.language, reason: "USER_HOSTILITY" });
 				}
 
 				if (classification.topicsMentioned.includes("POLITICS")) {
-					return ResponseRefusal.make({ reason: "POLITICS", language: classification.language });
+					return ResponseRefusal.make({ language: classification.language, reason: "POLITICS" });
 				}
 
 				const answerStyle = Match.value(classification.tone).pipe(
@@ -190,14 +191,11 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 						(value) => value < 10,
 						() => "GOOGLE:GEMINI-2.5-PRO",
 					),
-					Match.when(
-						10,
-						() => "ANTHROPIC:CLAUDE-4.1-OPUS",
-					),
+					Match.when(10, () => "ANTHROPIC:CLAUDE-4.1-OPUS"),
 					Match.orElseAbsurd,
 				);
 
-				return ResponseFulfillment.make({ model, reasoningEnabled, language: classification.language, answerStyle });
+				return ResponseFulfillment.make({ answerStyle, language: classification.language, model, reasoningEnabled });
 			}),
 			handleStreamedPart: Effect.fn("Bella/Core/handleStreamedPart")(function* ({
 				assistantMessageId,
@@ -259,4 +257,4 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 	}),
 }) {}
 
-export { ResponsePlan, ResponseFulfillment, ResponseRefusal } from "#src/shared.js";
+export { ResponseFulfillment, ResponsePlan, ResponseRefusal } from "#src/shared.js";

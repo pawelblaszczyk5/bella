@@ -31,6 +31,8 @@ const AnthropicClientLive = AnthropicClient.layerConfig({ apiKey: Config.redacte
 );
 
 class AiLanguageModelMap extends LayerMap.Service<AiLanguageModelMap>()("AiLanguageModelMap", {
+	dependencies: [],
+	idleTimeToLive: Duration.minutes(15),
 	lookup: (name: ResponseFulfillment["model"]) =>
 		Match.value(name).pipe(
 			Match.when("ANTHROPIC:CLAUDE-4-SONNET", () =>
@@ -50,8 +52,6 @@ class AiLanguageModelMap extends LayerMap.Service<AiLanguageModelMap>()("AiLangu
 			),
 			Match.exhaustive,
 		),
-	idleTimeToLive: Duration.minutes(15),
-	dependencies: [],
 }) {}
 
 export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
@@ -75,11 +75,11 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 			});
 
 		const generateRefusalAnswer = Effect.fn(function* ({
-			responseRefusal,
 			messages,
+			responseRefusal,
 		}: {
-			responseRefusal: ResponseRefusal;
 			messages: MessagesWithParts;
+			responseRefusal: ResponseRefusal;
 		}) {
 			const stream = AiLanguageModel.streamText({
 				prompt: mapMessagesWithPartsToPrompt(messages),
@@ -108,11 +108,11 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 		});
 
 		const generateFulfillmentAnswer = Effect.fn(function* ({
-			responseFulfillment,
 			messages,
+			responseFulfillment,
 		}: {
-			responseFulfillment: ResponseFulfillment;
 			messages: MessagesWithParts;
+			responseFulfillment: ResponseFulfillment;
 		}) {
 			const provideConfig: <A, E, R>(self: Stream.Stream<A, E, R>) => Stream.Stream<A, E, R> = Match.value(
 				responseFulfillment,
@@ -123,7 +123,7 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 					(responseFulfillment) =>
 						Stream.provideService(AnthropicLanguageModel.Config, {
 							thinking:
-								responseFulfillment.reasoningEnabled ? { type: "enabled", budget_tokens: 2000 } : { type: "disabled" },
+								responseFulfillment.reasoningEnabled ? { budget_tokens: 2_000, type: "enabled" } : { type: "disabled" },
 						}),
 				),
 				Match.whenOr(
@@ -135,7 +135,7 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 							generationConfig: {
 								thinkingConfig:
 									responseFulfillment.reasoningEnabled ?
-										{ includeThoughts: true, thinkingBudget: 2000 }
+										{ includeThoughts: true, thinkingBudget: 2_000 }
 									:	{ includeThoughts: false, thinkingBudget: 0 },
 							},
 						}),
@@ -197,9 +197,9 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 			}) {
 				const stream = yield* Match.value(responsePlan).pipe(
 					Match.tag("ResponseFulfillment", (responseFulfillment) =>
-						generateFulfillmentAnswer({ responseFulfillment, messages }),
+						generateFulfillmentAnswer({ messages, responseFulfillment }),
 					),
-					Match.tag("ResponseRefusal", (responseRefusal) => generateRefusalAnswer({ responseRefusal, messages })),
+					Match.tag("ResponseRefusal", (responseRefusal) => generateRefusalAnswer({ messages, responseRefusal })),
 					Match.exhaustive,
 				);
 
