@@ -39,8 +39,7 @@ const styles = stylex.create({
 		position: "sticky",
 	},
 	conversationsSection: {
-		display: "flex",
-		flexDirection: "column",
+		display: "grid",
 		gap: spacing[3],
 		marginInline: `calc(-1 * ${spacing[3]})`,
 		overflowY: "auto",
@@ -69,8 +68,6 @@ const styles = stylex.create({
 		borderBlockStartWidth: 1,
 		borderColor: mauve[6],
 		borderStyle: "solid",
-		display: "flex",
-		flexDirection: "column",
 		paddingBlock: spacing[4],
 	},
 	nav: {
@@ -84,8 +81,6 @@ const styles = stylex.create({
 		paddingBlock: spacing[5],
 		paddingInline: spacing[6],
 	},
-	navList: { display: "flex", flexDirection: "column" },
-	navListElement: { display: "contents" },
 	root: { backgroundColor: mauve[1], color: mauve[12], display: "grid", gridTemplateColumns: "300px minmax(0, 1fr)" },
 });
 
@@ -93,7 +88,7 @@ const ConversationLink = ({ conversation }: Readonly<{ conversation: Conversatio
 	const conversationState = useConversationState(conversation.id);
 
 	return (
-		<li {...stylex.props(styles.navListElement)}>
+		<li>
 			<Link
 				params={{ "conversation-id": conversation.id }}
 				to="/app/$conversation-id"
@@ -149,7 +144,7 @@ const AppLayoutRoute = () => {
 				</div>
 				<div {...stylex.props(styles.conversationsSection)}>
 					<p {...stylex.props(styles.conversationSectionTitle, typography[4])}>Conversations</p>
-					<ul {...stylex.props(styles.navList)}>
+					<ul>
 						{conversations.map((conversation) => (
 							<ConversationLink conversation={conversation} key={conversation.id} />
 						))}

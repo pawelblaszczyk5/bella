@@ -71,9 +71,7 @@ const highlightedCodeStyles = stylex.create({
 		borderBlockEndWidth: 1,
 		borderColor: mauve[6],
 		borderStyle: "solid",
-		display: "flex",
 		fontFamily: fontFamily.sans,
-		justifyContent: "space-between",
 		paddingBlock: spacing[3],
 		paddingInline: spacing[4],
 	},
@@ -101,7 +99,7 @@ const HighlightedCode = ({
 	return (
 		<span {...stylex.props(highlightedCodeStyles.root)}>
 			<span {...stylex.props(highlightedCodeStyles.topBar)}>
-				<span {...stylex.props(highlightedCodeStyles.languageInfo)}>{language}</span>
+				<span {...stylex.props(highlightedCodeStyles.languageInfo, typography[2])}>{language}</span>
 			</span>
 			{isSupportedLanguage ?
 				<Refractor language={language} value={deferredContent} {...stylex.props(highlightedCodeStyles.content)} />
