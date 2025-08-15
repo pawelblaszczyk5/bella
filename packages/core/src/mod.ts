@@ -1,7 +1,7 @@
 import type { AiResponse } from "@effect/ai";
 
 import { PgClient } from "@effect/sql-pg";
-import { Effect, Match } from "effect";
+import { Effect, Match, Metric } from "effect";
 
 import type {
 	AssistantMessageModel,
@@ -14,6 +14,7 @@ import { Ai } from "#src/ai.js";
 import { DatabaseDefault } from "#src/database/mod.js";
 import { Repository } from "#src/repository.js";
 import { ResponseFulfillment, ResponseRefusal, type ResponsePlan } from "#src/shared.js";
+import { modelUsageTotal, responseTotal } from "#src/metrics.js";
 
 export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 	dependencies: [DatabaseDefault, Repository.Default, Ai.Default],
@@ -129,6 +130,14 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					),
 					Match.exhaustive,
 				);
+
+				yield* responseTotal.pipe(
+					Metric.tagged("type", responsePlan._tag === "ResponseFulfillment" ? "fulfillment" : "refusal"),
+				)(Effect.succeed(1));
+
+				if (responsePlan._tag === "ResponseFulfillment") {
+					yield* modelUsageTotal.pipe(Metric.tagged("model", responsePlan.model))(Effect.succeed(1));
+				}
 
 				const stream = yield* ai.generateAnswer({ messages, responsePlan });
 
