@@ -48,7 +48,11 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					yield* Effect.forEach(
 						userMessage.parts,
 						Effect.fn(function* (messagePart) {
-							yield* repository.insertTextMessagePart({ data: messagePart.data, messageId: userMessage.id });
+							yield* repository.insertTextMessagePart({
+								data: messagePart.data,
+								id: messagePart.id,
+								messageId: userMessage.id,
+							});
 						}),
 					);
 
@@ -81,7 +85,11 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					yield* Effect.forEach(
 						userMessage.parts,
 						Effect.fn(function* (messagePart) {
-							yield* repository.insertTextMessagePart({ data: messagePart.data, messageId: userMessage.id });
+							yield* repository.insertTextMessagePart({
+								data: messagePart.data,
+								id: messagePart.id,
+								messageId: userMessage.id,
+							});
 						}),
 					);
 
@@ -111,7 +119,11 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				yield* Match.value(part).pipe(
 					Match.tag("TextPart", (part) =>
 						Effect.gen(function* () {
-							yield* repository.insertTextMessagePart({ data: { text: part.text }, messageId: assistantMessageId });
+							yield* repository.insertTextMessagePart({
+								data: { text: part.text },
+								id: undefined,
+								messageId: assistantMessageId,
+							});
 						}),
 					),
 					Match.tag("FinishPart", () =>

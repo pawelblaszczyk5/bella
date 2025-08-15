@@ -170,12 +170,14 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 			}),
 			insertTextMessagePart: Effect.fn("Bella/Repository/insertTextMessagePart")(function* ({
 				data,
+				id,
 				messageId,
 			}: {
 				data: TextMessagePartModel["data"];
+				id: TextMessagePartModel["id"] | undefined;
 				messageId: AssistantMessageModel["id"] | UserMessageModel["id"];
 			}) {
-				const textMessagePartId = TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
+				const textMessagePartId = id ?? TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
 
 				yield* insertMessagePart({ createdAt: undefined, data, id: textMessagePartId, messageId, type: "text" });
 			}),
