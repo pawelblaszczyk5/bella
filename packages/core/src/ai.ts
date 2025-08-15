@@ -1,12 +1,25 @@
 import { AiInput, AiLanguageModel } from "@effect/ai";
 import { GoogleAiClient, GoogleAiLanguageModel } from "@effect/ai-google";
 import { FetchHttpClient } from "@effect/platform";
-import { Array, Config, Effect, Layer, Match, Stream } from "effect";
+import { Array, Config, Effect, Layer, Match, Stream, String } from "effect";
 
 import type { AssistantMessageModel, TextMessagePartModel, UserMessageModel } from "#src/database/schema.js";
 
-const AiModel = GoogleAiLanguageModel.layer({ model: "gemini-2.5-flash" }).pipe(
-	Layer.provide(GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") })),
+const GoogleAiClientLive = GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") });
+
+const GeminiFlash = GoogleAiLanguageModel.layer({ model: "gemini-2.5-flash" }).pipe(
+	Layer.provide(GoogleAiClientLive),
+	Layer.provide(FetchHttpClient.layer),
+);
+
+// NOTE Leaving it here for later
+// const GeminiPro = GoogleAiLanguageModel.layer({ model: "gemini-2.5-pro" }).pipe(
+// 	Layer.provide(GoogleAiClientLive),
+// 	Layer.provide(FetchHttpClient.layer),
+// );
+
+const GeminiFlashLite = GoogleAiLanguageModel.layer({ model: "gemini-2.5-flash-lite" }).pipe(
+	Layer.provide(GoogleAiClientLive),
 	Layer.provide(FetchHttpClient.layer),
 );
 
@@ -41,9 +54,48 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 
 						return AiInput.AssistantMessage.make({ parts: Array.map(message.parts, mapMessagePart) });
 					}),
-				}).pipe(Stream.provideLayer(AiModel));
+				}).pipe(Stream.provideLayer(GeminiFlash));
 
 				return stream;
+			}),
+			generateTitle: Effect.fn("Bella/Ai/generateTitle")(function* (
+				textMessagePartContentToGenerateTitleFrom: TextMessagePartModel["data"]["text"],
+			) {
+				const response = yield* AiLanguageModel.generateText({
+					prompt: [
+						// cspell:ignore cześć, obecnie, dzieje, polsce
+						AiInput.UserMessage.make({
+							parts: [AiInput.TextPart.make({ text: "Cześć, co obecnie dzieje się w Polsce?" })],
+						}),
+						// cspell:ignore wydarzenia
+						AiInput.AssistantMessage.make({ parts: [AiInput.TextPart.make({ text: "Wydarzenia w Polsce" })] }),
+						AiInput.UserMessage.make({
+							parts: [
+								AiInput.TextPart.make({
+									text: "Generate me a code for React component, using React Aria Components, which will be responsible for managing booking date",
+								}),
+							],
+						}),
+						AiInput.AssistantMessage.make({
+							parts: [AiInput.TextPart.make({ text: "Booking date component generation" })],
+						}),
+						AiInput.UserMessage.make({ parts: [AiInput.TextPart.make({ text: "Who is the current US president?" })] }),
+						AiInput.AssistantMessage.make({ parts: [AiInput.TextPart.make({ text: "US president" })] }),
+						AiInput.UserMessage.make({
+							parts: [AiInput.TextPart.make({ text: textMessagePartContentToGenerateTitleFrom })],
+						}),
+					],
+					system: String.stripMargin(`
+						|<task>
+						|	You're a helpful assistant tasked with generating titles for conversations in ai chat app. In each message you're receiving user message and you should respond with exactly one title suggestion. You shouldn't respond with anything else, it should include only the title suggestion
+						|</task>
+						|<style>
+						|	The title should be concise, ideally a few words being a quintessence and a summary of the user message. It shouldn't ever directly answer user question. It must be a summary. It must be in the same language as the user message.
+						|</style> 
+					`),
+				}).pipe(Effect.provide(GeminiFlashLite));
+
+				return response.text.trim();
 			}),
 		};
 	}),

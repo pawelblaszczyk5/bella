@@ -71,8 +71,10 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					parts: ReadonlyArray<Pick<TextMessagePartModel, "data" | "id" | "type">>;
 				};
 			}) {
+				const title = yield* ai.generateTitle(userMessage.parts.map((part) => part.data.text).join(""));
+
 				const transactionId = yield* Effect.gen(function* () {
-					yield* repository.insertConversation({ id: conversationId, title: "Lorem ipsum" });
+					yield* repository.insertConversation({ id: conversationId, title });
 
 					yield* repository.insertUserMessage({ conversationId, id: userMessage.id, status: "COMPLETED" });
 
