@@ -56,7 +56,7 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 		});
 
 		return {
-			continueConversation: Effect.fn("Api/startNewConversation")(function* (
+			continueConversation: Effect.fn("Api/continueConversation")(function* (
 				conversationActionData: ConversationActionData,
 			) {
 				yield* Effect.annotateCurrentSpan({
