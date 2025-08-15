@@ -63,6 +63,17 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 			Request: AssistantMessageModel.select.fields.id,
 		});
 
+		const interruptMessage = SqlSchema.void({
+			execute: (request) => sql`
+				UPDATE ${sql("message")}
+				SET
+					${sql.update({ status: "INTERRUPTED" })}
+				WHERE
+					${sql("id")} = ${request};
+			`,
+			Request: AssistantMessageModel.select.fields.id,
+		});
+
 		const getTransactionId = SqlSchema.single({
 			// cspell:ignore xact
 			execute: () => sql`
@@ -107,12 +118,32 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 			Result: Schema.Union(TextMessagePartModel.select.pick("id", "messageId", "type", "data")),
 		});
 
+		const findMessageToCheckInterruptionStatus = SqlSchema.single({
+			execute: (request) => sql`
+				SELECT
+					${sql("status")}
+				FROM
+					${sql("message")}
+				WHERE
+					${sql("id")} = ${request};
+			`,
+			Request: AssistantMessageModel.select.fields.id,
+			Result: AssistantMessageModel.select.pick("status"),
+		});
+
 		const mapMessagePart = Match.type<Omit<TextMessagePartModel, "createdAt">>().pipe(
 			Match.when({ type: "text" }, (part) => AiInput.TextPart.make({ text: part.data.text })),
 			Match.exhaustive,
 		);
 
 		return {
+			checkIsMessageInterrupted: Effect.fn("Bella/checkIsMessageInterrupted")(function* (
+				assistantMessageId: AssistantMessageModel["id"],
+			) {
+				const message = yield* findMessageToCheckInterruptionStatus(assistantMessageId);
+
+				return message.status === "INTERRUPTED";
+			}),
 			continueConversation: Effect.fn("Bella/continueConversation")(function* ({
 				assistantMessage,
 				conversationId,
@@ -272,6 +303,17 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 			) {
 				const result = yield* Effect.gen(function* () {
 					yield* completeMessage(assistantMessageId);
+
+					return yield* getTransactionId();
+				}).pipe(sql.withTransaction);
+
+				return result.transactionId;
+			}),
+			markMessageAsInterrupted: Effect.fn("Bella/markMessageAsInterrupted")(function* (
+				assistantMessageId: AssistantMessageModel["id"],
+			) {
+				const result = yield* Effect.gen(function* () {
+					yield* interruptMessage(assistantMessageId);
 
 					return yield* getTransactionId();
 				}).pipe(sql.withTransaction);

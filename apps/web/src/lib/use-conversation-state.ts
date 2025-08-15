@@ -33,6 +33,7 @@ export const useConversationState = (conversationId: ConversationShape["id"]) =>
 
 	return Match.value(message.status).pipe(
 		Match.when("COMPLETED", () => "IDLE" as const),
+		Match.when("INTERRUPTED", () => "IDLE" as const),
 		Match.when("IN_PROGRESS", () => "GENERATING" as const),
 		Match.exhaustive,
 	);

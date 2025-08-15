@@ -172,7 +172,7 @@ export const useStopGeneration = () => {
 				// NOTE this should be resolved after this https://github.com/TanStack/db/issues/407
 				const mutableDraft = draft as WritableDeep<typeof draft>;
 
-				mutableDraft.status = "COMPLETED";
+				mutableDraft.status = "INTERRUPTED";
 			});
 		},
 	});

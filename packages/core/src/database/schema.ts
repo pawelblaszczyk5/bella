@@ -28,7 +28,7 @@ export class AssistantMessageModel extends Model.Class<AssistantMessageModel>(
 	...BaseMessageFields,
 	id: Model.GeneratedByApp(Id.pipe(Schema.brand("AssistantMessageId"))),
 	role: Schema.Literal("ASSISTANT"),
-	status: Schema.Literal("IN_PROGRESS", "COMPLETED"),
+	status: Schema.Literal("IN_PROGRESS", "INTERRUPTED", "COMPLETED"),
 }) {}
 
 const BaseMessagePartFields = { createdAt: Model.DateTimeInsertFromDate };

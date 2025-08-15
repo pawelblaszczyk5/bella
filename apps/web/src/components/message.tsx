@@ -33,7 +33,7 @@ const AssistantMessage = ({
 	const content = messageParts.map((messagePart) => messagePart.data.text).join("");
 
 	if (messageParts.length === 0) {
-		if (message.status === "COMPLETED") {
+		if (message.status === "") {
 			return (
 				<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageStatus)}>
 					Generation stopped before could generate anything 😞
@@ -43,7 +43,7 @@ const AssistantMessage = ({
 
 		return (
 			<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageStatus)}>
-				Generating launching 🚀
+				Generation launching 🚀
 			</div>
 		);
 	}
