@@ -1,0 +1,31 @@
+diff --git a/dist/esm/AnthropicClient.js b/dist/esm/AnthropicClient.js
+index 2489686702253efd9d064df7489555d1b396a88d..ce42595e743d741f65c6e6e31d4778f0c760f9fb 100644
+--- a/dist/esm/AnthropicClient.js
++++ b/dist/esm/AnthropicClient.js
+@@ -38,7 +38,7 @@ export const make = options => Effect.gen(function* () {
+   const client = Generated.make(httpClient, {
+     transformClient: client => AnthropicConfig.getOrUndefined.pipe(Effect.map(config => config?.transformClient ? config.transformClient(client) : client))
+   });
+-  const streamRequest = request => httpClientOk.execute(request).pipe(Effect.map(r => r.stream), Stream.unwrapScoped, Stream.decodeText(), Stream.pipeThroughChannel(Sse.makeChannel()), Stream.takeWhile(event => event.event !== "message_stop"), Stream.map(event => JSON.parse(event.data)));
++  const streamRequest = request => httpClientOk.execute(request).pipe(Effect.map(r => r.stream), Stream.unwrapScoped, Stream.decodeText(), Stream.pipeThroughChannel(Sse.makeChannel()), Stream.map(event => JSON.parse(event.data)));
+   const stream = request => Stream.suspend(() => {
+     const toolCalls = {};
+     let finishReason = "unknown";
+@@ -52,6 +52,9 @@ export const make = options => Effect.gen(function* () {
+       cacheWriteInputTokens: 0
+     };
+     const metadata = {};
++
++    let finished = false;
++
+     return streamRequest(HttpClientRequest.post("/v1/messages", {
+       body: HttpBody.unsafeJson({
+         ...request,
+@@ -90,6 +93,7 @@ export const make = options => Effect.gen(function* () {
+           }
+         case "message_stop":
+           {
++            finished = true;
+             parts.push(new AiResponse.FinishPart({
+               usage,
+               reason: finishReason,

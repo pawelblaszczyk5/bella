@@ -94,6 +94,9 @@ overrides:
   react-dom: 0.0.0-experimental-f1222f76-20250812
 
 patchedDependencies:
+  '@effect/ai-anthropic':
+    hash: c4b348853b70506c1b6341f55b32aa0df47ce90cf912b278483f039903b2f2bb
+    path: patches/@effect__ai-anthropic.patch
   '@tanstack/db':
     hash: 915147ae55db2baf94685782c4ddf056b4e2f24d4bb094455aff7ed5686029c6
     path: patches/@tanstack__db.patch
@@ -482,7 +485,7 @@ importers:
         version: 0.26.0(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(@effect/rpc@0.69.0(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7))(effect@3.17.7)
       '@effect/ai-anthropic':
         specifier: 'catalog:'
-        version: 0.16.0(@effect/ai@0.26.0(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(@effect/rpc@0.69.0(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7))(effect@3.17.7))(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)
+        version: 0.16.0(patch_hash=c4b348853b70506c1b6341f55b32aa0df47ce90cf912b278483f039903b2f2bb)(@effect/ai@0.26.0(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(@effect/rpc@0.69.0(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7))(effect@3.17.7))(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)
       '@effect/ai-google':
         specifier: 'catalog:'
         version: 0.5.0(@effect/ai@0.26.0(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(@effect/rpc@0.69.0(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7))(effect@3.17.7))(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)
@@ -7699,7 +7702,7 @@ snapshots:
 
   '@dual-bundle/import-meta-resolve@4.1.0': {}
 
-  '@effect/ai-anthropic@0.16.0(@effect/ai@0.26.0(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(@effect/rpc@0.69.0(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7))(effect@3.17.7))(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)':
+  '@effect/ai-anthropic@0.16.0(patch_hash=c4b348853b70506c1b6341f55b32aa0df47ce90cf912b278483f039903b2f2bb)(@effect/ai@0.26.0(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(@effect/rpc@0.69.0(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7))(effect@3.17.7))(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)':
     dependencies:
       '@anthropic-ai/tokenizer': 0.0.4
       '@effect/ai': 0.26.0(@effect/experimental@0.54.6(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7)(ioredis@5.7.0))(@effect/platform@0.90.3(effect@3.17.7))(@effect/rpc@0.69.0(@effect/platform@0.90.3(effect@3.17.7))(effect@3.17.7))(effect@3.17.7)
