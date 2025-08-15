@@ -16,6 +16,10 @@
 			"default": "./dist/src/styles/typography.js",
 			"types": "./dist/src/styles/typography.d.ts"
 		},
+		"./theme/animation.stylex": {
+			"default": "./dist/src/theme/animation.stylex.js",
+			"types": "./dist/src/theme/animation.stylex.d.ts"
+		},
 		"./theme/color.stylex": {
 			"default": "./dist/src/theme/color.stylex.js",
 			"types": "./dist/src/theme/color.stylex.d.ts"
