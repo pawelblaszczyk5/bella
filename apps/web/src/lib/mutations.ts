@@ -32,19 +32,17 @@ export const useStartNewConversation = () => {
 			]);
 		},
 		onMutate: (data: ConversationActionData) => {
-			const now = DateTime.unsafeNow();
-
 			conversationsCollection.insert({
-				createdAt: now,
+				createdAt: DateTime.unsafeNow(),
 				deletedAt: null,
 				id: data.conversationId,
 				title: "Loading..",
-				updatedAt: now,
+				updatedAt: DateTime.unsafeNow(),
 			});
 
 			messagesCollection.insert({
 				conversationId: data.conversationId,
-				createdAt: now,
+				createdAt: DateTime.unsafeNow(),
 				id: data.userMessage.id,
 				role: "USER",
 				status: "COMPLETED",
@@ -52,7 +50,7 @@ export const useStartNewConversation = () => {
 
 			data.userMessage.parts.forEach((messagePart) => {
 				messagePartsCollection.insert({
-					createdAt: now,
+					createdAt: DateTime.unsafeNow(),
 					data: messagePart.data,
 					id: messagePart.id,
 					messageId: data.userMessage.id,
@@ -62,7 +60,7 @@ export const useStartNewConversation = () => {
 
 			messagesCollection.insert({
 				conversationId: data.conversationId,
-				createdAt: now,
+				createdAt: DateTime.unsafeNow(),
 				id: data.assistantMessage.id,
 				role: "ASSISTANT",
 				status: "IN_PROGRESS",
@@ -105,11 +103,9 @@ export const useContinueConversation = () => {
 			]);
 		},
 		onMutate: (data: ConversationActionData) => {
-			const now = DateTime.unsafeNow();
-
 			messagesCollection.insert({
 				conversationId: data.conversationId,
-				createdAt: now,
+				createdAt: DateTime.unsafeNow(),
 				id: data.userMessage.id,
 				role: "USER",
 				status: "COMPLETED",
@@ -117,7 +113,7 @@ export const useContinueConversation = () => {
 
 			data.userMessage.parts.forEach((messagePart) => {
 				messagePartsCollection.insert({
-					createdAt: now,
+					createdAt: DateTime.unsafeNow(),
 					data: messagePart.data,
 					id: messagePart.id,
 					messageId: data.userMessage.id,
@@ -127,7 +123,7 @@ export const useContinueConversation = () => {
 
 			messagesCollection.insert({
 				conversationId: data.conversationId,
-				createdAt: now,
+				createdAt: DateTime.unsafeNow(),
 				id: data.assistantMessage.id,
 				role: "ASSISTANT",
 				status: "IN_PROGRESS",
