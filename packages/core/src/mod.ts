@@ -174,12 +174,16 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 						() => "GOOGLE:GEMINI-2.5-FLASH-LITE",
 					),
 					Match.when(
-						(value) => value < 6,
+						(value) => value < 7,
 						() => "GOOGLE:GEMINI-2.5-FLASH",
 					),
 					Match.when(
-						(value) => value <= 10,
+						(value) => value < 10,
 						() => "GOOGLE:GEMINI-2.5-PRO",
+					),
+					Match.when(
+						10,
+						() => "ANTHROPIC:CLAUDE-4.1-OPUS",
 					),
 					Match.orElseAbsurd,
 				);

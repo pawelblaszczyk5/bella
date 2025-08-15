@@ -36,6 +36,9 @@ class AiLanguageModelMap extends LayerMap.Service<AiLanguageModelMap>()("AiLangu
 			Match.when("ANTHROPIC:CLAUDE-4-SONNET", () =>
 				AnthropicLanguageModel.layer({ model: "claude-4-sonnet-20250514" }).pipe(Layer.provide(AnthropicClientLive)),
 			),
+			Match.when("ANTHROPIC:CLAUDE-4.1-OPUS", () =>
+				AnthropicLanguageModel.layer({ model: "claude-opus-4-1-20250805" }).pipe(Layer.provide(AnthropicClientLive)),
+			),
 			Match.when("GOOGLE:GEMINI-2.5-FLASH-LITE", () =>
 				GoogleAiLanguageModel.layer({ model: "gemini-2.5-flash-lite" }).pipe(Layer.provide(GoogleAiClientLive)),
 			),
@@ -114,11 +117,14 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 			const provideConfig: <A, E, R>(self: Stream.Stream<A, E, R>) => Stream.Stream<A, E, R> = Match.value(
 				responseFulfillment,
 			).pipe(
-				Match.when({ model: "ANTHROPIC:CLAUDE-4-SONNET" }, (responseFulfillment) =>
-					Stream.provideService(AnthropicLanguageModel.Config, {
-						thinking:
-							responseFulfillment.reasoningEnabled ? { type: "enabled", budget_tokens: 2000 } : { type: "disabled" },
-					}),
+				Match.whenOr(
+					{ model: "ANTHROPIC:CLAUDE-4-SONNET" },
+					{ model: "ANTHROPIC:CLAUDE-4.1-OPUS" },
+					(responseFulfillment) =>
+						Stream.provideService(AnthropicLanguageModel.Config, {
+							thinking:
+								responseFulfillment.reasoningEnabled ? { type: "enabled", budget_tokens: 2000 } : { type: "disabled" },
+						}),
 				),
 				Match.whenOr(
 					{ model: "GOOGLE:GEMINI-2.5-FLASH-LITE" },

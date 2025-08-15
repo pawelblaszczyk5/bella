@@ -38,6 +38,7 @@ export class ResponseFulfillment extends Schema.TaggedClass<ResponseFulfillment>
 			"GOOGLE:GEMINI-2.5-FLASH",
 			"GOOGLE:GEMINI-2.5-FLASH-LITE",
 			"ANTHROPIC:CLAUDE-4-SONNET",
+			"ANTHROPIC:CLAUDE-4.1-OPUS",
 		),
 		reasoningEnabled: Schema.Boolean,
 	},
