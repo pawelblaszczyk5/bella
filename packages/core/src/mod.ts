@@ -232,11 +232,11 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				const messagesWithParts = yield* Effect.forEach(
 					messages,
 					Effect.fn(function* (message) {
-						const partsForThisMessage = yield* Record.get(groupedParts, message.id);
-
-						return { id: message.id, parts: partsForThisMessage, role: message.role };
+						return Record.get(groupedParts, message.id).pipe(
+							Option.map((parts) => ({ id: message.id, parts, role: message.role })),
+						);
 					}),
-				);
+				).pipe(Effect.map((maybeMessages) => Array.filterMap(maybeMessages, (maybeMessage) => maybeMessage)));
 
 				const stream = AiLanguageModel.streamText({
 					prompt: messagesWithParts.map((message) => {
