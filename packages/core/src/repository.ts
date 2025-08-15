@@ -4,10 +4,13 @@ import { Array, Effect, Option, Record, Schema } from "effect";
 
 import { IdGenerator } from "@bella/id-generator/effect";
 
+import type { MessagesWithParts } from "#src/shared.js";
+
 import { DatabaseDefault } from "#src/database/mod.js";
 import {
 	AssistantMessageModel,
 	ConversationModel,
+	ReasoningMessagePartModel,
 	TextMessagePartModel,
 	TransactionId,
 	UserMessageModel,
@@ -41,7 +44,7 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 				INSERT INTO
 					${sql("messagePart")} ${sql.insert({ ...request, data: sql.json(request.data) })};
 			`,
-			Request: Model.Union(TextMessagePartModel).insert,
+			Request: Model.Union(TextMessagePartModel, ReasoningMessagePartModel).insert,
 		});
 
 		const updateMessageStatus = SqlSchema.void({
@@ -84,7 +87,7 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 			Result: Schema.Union(AssistantMessageModel.select.pick("id", "role"), UserMessageModel.select.pick("id", "role")),
 		});
 
-		const findAllMessagePartsForMessages = SqlSchema.findAll({
+		const findAllUserMessagePartsForMessages = SqlSchema.findAll({
 			execute: (request) => sql`
 				SELECT
 					${sql("id")},
@@ -98,8 +101,29 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 				ORDER BY
 					${sql("createdAt")} ASC;
 			`,
-			Request: Schema.Array(Schema.Union(AssistantMessageModel.select.fields.id, UserMessageModel.select.fields.id)),
+			Request: Schema.Array(UserMessageModel.select.fields.id),
 			Result: Schema.Union(TextMessagePartModel.select.pick("id", "messageId", "type", "data")),
+		});
+
+		const findAllAssistantMessagePartsForMessages = SqlSchema.findAll({
+			execute: (request) => sql`
+				SELECT
+					${sql("id")},
+					${sql("messageId")},
+					${sql("type")},
+					${sql("data")}
+				FROM
+					${sql("messagePart")}
+				WHERE
+					${sql.in("messageId", request)}
+				ORDER BY
+					${sql("createdAt")} ASC;
+			`,
+			Request: Schema.Array(AssistantMessageModel.select.fields.id),
+			Result: Schema.Union(
+				TextMessagePartModel.select.pick("id", "messageId", "type", "data"),
+				ReasoningMessagePartModel.select.pick("id", "messageId", "type", "data"),
+			),
 		});
 
 		const getMessageStatus = SqlSchema.single({
@@ -128,16 +152,55 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 			) {
 				const messages = yield* findAllMessagesForConversation(conversationId);
 
-				const groupedParts = yield* findAllMessagePartsForMessages(messages.map((message) => message.id)).pipe(
-					Effect.map(Array.groupBy((part) => part.messageId)),
+				const { assistantMessageParts, userMessageParts } = yield* Effect.all(
+					{
+						assistantMessageParts: findAllAssistantMessagePartsForMessages(
+							Array.filterMap(messages, (message) =>
+								message.role === "ASSISTANT" ? Option.some(message.id) : Option.none(),
+							),
+						).pipe(Effect.map(Array.groupBy((part) => part.messageId))),
+						userMessageParts: findAllUserMessagePartsForMessages(
+							Array.filterMap(messages, (message) =>
+								message.role === "USER" ? Option.some(message.id) : Option.none(),
+							),
+						).pipe(Effect.map(Array.groupBy((part) => part.messageId))),
+					},
+					{ concurrency: 2 },
 				);
 
-				const messagesWithParts = yield* Effect.forEach(
+				const messagesWithParts = Array.reduce<(typeof messages)[number], MessagesWithParts>(
 					messages,
-					Effect.fn(function* (message) {
-						return Record.get(groupedParts, message.id).pipe(Option.map((parts) => ({ ...message, parts })));
-					}),
-				).pipe(Effect.map(Array.filterMap((maybeMessage) => maybeMessage)));
+					[],
+					(accumulator, message) => {
+						if (message.role === "USER") {
+							const maybeMessageParts = Record.get(userMessageParts, message.id);
+
+							return Option.match(maybeMessageParts, {
+								onNone: () => accumulator,
+								onSome: (messageParts) => {
+									const messageWithParts = { ...message, parts: messageParts };
+
+									accumulator.push(messageWithParts);
+
+									return accumulator;
+								},
+							});
+						}
+
+						const maybeMessageParts = Record.get(assistantMessageParts, message.id);
+
+						return Option.match(maybeMessageParts, {
+							onNone: () => accumulator,
+							onSome: (messageParts) => {
+								const messageWithParts = { ...message, parts: messageParts };
+
+								accumulator.push(messageWithParts);
+
+								return accumulator;
+							},
+						});
+					},
+				);
 
 				return messagesWithParts;
 			}),
@@ -168,6 +231,19 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 					updatedAt: undefined,
 				});
 			}),
+			insertReasoningMessagePart: Effect.fn("Bella/Repository/insertReasoningMessagePart")(function* ({
+				data,
+				id,
+				messageId,
+			}: {
+				data: ReasoningMessagePartModel["data"];
+				id: ReasoningMessagePartModel["id"] | undefined;
+				messageId: ReasoningMessagePartModel["messageId"];
+			}) {
+				const textMessagePartId = id ?? ReasoningMessagePartModel.fields.id.make(yield* idGenerator.generate());
+
+				yield* insertMessagePart({ createdAt: undefined, data, id: textMessagePartId, messageId, type: "reasoning" });
+			}),
 			insertTextMessagePart: Effect.fn("Bella/Repository/insertTextMessagePart")(function* ({
 				data,
 				id,
@@ -175,7 +251,7 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 			}: {
 				data: TextMessagePartModel["data"];
 				id: TextMessagePartModel["id"] | undefined;
-				messageId: AssistantMessageModel["id"] | UserMessageModel["id"];
+				messageId: TextMessagePartModel["messageId"];
 			}) {
 				const textMessagePartId = id ?? TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
 

@@ -44,3 +44,13 @@ export class TextMessagePartModel extends Model.Class<TextMessagePartModel>(
 	messageId: SharedMessageId,
 	type: Schema.Literal("text"),
 }) {}
+
+export class ReasoningMessagePartModel extends Model.Class<ReasoningMessagePartModel>(
+	"@bella/core/database/schema/ReasoningMessagePartModel",
+)({
+	...BaseMessagePartFields,
+	data: Schema.Struct({ text: Schema.NonEmptyString }),
+	id: Model.GeneratedByApp(Id.pipe(Schema.brand("ReasoningMessagePartId"))),
+	messageId: AssistantMessageModel.fields.id,
+	type: Schema.Literal("reasoning"),
+}) {}

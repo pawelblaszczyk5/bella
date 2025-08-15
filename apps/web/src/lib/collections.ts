@@ -5,6 +5,7 @@ import { DateTime, Schema } from "effect";
 import {
 	AssistantMessageModel,
 	ConversationModel,
+	ReasoningMessagePartModel,
 	TextMessagePartModel,
 	UserMessageModel,
 } from "@bella/core/database-schema";
@@ -75,11 +76,21 @@ export const TextMessagePartShape = Schema.Struct({
 
 export type TextMessagePartShape = Schema.Schema.Type<typeof TextMessagePartShape>;
 
+export const ReasoningMessagePartShape = Schema.Struct({
+	...BaseMessagePartShapeFields,
+	data: ReasoningMessagePartModel.select.fields.data,
+	id: ReasoningMessagePartModel.select.fields.id,
+	messageId: ReasoningMessagePartModel.select.fields.messageId,
+	type: ReasoningMessagePartModel.select.fields.type,
+});
+
+export type ReasoningMessagePartShape = Schema.Schema.Type<typeof ReasoningMessagePartShape>;
+
 export const messagePartsCollection = createCollection(
 	electricCollectionOptions({
 		getKey: (messagePart) => messagePart.id,
 		id: "messages",
-		schema: Schema.standardSchemaV1(TextMessagePartShape),
+		schema: Schema.standardSchemaV1(Schema.Union(TextMessagePartShape, ReasoningMessagePartShape)),
 		shapeOptions: {
 			parser: { timestamptz: (date: string) => DateTime.unsafeMake(date) },
 			url: new URL("/api/message-parts", import.meta.env.VITE_WEB_BASE_URL).toString(),

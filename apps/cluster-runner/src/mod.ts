@@ -101,7 +101,7 @@ const GenerateMessageLive = GenerateMessage.toLayer(
 
 				const cachedIsMessageInterrupted = yield* Effect.cachedWithTTL(
 					bella.checkIsMessageInterrupted(payload.assistantMessage.id),
-					Duration.millis(50),
+					Duration.millis(150),
 				);
 
 				yield* messageStream.pipe(

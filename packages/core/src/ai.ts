@@ -1,9 +1,10 @@
 import { AiInput, AiLanguageModel } from "@effect/ai";
 import { GoogleAiClient, GoogleAiLanguageModel } from "@effect/ai-google";
 import { FetchHttpClient } from "@effect/platform";
-import { Array, Config, Effect, Layer, Match, Stream, String } from "effect";
+import { Array, Config, Effect, Layer, Match, Option, Stream, String } from "effect";
 
-import type { AssistantMessageModel, TextMessagePartModel, UserMessageModel } from "#src/database/schema.js";
+import type { ReasoningMessagePartModel, TextMessagePartModel } from "#src/database/schema.js";
+import type { MessagesWithParts } from "#src/shared.js";
 
 const GoogleAiClientLive = GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") });
 
@@ -26,33 +27,21 @@ const GeminiFlashLite = GoogleAiLanguageModel.layer({ model: "gemini-2.5-flash-l
 export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 	dependencies: [],
 	effect: Effect.gen(function* () {
-		const mapMessagePart = Match.type<Omit<TextMessagePartModel, "createdAt">>().pipe(
-			Match.when({ type: "text" }, (part) => AiInput.TextPart.make({ text: part.data.text })),
+		const mapMessagePart = Match.type<Omit<ReasoningMessagePartModel | TextMessagePartModel, "createdAt">>().pipe(
+			Match.when({ type: "text" }, (part) => Option.some(AiInput.TextPart.make({ text: part.data.text }))),
+			Match.when({ type: "reasoning" }, () => Option.none()),
 			Match.exhaustive,
 		);
 
 		return {
-			generateAnswer: Effect.fn("Bella/Ai/generateAnswer")(function* (
-				messages: Array<
-					| {
-							id: AssistantMessageModel["id"];
-							parts: Array<Pick<TextMessagePartModel, "data" | "id" | "messageId" | "type">>;
-							role: AssistantMessageModel["role"];
-					  }
-					| {
-							id: UserMessageModel["id"];
-							parts: Array<Pick<TextMessagePartModel, "data" | "id" | "messageId" | "type">>;
-							role: UserMessageModel["role"];
-					  }
-				>,
-			) {
+			generateAnswer: Effect.fn("Bella/Ai/generateAnswer")(function* (messages: MessagesWithParts) {
 				const stream = AiLanguageModel.streamText({
 					prompt: messages.map((message) => {
 						if (message.role === "USER") {
-							return AiInput.UserMessage.make({ parts: Array.map(message.parts, mapMessagePart) });
+							return AiInput.UserMessage.make({ parts: Array.filterMap(message.parts, mapMessagePart) });
 						}
 
-						return AiInput.AssistantMessage.make({ parts: Array.map(message.parts, mapMessagePart) });
+						return AiInput.AssistantMessage.make({ parts: Array.filterMap(message.parts, mapMessagePart) });
 					}),
 					system: String.stripMargin(`
 						|<task>
@@ -62,7 +51,12 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 						|	Be kind and respectful, no matter what happens you're supposed to be nice for the user. Don't always agree with him, you're welcome to challenge his ideas if you have a better one. Try to answer in visually engaging way, use emojis if appropriate, but don't overused them. Structure your answer hierarchically, use headings, list, tables where necessary. 
 						|</style>
 						`),
-				}).pipe(Stream.provideLayer(GeminiFlash));
+				}).pipe(
+					Stream.provideService(GoogleAiLanguageModel.Config, {
+						generationConfig: { thinkingConfig: { includeThoughts: true } },
+					}),
+					Stream.provideLayer(GeminiFlash),
+				);
 
 				return stream;
 			}),

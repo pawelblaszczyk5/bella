@@ -126,12 +126,21 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 							});
 						}),
 					),
+					Match.tag("ReasoningPart", (part) =>
+						Effect.gen(function* () {
+							yield* repository.insertReasoningMessagePart({
+								data: { text: part.reasoningText },
+								id: undefined,
+								messageId: assistantMessageId,
+							});
+						}),
+					),
 					Match.tag("FinishPart", () =>
 						Effect.gen(function* () {
 							yield* repository.updateMessageStatus({ id: assistantMessageId, status: "COMPLETED" });
 						}),
 					),
-					Match.orElse(() => Effect.void),
+					Match.orElse(Effect.log),
 				);
 			}),
 			markMessageAsCompleted: Effect.fn("Bella/Core/markMessageAsCompleted")(function* (
