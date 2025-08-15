@@ -20,7 +20,9 @@ const AssistantMessage = Schema.Struct({ id: AssistantMessageModel.insert.fields
 
 export class ConversationFlowError extends Schema.TaggedError<ConversationFlowError>(
 	"@bella/core/ConversationFlowError",
-)("ConversationFlowError", { type: Schema.Literal("GENERATION_ERROR", "DATA_ACCESS_ERROR", "STOPPING_IDLE") }) {
+)("ConversationFlowError", {
+	type: Schema.Literal("GENERATION_ERROR", "DATA_ACCESS_ERROR", "STOPPING_IDLE", "CLASSIFICATION_ERROR"),
+}) {
 	override get message() {
 		return `Conversation flow failed with type "${this.type}"`;
 	}

@@ -25,8 +25,9 @@
 	},
 	"dependencies": {
 		"@bella/id-generator": "workspace:*",
-		"@effect/ai": "^0.25.2",
-		"@effect/ai-google": "^0.4.0",
+		"@effect/ai": "catalog:",
+		"@effect/ai-anthropic": "catalog:",
+		"@effect/ai-google": "catalog:",
 		"@effect/experimental": "catalog:",
 		"@effect/platform": "catalog:",
 		"@effect/platform-node": "catalog:",

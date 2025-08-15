@@ -1,3 +1,5 @@
+import { Schema } from "effect";
+
 import type {
 	AssistantMessageModel,
 	ReasoningMessagePartModel,
@@ -20,3 +22,27 @@ export type MessagesWithParts = Array<
 			role: UserMessageModel["role"];
 	  }
 >;
+
+export class ResponseRefusal extends Schema.TaggedClass<ResponseRefusal>("Bella/Core/ResponseRefusal")(
+	"ResponseRefusal",
+	{ language: Schema.NonEmptyTrimmedString, reason: Schema.Literal("USER_HOSTILITY", "POLITICS") },
+) {}
+
+export class ResponseFulfillment extends Schema.TaggedClass<ResponseFulfillment>("Bella/Core/ResponseFulfillment")(
+	"ResponseFulfillment",
+	{
+		answerStyle: Schema.Literal("FORMAL", "FRIENDLY"),
+		language: Schema.NonEmptyTrimmedString,
+		model: Schema.Literal(
+			"GOOGLE:GEMINI-2.5-PRO",
+			"GOOGLE:GEMINI-2.5-FLASH",
+			"GOOGLE:GEMINI-2.5-FLASH-LITE",
+			"ANTHROPIC:CLAUDE-4-SONNET",
+		),
+		reasoningEnabled: Schema.Boolean,
+	},
+) {}
+
+export const ResponsePlan = Schema.Union(ResponseRefusal, ResponseFulfillment);
+
+export type ResponsePlan = Schema.Schema.Type<typeof ResponsePlan>;

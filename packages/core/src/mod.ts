@@ -13,6 +13,7 @@ import type {
 import { Ai } from "#src/ai.js";
 import { DatabaseDefault } from "#src/database/mod.js";
 import { Repository } from "#src/repository.js";
+import { ResponseFulfillment, ResponseRefusal, type ResponsePlan } from "#src/shared.js";
 
 export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 	dependencies: [DatabaseDefault, Repository.Default, Ai.Default],
@@ -100,14 +101,90 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 				return transactionId;
 			}),
-			getNewMessageStream: Effect.fn("Bella/Core/getNewMessageStream")(function* (
-				conversationId: ConversationModel["id"],
-			) {
+			getNewMessageStream: Effect.fn("Bella/Core/getNewMessageStream")(function* ({
+				conversationId,
+				responsePlan,
+			}: {
+				conversationId: ConversationModel["id"];
+				responsePlan: ResponsePlan;
+			}) {
 				const messages = yield* repository.getMessagesWithParts(conversationId);
 
-				const stream = yield* ai.generateAnswer(messages);
+				yield* Match.value(responsePlan).pipe(
+					Match.tag("ResponseFulfillment", (responseFulfillment) =>
+						Effect.annotateCurrentSpan({
+							type: responseFulfillment._tag,
+							model: responseFulfillment.model,
+							answerStyle: responseFulfillment.answerStyle,
+							language: responseFulfillment.language,
+							reasoningEnabled: responseFulfillment.reasoningEnabled,
+						}),
+					),
+					Match.tag("ResponseRefusal", (responseRefusal) =>
+						Effect.annotateCurrentSpan({
+							type: responseRefusal._tag,
+							reason: responseRefusal.reason,
+							language: responseRefusal.language,
+						}),
+					),
+					Match.exhaustive,
+				);
+
+				const stream = yield* ai.generateAnswer({ messages, responsePlan });
 
 				return stream;
+			}),
+			getResponsePlan: Effect.fn("Bella/Core/getResponsePlan")(function* (conversationId: ConversationModel["id"]) {
+				const messages = yield* repository.getMessagesWithParts(conversationId);
+
+				const classification = yield* ai.classifyIncomingMessage(messages);
+
+				if (classification.tone === "HOSTILE") {
+					return ResponseRefusal.make({ reason: "USER_HOSTILITY", language: classification.language });
+				}
+
+				if (classification.topicsMentioned.includes("POLITICS")) {
+					return ResponseRefusal.make({ reason: "POLITICS", language: classification.language });
+				}
+
+				const answerStyle = Match.value(classification.tone).pipe(
+					Match.withReturnType<ResponseFulfillment["answerStyle"]>(),
+					Match.whenOr("PLAYFUL", "UNCLASSIFIED", "FRIENDLY", () => "FRIENDLY"),
+					Match.when("FORMAL", () => "FORMAL"),
+					Match.exhaustive,
+				);
+
+				const isProgrammingRelated = classification.topicsMentioned.includes("PROGRAMMING");
+
+				if (isProgrammingRelated) {
+					return ResponseFulfillment.make({
+						answerStyle,
+						language: classification.language,
+						model: "ANTHROPIC:CLAUDE-4-SONNET",
+						reasoningEnabled: true,
+					});
+				}
+
+				const reasoningEnabled = classification.complexity >= 6;
+
+				const model = Match.value(classification.complexity).pipe(
+					Match.withReturnType<ResponseFulfillment["model"]>(),
+					Match.when(
+						(value) => value < 4,
+						() => "GOOGLE:GEMINI-2.5-FLASH-LITE",
+					),
+					Match.when(
+						(value) => value < 6,
+						() => "GOOGLE:GEMINI-2.5-FLASH",
+					),
+					Match.when(
+						(value) => value <= 10,
+						() => "GOOGLE:GEMINI-2.5-PRO",
+					),
+					Match.orElseAbsurd,
+				);
+
+				return ResponseFulfillment.make({ model, reasoningEnabled, language: classification.language, answerStyle });
 			}),
 			handleStreamedPart: Effect.fn("Bella/Core/handleStreamedPart")(function* ({
 				assistantMessageId,
@@ -140,7 +217,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 							yield* repository.updateMessageStatus({ id: assistantMessageId, status: "COMPLETED" });
 						}),
 					),
-					Match.orElse(Effect.log),
+					Match.orElse(() => Effect.void),
 				);
 			}),
 			markMessageAsCompleted: Effect.fn("Bella/Core/markMessageAsCompleted")(function* (
@@ -168,3 +245,5 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 		};
 	}),
 }) {}
+
+export { ResponsePlan, ResponseFulfillment, ResponseRefusal } from "#src/shared.js";
