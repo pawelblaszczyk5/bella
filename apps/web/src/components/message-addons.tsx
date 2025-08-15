@@ -16,6 +16,7 @@ const reasoningDisclosureStyles = stylex.create({
 	chevron: { transitionDuration: duration[3], transitionProperty: "rotate", transitionTimingFunction: "ease-in-out" },
 	chevronRotated: { rotate: "90deg" },
 	heading: { fontWeight: fontWeight.medium },
+	reasoningContent: { color: mauve[11] },
 	root: { paddingBlock: spacing[3] },
 	trigger: {
 		alignItems: "center",
@@ -49,7 +50,7 @@ export const ReasoningDisclosure = ({ text }: Readonly<{ text: string }>) => (
 						Inspect reasoning&nbsp;&nbsp;💡
 					</Button>
 				</Heading>
-				<DisclosurePanel>
+				<DisclosurePanel {...stylex.props(reasoningDisclosureStyles.reasoningContent, typography[2])}>
 					<Markdown>{text}</Markdown>
 				</DisclosurePanel>
 			</>
