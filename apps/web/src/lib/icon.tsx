@@ -7,6 +7,7 @@ export type IconName =
 	| "24-hammer"
 	| "24-home"
 	| "24-lightbulb"
+	| "24-message-warning"
 	| "24-send"
 	| "24-shell"
 	| "24-sync"

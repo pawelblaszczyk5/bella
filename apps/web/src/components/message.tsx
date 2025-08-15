@@ -3,7 +3,7 @@ import type { WritableDeep } from "type-fest";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 
 import { assert } from "@bella/assert";
-import { mauve, violet } from "@bella/design-system/theme/color.stylex";
+import { violet } from "@bella/design-system/theme/color.stylex";
 import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import stylex from "@bella/stylex";
@@ -16,17 +16,16 @@ import type {
 } from "#src/lib/collections.js";
 
 import { Markdown } from "#src/components/markdown.js";
-import { ReasoningDisclosure } from "#src/components/reasoning-disclosure.js";
+import { InterruptionNotification, MessageLoader, ReasoningDisclosure } from "#src/components/message-addons.js";
 import { messagePartsCollection, messagesCollection } from "#src/lib/collections.js";
 
 const styles = stylex.create({
 	assistantMessage: { alignSelf: "flex-start" },
-	assistantMessageStatus: { color: mauve[11] },
 	assistantMessageStretched: { inlineSize: "100%" },
 	base: { borderRadius: radii[5], maxInlineSize: "90%", paddingBlock: spacing[4], paddingInline: spacing[5] },
 	userMessage: {
 		alignSelf: "flex-end",
-		backgroundColor: violet[3],
+		backgroundColor: violet[2],
 		borderColor: violet[6],
 		borderRadius: radii[4],
 		borderStyle: "solid",
@@ -74,15 +73,15 @@ const AssistantMessage = ({
 	if (mergedMessageParts.length === 0) {
 		if (message.status === "INTERRUPTED") {
 			return (
-				<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageStatus)}>
-					Generation stopped before could generate anything 😞
+				<div {...stylex.props(styles.base, styles.assistantMessage)}>
+					<InterruptionNotification hasContent={false} />
 				</div>
 			);
 		}
 
 		return (
-			<div {...stylex.props(styles.base, styles.assistantMessage, styles.assistantMessageStatus)}>
-				Generation launching 🚀
+			<div {...stylex.props(styles.base, styles.assistantMessage)}>
+				<MessageLoader />
 			</div>
 		);
 	}
@@ -92,11 +91,7 @@ const AssistantMessage = ({
 
 	return (
 		<div {...stylex.props(styles.base, styles.assistantMessage, hasReasoning && styles.assistantMessageStretched)}>
-			{message.status === "INTERRUPTED" && (
-				<div {...stylex.props(styles.assistantMessageStatus)}>
-					Generation stopped while generating, below is partial content
-				</div>
-			)}
+			{message.status === "INTERRUPTED" && <InterruptionNotification hasContent />}
 			{mergedMessageParts.map((messagePart) => {
 				if (messagePart.type === "text") {
 					return <Markdown key={messagePart.id}>{messagePart.data.text}</Markdown>;
@@ -104,7 +99,7 @@ const AssistantMessage = ({
 
 				return <ReasoningDisclosure key={messagePart.id} text={messagePart.data.text} />;
 			})}
-			{!hasTextContent && message.status !== "INTERRUPTED" && <p>Generation in progress ⚙️</p>}
+			{!hasTextContent && message.status !== "INTERRUPTED" && <MessageLoader />}
 		</div>
 	);
 };

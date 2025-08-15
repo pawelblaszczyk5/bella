@@ -78,7 +78,7 @@ const styles = stylex.create({
 	},
 	navList: { display: "flex", flexDirection: "column" },
 	navListElement: { display: "contents" },
-	root: { backgroundColor: mauve[1], color: mauve[12], display: "grid", gridTemplateColumns: "280px minmax(0, 1fr)" },
+	root: { backgroundColor: mauve[1], color: mauve[12], display: "grid", gridTemplateColumns: "300px minmax(0, 1fr)" },
 });
 
 const ConversationLink = ({ conversation }: Readonly<{ conversation: ConversationShape }>) => {
