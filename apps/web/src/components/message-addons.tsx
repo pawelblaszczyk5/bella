@@ -17,7 +17,7 @@ const reasoningDisclosureStyles = stylex.create({
 	chevronRotated: { rotate: "90deg" },
 	heading: { fontWeight: fontWeight.medium },
 	reasoningContent: { color: mauve[11] },
-	root: { paddingBlock: spacing[3] },
+	root: { paddingBlock: spacing[2] },
 	trigger: {
 		alignItems: "center",
 		backgroundColor: { ":is([data-hovered])": mauve[4], default: null },
@@ -66,11 +66,11 @@ const shimmerKeyframes = stylex.keyframes({
 const messageLoaderStyles = stylex.create({
 	root: { display: "grid", gap: spacing[2] },
 	shimmerPart: {
-		animationDuration: duration[9],
+		animationDuration: "2000ms",
 		animationIterationCount: "infinite",
 		animationName: shimmerKeyframes,
-		animationTimingFunction: "ease-in-out",
-		backgroundImage: "linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)",
+		animationTimingFunction: "linear",
+		backgroundImage: `linear-gradient(90deg, ${mauve[4]} 25%, ${mauve[7]} 50%, ${mauve[4]} 75%)`,
 		backgroundSize: "200% 100%",
 		blockSize: 16,
 		borderRadius: radii[3],
