@@ -91,7 +91,6 @@ const AssistantMessage = ({
 
 	return (
 		<div {...stylex.props(styles.base, styles.assistantMessage, hasReasoning && styles.assistantMessageStretched)}>
-			{message.status === "INTERRUPTED" && <InterruptionNotification hasContent />}
 			{mergedMessageParts.map((messagePart) => {
 				if (messagePart.type === "text") {
 					return <Markdown key={messagePart.id}>{messagePart.data.text}</Markdown>;
@@ -100,6 +99,7 @@ const AssistantMessage = ({
 				return <ReasoningDisclosure key={messagePart.id} text={messagePart.data.text} />;
 			})}
 			{!hasTextContent && message.status !== "INTERRUPTED" && <MessageLoader />}
+			{message.status === "INTERRUPTED" && <InterruptionNotification hasContent />}
 		</div>
 	);
 };
