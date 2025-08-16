@@ -30,13 +30,18 @@ const AnthropicClientLive = AnthropicClient.layerConfig({ apiKey: Config.redacte
 	Layer.provide(FetchHttpClient.layer),
 );
 
+type InternalModels = "ANTHROPIC:CLAUDE-3.5-HAIKU";
+
 class AiLanguageModelMap extends LayerMap.Service<AiLanguageModelMap>()("AiLanguageModelMap", {
 	dependencies: [],
 	idleTimeToLive: Duration.minutes(15),
-	lookup: (name: ResponseFulfillment["model"]) =>
+	lookup: (name: InternalModels | ResponseFulfillment["model"]) =>
 		Match.value(name).pipe(
 			Match.when("ANTHROPIC:CLAUDE-4-SONNET", () =>
 				AnthropicLanguageModel.layer({ model: "claude-4-sonnet-20250514" }).pipe(Layer.provide(AnthropicClientLive)),
+			),
+			Match.when("ANTHROPIC:CLAUDE-3.5-HAIKU", () =>
+				AnthropicLanguageModel.layer({ model: "claude-3-5-haiku-20241022" }).pipe(Layer.provide(AnthropicClientLive)),
 			),
 			Match.when("ANTHROPIC:CLAUDE-4.1-OPUS", () =>
 				AnthropicLanguageModel.layer({ model: "claude-opus-4-1-20250805" }).pipe(Layer.provide(AnthropicClientLive)),
@@ -184,7 +189,7 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 						|	Be accurate. Don't make mistakes. Another colleague job is dependant on yours one. The output must be valid according to passed schema.
 						|</style>
 					`),
-				}).pipe(Effect.provide(aiLanguageModelMap.get("ANTHROPIC:CLAUDE-4-SONNET")));
+				}).pipe(Effect.provide(aiLanguageModelMap.get("ANTHROPIC:CLAUDE-3.5-HAIKU")));
 
 				return response.value;
 			}),
