@@ -45,7 +45,7 @@ msgstr "Light mode"
 msgid "Match system"
 msgstr "Match system"
 
-#: src/components/composer.tsx:89
+#: src/components/composer.tsx:92
 msgid "Message content"
 msgstr "Message content"
 
@@ -53,11 +53,11 @@ msgstr "Message content"
 msgid "Polish"
 msgstr "Polish"
 
-#: src/components/composer.tsx:123
+#: src/components/composer.tsx:126
 msgid "Send message"
 msgstr "Send message"
 
-#: src/components/composer.tsx:115
+#: src/components/composer.tsx:118
 msgid "Stop generation"
 msgstr "Stop generation"
 

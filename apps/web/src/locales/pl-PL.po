@@ -45,7 +45,7 @@ msgstr "Jasny motyw"
 msgid "Match system"
 msgstr "Dopasuj do urządzenia"
 
-#: src/components/composer.tsx:89
+#: src/components/composer.tsx:92
 msgid "Message content"
 msgstr "Treść wiadomości"
 
@@ -53,11 +53,11 @@ msgstr "Treść wiadomości"
 msgid "Polish"
 msgstr "Polski"
 
-#: src/components/composer.tsx:123
+#: src/components/composer.tsx:126
 msgid "Send message"
 msgstr "Wyślij wiadomość"
 
-#: src/components/composer.tsx:115
+#: src/components/composer.tsx:118
 msgid "Stop generation"
 msgstr "Zatrzymaj generowanie"
 
