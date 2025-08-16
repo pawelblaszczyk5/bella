@@ -224,7 +224,7 @@
 					"disableTextWrap": false,
 					"editorMode": "code",
 					"exemplar": false,
-					"expr": "sum by(model) (\n  increase(model_usage_total[$__range])\n)",
+					"expr": "round(\n  sum by(model) (\n    increase(model_usage_total[$__range])\n  )\n)",
 					"format": "heatmap",
 					"fullMetaSearch": false,
 					"includeNullMetadata": true,
@@ -282,7 +282,7 @@
 					"disableTextWrap": false,
 					"editorMode": "code",
 					"exemplar": false,
-					"expr": "sum by(type) (\n  increase(response_total[$__range])\n)\n",
+					"expr": "round(\n  sum by(type) (\n    increase(response_total[$__range])\n  )\n)",
 					"format": "heatmap",
 					"fullMetaSearch": false,
 					"includeNullMetadata": true,
@@ -307,5 +307,5 @@
 	"timezone": "browser",
 	"title": "Bella",
 	"uid": "cd5c9e92-8be4-4bd5-bf5b-02d066a8443b",
-	"version": 18
+	"version": 20
 }
