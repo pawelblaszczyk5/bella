@@ -20,7 +20,6 @@ const styles = stylex.create({
 	button: {
 		aspectRatio: "1/1",
 		backgroundColor: { ":is([data-hovered])": violet[4], default: null },
-		borderRadius: radii[4],
 		display: "grid",
 		inlineSize: 40,
 		placeItems: "center",
@@ -36,6 +35,7 @@ const styles = stylex.create({
 		borderStyle: "solid",
 		borderWidth: 1,
 		display: "flex",
+		overflow: "hidden",
 		width: "max-content",
 	},
 	indicator: { position: "relative" },
