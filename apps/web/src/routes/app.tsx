@@ -4,7 +4,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { typography } from "@bella/design-system/styles/typography";
 import { ring } from "@bella/design-system/styles/utilities";
 import { duration } from "@bella/design-system/theme/animation.stylex";
-import { mauve, violet } from "@bella/design-system/theme/color.stylex";
+import { cyanDark, mauve, mauveDark, violet, violetDark } from "@bella/design-system/theme/color.stylex";
 import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import { fontWeight } from "@bella/design-system/theme/typography.stylex";
@@ -12,9 +12,16 @@ import stylex from "@bella/stylex";
 
 import type { ConversationShape } from "#src/lib/collections.js";
 
-import { conversationsCollection, messagePartsCollection, messagesCollection } from "#src/lib/collections.js";
+import { ThemeSwitch } from "#src/components/theme-switch.js";
+import {
+	conversationsCollection,
+	messagePartsCollection,
+	messagesCollection,
+	userPreferencesCollection,
+} from "#src/lib/collections.js";
 import { Icon } from "#src/lib/icon.js";
 import { Link } from "#src/lib/link.js";
+import { useColorMode } from "#src/lib/use-color-mode.js";
 import { useConversationState } from "#src/lib/use-conversation-state.js";
 
 const styles = stylex.create({
@@ -78,7 +85,7 @@ const styles = stylex.create({
 		borderStyle: "solid",
 		display: "grid",
 		gap: spacing[6],
-		gridTemplateRows: "auto auto minmax(0, 1fr)",
+		gridTemplateRows: "auto auto minmax(0, 1fr) auto",
 		paddingBlock: spacing[5],
 		paddingInline: spacing[6],
 	},
@@ -103,6 +110,8 @@ const ConversationLink = ({ conversation }: Readonly<{ conversation: Conversatio
 };
 
 const AppLayoutRoute = () => {
+	const colorMode = useColorMode();
+
 	const { data: conversations } = useLiveQuery((q) =>
 		q
 			.from({ conversationsCollection })
@@ -110,7 +119,7 @@ const AppLayoutRoute = () => {
 	);
 
 	return (
-		<div {...stylex.props(styles.root)}>
+		<div {...stylex.props(styles.root, colorMode.calculated === "DARK" && [cyanDark, violetDark, mauveDark])}>
 			<nav {...stylex.props(styles.nav)}>
 				<h1 {...stylex.props(styles.heading, typography[8])}>
 					Bella <Icon name="24-shell" />
@@ -151,6 +160,7 @@ const AppLayoutRoute = () => {
 						))}
 					</ul>
 				</div>
+				<ThemeSwitch />
 			</nav>
 			<main {...stylex.props(styles.main)}>
 				<Outlet />
@@ -167,6 +177,7 @@ export const Route = createFileRoute("/app")({
 			conversationsCollection.preload(),
 			messagesCollection.preload(),
 			messagePartsCollection.preload(),
+			userPreferencesCollection.preload(),
 		]);
 	},
 	shouldReload: false,

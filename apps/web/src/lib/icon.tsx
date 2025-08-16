@@ -8,8 +8,11 @@ export type IconName =
 	| "24-home"
 	| "24-lightbulb"
 	| "24-message-warning"
+	| "24-monitor"
+	| "24-moon"
 	| "24-send"
 	| "24-shell"
+	| "24-sun"
 	| "24-sync"
 	| "24-todo"
 	| "24-unplug";

@@ -1,5 +1,5 @@
 import { electricCollectionOptions } from "@tanstack/electric-db-collection";
-import { createCollection } from "@tanstack/react-db";
+import { createCollection, localStorageCollectionOptions } from "@tanstack/react-db";
 import { DateTime, Schema } from "effect";
 
 import {
@@ -95,5 +95,21 @@ export const messagePartsCollection = createCollection(
 			parser: { timestamptz: (date: string) => DateTime.unsafeMake(date) },
 			url: new URL("/api/message-parts", import.meta.env.VITE_WEB_BASE_URL).toString(),
 		},
+	}),
+);
+
+const UserPreferenceShape = Schema.Union(
+	Schema.Struct({ type: Schema.Literal("COLOR_MODE"), value: Schema.Literal("DARK", "LIGHT", "SYSTEM") }),
+);
+
+export const userPreferencesCollection = createCollection(
+	localStorageCollectionOptions({
+		getKey: (userPreference) => userPreference.type,
+		id: "userPreferences",
+		schema: Schema.standardSchemaV1(UserPreferenceShape),
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, n/no-unsupported-features/node-builtins -- come on
+		storage: globalThis.localStorage ?? {},
+		storageEventApi: globalThis,
+		storageKey: "bella-user-preferences",
 	}),
 );
