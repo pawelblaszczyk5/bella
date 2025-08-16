@@ -1,3 +1,5 @@
+import { Trans } from "@lingui/react/macro";
+
 import { typography } from "@bella/design-system/styles/typography";
 import { violet } from "@bella/design-system/theme/color.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
@@ -32,7 +34,7 @@ export const NewConversation = () => {
 	return (
 		<div {...stylex.props(styles.root)}>
 			<h1 {...stylex.props(styles.heading, typography[9], styles.headingTypographyOverride)}>
-				What are you up to today?
+				<Trans>What are you up to today?</Trans>
 			</h1>
 			<Composer
 				isGenerationInProgress={false}

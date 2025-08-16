@@ -28,11 +28,35 @@ export const useColorMode = () => {
 
 	const preference = preferences.at(0);
 
+	if (preference) {
+		assert(preference.type === "COLOR_MODE", "Selected by type, it must be proper type");
+	}
+
 	const isSystemPreferredDark = useSyncExternalStore(subscribe, getSnapshot);
 
 	if (!preference || preference.value === "SYSTEM") {
-		return { calculated: isSystemPreferredDark ? "DARK" as const : "LIGHT" as const, value: "SYSTEM" as const };
+		return { calculated: isSystemPreferredDark ? ("DARK" as const) : ("LIGHT" as const), value: "SYSTEM" as const };
 	}
 
 	return { calculated: preference.value, value: preference.value };
+};
+
+export const DEFAULT_LANGUAGE = "en-US";
+
+export const useLanguage = () => {
+	const { data: preferences } = useLiveQuery((q) =>
+		q
+			.from({ userPreferencesCollection })
+			.where(({ userPreferencesCollection }) => eq(userPreferencesCollection.type, "LANGUAGE")),
+	);
+
+	assert(preferences.length <= 1, "Can't have more than one preference for given type");
+
+	const preference = preferences.at(0);
+
+	if (preference) {
+		assert(preference.type === "LANGUAGE", "Selected by type, it must be proper type");
+	}
+
+	return preference ? preference.value : DEFAULT_LANGUAGE;
 };

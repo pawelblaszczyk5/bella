@@ -15,6 +15,7 @@
 		"dev:packages": "turbo watch dev --filter=\"./packages/*\"",
 		"format": "prettier \".\" --check",
 		"format:fix": "prettier \".\" --write",
+		"i18n:extract": "pnpm --filter \"@bella/web\" run i18n:extract",
 		"lint": "turbo run lint",
 		"lint:fix": "turbo run lint:fix",
 		"preview": "turbo run preview",

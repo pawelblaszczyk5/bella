@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { Button, Disclosure, DisclosurePanel, Heading } from "react-aria-components";
 
 import { typography } from "@bella/design-system/styles/typography";
@@ -47,7 +48,7 @@ export const ReasoningDisclosure = ({ text }: Readonly<{ text: string }>) => (
 								props.isExpanded && reasoningDisclosureStyles.chevronRotated,
 							)}
 						/>
-						Inspect reasoning&nbsp;&nbsp;💡
+						<Trans>Inspect reasoning&nbsp;&nbsp;💡</Trans>
 					</Button>
 				</Heading>
 				<DisclosurePanel {...stylex.props(reasoningDisclosureStyles.reasoningContent, typography[2])}>
@@ -99,7 +100,7 @@ const interruptionNotificationStyles = stylex.create({
 		color: mauve[11],
 		display: "flex",
 		gap: spacing[3],
-		inlineSize: 672,
+		inlineSize: 720,
 		maxInlineSize: "100%",
 		paddingBlock: spacing[3],
 		paddingInline: spacing[4],
@@ -109,7 +110,15 @@ const interruptionNotificationStyles = stylex.create({
 export const InterruptionNotification = ({ hasContent }: Readonly<{ hasContent: boolean }>) => (
 	<div {...stylex.props(interruptionNotificationStyles.root, typography[2])}>
 		<Icon name="24-message-warning" />
-		{hasContent && <p>This message was stopped mid-generation, don't be surprised if content is cut-off 😉</p>}
-		{!hasContent && <p>This message was stopped before we could generate any meaningful content 😞</p>}
+		{hasContent && (
+			<p>
+				<Trans>This message was stopped mid-generation, don't be surprised if content is cut-off 😉</Trans>
+			</p>
+		)}
+		{!hasContent && (
+			<p>
+				<Trans>This message was stopped before we could generate any meaningful content 😞</Trans>
+			</p>
+		)}
 	</div>
 );

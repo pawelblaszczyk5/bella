@@ -100,6 +100,7 @@ export const messagePartsCollection = createCollection(
 
 const UserPreferenceShape = Schema.Union(
 	Schema.Struct({ type: Schema.Literal("COLOR_MODE"), value: Schema.Literal("DARK", "LIGHT", "SYSTEM") }),
+	Schema.Struct({ type: Schema.Literal("LANGUAGE"), value: Schema.Literal("pl-PL", "en-US") }),
 );
 
 export const userPreferencesCollection = createCollection(

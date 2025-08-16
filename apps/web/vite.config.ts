@@ -1,6 +1,7 @@
 import type { ViteReactPluginApi } from "@vitejs/plugin-react";
 import type { Plugin } from "vite";
 
+import { lingui } from "@lingui/vite-plugin";
 import optimizeLocales from "@react-aria/optimize-locales-plugin";
 // @ts-expect-error - untyped module
 import stylexPlugin from "@stylexjs/postcss-plugin";
@@ -18,6 +19,7 @@ const typedStylexPlugin = stylexPlugin as (options: {
 
 const getBabelConfig = (isDevelopment: boolean) => ({
 	plugins: [
+		["@lingui/babel-plugin-lingui-macro", {}],
 		["babel-plugin-react-compiler", {}],
 		["@babel/plugin-syntax-jsx", {}],
 		[
@@ -78,6 +80,7 @@ export default defineConfig((environment) => {
 			tanstackStart({ customViteReactPlugin: true, tsr: { addExtensions: true } }),
 			react({ babel: getBabelConfig(isDevelopment) }),
 			disableReactCompilerInSsrContext(),
+			lingui(),
 		],
 		server: { host: true, port: 5_821, strictPort: true },
 	};

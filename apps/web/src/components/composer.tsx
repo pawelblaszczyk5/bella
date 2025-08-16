@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro";
 import { useRef, useState } from "react";
 import { Button, Form, Label, TextArea, TextField } from "react-aria-components";
 
@@ -84,7 +85,9 @@ export const Composer = ({
 				value={messageContent}
 				isRequired
 			>
-				<Label {...stylex.props(accessibility.srOnly)}>Message content to send</Label>
+				<Label {...stylex.props(accessibility.srOnly)}>
+					<Trans>Message content</Trans>
+				</Label>
 				<TextArea
 					onKeyDown={(event) => {
 						if (event.key !== "Enter" || event.shiftKey) {
@@ -108,13 +111,17 @@ export const Composer = ({
 					type="button"
 					{...stylex.props(styles.action, ring.focusVisible)}
 				>
-					<span {...stylex.props(accessibility.srOnly)}>Stop generation</span>
+					<span {...stylex.props(accessibility.srOnly)}>
+						<Trans>Stop generation</Trans>
+					</span>
 					<Icon name="24-unplug" />
 				</Button>
 			)}
 			{!isGenerationInProgress && (
 				<Button type="submit" {...stylex.props(styles.action, ring.focusVisible)}>
-					<span {...stylex.props(accessibility.srOnly)}>Send message</span>
+					<span {...stylex.props(accessibility.srOnly)}>
+						<Trans>Send message</Trans>
+					</span>
 					<Icon name="24-send" />
 				</Button>
 			)}
