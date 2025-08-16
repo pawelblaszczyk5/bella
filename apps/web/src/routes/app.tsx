@@ -39,7 +39,8 @@ const styles = stylex.create({
 		position: "sticky",
 	},
 	conversationsSection: {
-		display: "grid",
+		display: "flex",
+		flexDirection: "column",
 		gap: spacing[3],
 		marginInline: `calc(-1 * ${spacing[3]})`,
 		overflowY: "auto",
