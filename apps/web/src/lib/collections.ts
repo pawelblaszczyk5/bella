@@ -89,7 +89,7 @@ export type ReasoningMessagePartShape = Schema.Schema.Type<typeof ReasoningMessa
 export const messagePartsCollection = createCollection(
 	electricCollectionOptions({
 		getKey: (messagePart) => messagePart.id,
-		id: "messages",
+		id: "messageParts",
 		schema: Schema.standardSchemaV1(Schema.Union(TextMessagePartShape, ReasoningMessagePartShape)),
 		shapeOptions: {
 			parser: { timestamptz: (date: string) => DateTime.unsafeMake(date) },
