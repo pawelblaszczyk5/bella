@@ -37,7 +37,7 @@ const styles = stylex.create({
 	form: { blockSize: "fit-content", inlineSize: "fit-content", position: "relative" },
 	textarea: {
 		backgroundColor: mauve[1],
-		borderColor: mauve[7],
+		borderColor: { ":is([data-hovered])": mauve[8], default: mauve[7] },
 		borderRadius: radii[5],
 		borderStyle: "solid",
 		borderWidth: 1,
@@ -47,6 +47,9 @@ const styles = stylex.create({
 		paddingInlineEnd: `calc(${spacing[5]} + ${spacing[4]} + 48px)`,
 		paddingInlineStart: spacing[5],
 		resize: "none",
+		transitionDuration: duration[2],
+		transitionProperty: "border-color",
+		transitionTimingFunction: "ease-in-out",
 	},
 });
 
