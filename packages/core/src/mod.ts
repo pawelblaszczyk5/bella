@@ -46,6 +46,8 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				};
 			}) {
 				const transactionId = yield* Effect.gen(function* () {
+					yield* repository.updateConversationDate(conversationId);
+
 					yield* repository.insertUserMessage({ conversationId, id: userMessage.id, status: "COMPLETED" });
 
 					yield* Effect.forEach(

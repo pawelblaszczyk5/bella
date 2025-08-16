@@ -1,3 +1,4 @@
+import type { DeepMutable } from "effect/Types";
 import type { WritableDeep } from "type-fest";
 
 import { createOptimisticAction } from "@tanstack/react-db";
@@ -101,12 +102,19 @@ export const useContinueConversation = () => {
 			const transactionId = await continueConversationProcedure({ data });
 
 			await Promise.all([
+				conversationsCollection.utils.awaitTxId(transactionId),
 				messagesCollection.utils.awaitTxId(transactionId),
 				messagePartsCollection.utils.awaitTxId(transactionId),
 			]);
 		},
 		onMutate: (data: ConversationActionData) => {
 			const now = DateTime.unsafeNow();
+
+			conversationsCollection.update(data.conversationId, (draft) => {
+				const mutableDraft = draft as DeepMutable<typeof draft>;
+
+				mutableDraft.updatedAt = now;
+			});
 
 			messagesCollection.insert({
 				conversationId: data.conversationId,

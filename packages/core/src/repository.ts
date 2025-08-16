@@ -139,6 +139,17 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 			Result: Schema.Union(AssistantMessageModel.select.pick("status"), UserMessageModel.select.pick("status")),
 		});
 
+		const updateConversationDate = SqlSchema.void({
+			execute: (request) => sql`
+				UPDATE ${sql("conversation")}
+				SET
+					${sql.update(request, ["id"])}
+				WHERE
+					${sql("id")} = ${request.id};
+			`,
+			Request: ConversationModel.update.pick("id", "updatedAt"),
+		});
+
 		return {
 			getMessageStatus: Effect.fn("Bella/Repository/getMessageStatus")(function* (
 				messageId: AssistantMessageModel["id"] | UserMessageModel["id"],
@@ -267,6 +278,11 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 					role: "USER",
 					status: message.status,
 				});
+			}),
+			updateConversationDate: Effect.fn("Bella/Repository/updateConversationDate")(function* (
+				conversationId: ConversationModel["id"],
+			) {
+				yield* updateConversationDate({ id: conversationId, updatedAt: undefined });
 			}),
 			updateMessageStatus: Effect.fn("Bella/Repository/markMessageAsInterrupted")(function* (
 				data:
