@@ -100,22 +100,24 @@ export const Composer = ({
 					{...stylex.props(styles.textarea, ring.focus)}
 				/>
 			</TextField>
-			<Button
-				onPress={() => {
-					if (!isGenerationInProgress) {
-						return;
-					}
-
-					onStopGeneration();
-				}}
-				type={isGenerationInProgress ? "button" : "submit"}
-				{...stylex.props(styles.action, ring.focusVisible)}
-			>
-				<span {...stylex.props(accessibility.srOnly)}>
-					{isGenerationInProgress ? "Stop generation" : "Send message"}
-				</span>
-				<Icon name={isGenerationInProgress ? "24-unplug" : "24-send"} />
-			</Button>
+			{isGenerationInProgress && (
+				<Button
+					onPress={() => {
+						onStopGeneration();
+					}}
+					type="button"
+					{...stylex.props(styles.action, ring.focusVisible)}
+				>
+					<span {...stylex.props(accessibility.srOnly)}>Stop generation</span>
+					<Icon name="24-unplug" />
+				</Button>
+			)}
+			{!isGenerationInProgress && (
+				<Button type="submit" {...stylex.props(styles.action, ring.focusVisible)}>
+					<span {...stylex.props(accessibility.srOnly)}>Send message</span>
+					<Icon name="24-send" />
+				</Button>
+			)}
 		</Form>
 	);
 };
