@@ -224,7 +224,7 @@
 					"disableTextWrap": false,
 					"editorMode": "code",
 					"exemplar": false,
-					"expr": "sum by(model) (model_usage_total)",
+					"expr": "sum by(model) (\n  increase(model_usage_total[$__range])\n)",
 					"format": "heatmap",
 					"fullMetaSearch": false,
 					"includeNullMetadata": true,
@@ -282,7 +282,7 @@
 					"disableTextWrap": false,
 					"editorMode": "code",
 					"exemplar": false,
-					"expr": "sum by(type) (response_total)",
+					"expr": "sum by(type) (\n  increase(response_total[$__range])\n)\n",
 					"format": "heatmap",
 					"fullMetaSearch": false,
 					"includeNullMetadata": true,
@@ -302,10 +302,10 @@
 	"schemaVersion": 41,
 	"tags": [],
 	"templating": { "list": [] },
-	"time": { "from": "now-5m", "to": "now" },
+	"time": { "from": "now-15m", "to": "now" },
 	"timepicker": {},
 	"timezone": "browser",
 	"title": "Bella",
 	"uid": "cd5c9e92-8be4-4bd5-bf5b-02d066a8443b",
-	"version": 16
+	"version": 18
 }

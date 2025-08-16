@@ -38,8 +38,6 @@ services:
       - 43170:4317
       - 43180:4318
       - 30002:3000
-    environment:
-      OTEL_METRIC_EXPORT_INTERVAL: 5000
     volumes:
       - otel_data:/data
 
