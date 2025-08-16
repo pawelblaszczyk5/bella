@@ -26,10 +26,7 @@ export const useConversationState = (conversationId: ConversationShape["id"]) =>
 	const message = messages.at(0);
 
 	assert(message, "At least one message must exist in each conversation");
-
-	if (message.role === "USER") {
-		return "GENERATING" as const;
-	}
+	assert(message.role === "ASSISTANT", "Assistant message must always be latest");
 
 	return Match.value(message.status).pipe(
 		Match.when("COMPLETED", () => "IDLE" as const),
