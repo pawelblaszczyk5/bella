@@ -32,6 +32,6 @@
 		"vitejs"
 	],
 	"enableGlobDot": true,
-	"ignoreWords": ["caddyfile", "pawelblaszczyk", "predev", "taze", "tseslint"],
+	"ignoreWords": ["caddyfile", "jsurl", "pawelblaszczyk", "predev", "taze", "tseslint"],
 	"overrides": [{ "language": "pl-PL,en-US", "filename": "apps/web/src/locales/pl-PL.po" }]
 }

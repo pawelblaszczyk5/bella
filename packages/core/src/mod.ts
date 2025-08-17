@@ -1,12 +1,13 @@
 import type { AiResponse } from "@effect/ai";
 
 import { PgClient } from "@effect/sql-pg";
-import { Array, Effect, Match, Metric } from "effect";
+import { Array, DateTime, Effect, Match, Metric, Option } from "effect";
 
 import type {
 	AssistantMessageModel,
 	ConversationModel,
 	TextMessagePartModel,
+	UserExperienceEvaluationModel,
 	UserMessageModel,
 } from "#src/database/schema.js";
 import type { ResponsePlan } from "#src/shared.js";
@@ -26,6 +27,25 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 		const repository = yield* Repository;
 
 		return {
+			changeUserExperienceEvaluationResolvedStatus: Effect.fn(function* ({
+				id,
+				isResolved,
+			}: {
+				id: UserExperienceEvaluationModel["id"];
+				isResolved: boolean;
+			}) {
+				const transactionId = yield* Effect.gen(function* () {
+					const now = yield* DateTime.now;
+
+					yield* repository.updateUserExperienceEvaluationResolvedAt({
+						id,
+						resolvedAt: isResolved ? Option.some(now) : Option.none(),
+					});
+					return yield* repository.getTransactionId();
+				}).pipe(sql.withTransaction);
+
+				return transactionId;
+			}),
 			checkIsMessageInterrupted: Effect.fn("Bella/Core/checkIsMessageInterrupted")(function* (
 				assistantMessageId: AssistantMessageModel["id"],
 			) {

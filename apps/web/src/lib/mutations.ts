@@ -5,9 +5,18 @@ import { createOptimisticAction } from "@tanstack/react-db";
 import { useNavigate } from "@tanstack/react-router";
 import { DateTime, Duration } from "effect";
 
-import type { ConversationActionData, StopGenerationData } from "#src/lib/api.js";
+import type {
+	ChangeUserExperienceEvaluationResolvedStatusData,
+	ConversationActionData,
+	StopGenerationData,
+} from "#src/lib/api.js";
 
-import { continueConversationProcedure, startNewConversationProcedure, stopGenerationProcedure } from "#src/lib/api.js";
+import {
+	changeUserExperienceEvaluationResolvedStatusProcedure,
+	continueConversationProcedure,
+	startNewConversationProcedure,
+	stopGenerationProcedure,
+} from "#src/lib/api.js";
 import {
 	AssistantMessageShape,
 	conversationsCollection,
@@ -15,6 +24,7 @@ import {
 	messagePartsCollection,
 	messagesCollection,
 	TextMessagePartShape,
+	userExperienceEvaluationCollection,
 	UserMessageShape,
 } from "#src/lib/collections.js";
 import { generateId } from "#src/lib/id-pool.js";
@@ -193,6 +203,33 @@ export const useStopGeneration = () => {
 			assistantMessage: { id: payload.assistantMessageId },
 			conversationId: payload.conversationId,
 		});
+
+		return transaction;
+	};
+
+	return handler;
+};
+
+// eslint-disable-next-line react-hooks-extra/no-redundant-custom-hook, react-hooks-extra/no-useless-custom-hooks -- let me live like this for now
+export const useChangeUserExperienceEvaluationResolvedStatus = () => {
+	const action = createOptimisticAction({
+		mutationFn: async (data) => {
+			const transactionId = await changeUserExperienceEvaluationResolvedStatusProcedure({ data });
+
+			await userExperienceEvaluationCollection.utils.awaitTxId(transactionId);
+		},
+		onMutate: (data: ChangeUserExperienceEvaluationResolvedStatusData) => {
+			userExperienceEvaluationCollection.update(data.evaluationId, (draft) => {
+				// NOTE this should be resolved after this https://github.com/TanStack/db/issues/407
+				const mutableDraft = draft as WritableDeep<typeof draft>;
+
+				mutableDraft.resolvedAt = DateTime.unsafeNow();
+			});
+		},
+	});
+
+	const handler = (payload: ChangeUserExperienceEvaluationResolvedStatusData) => {
+		const transaction = action(payload);
 
 		return transaction;
 	};

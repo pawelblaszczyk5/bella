@@ -159,6 +159,17 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 			Request: ConversationModel.update.pick("id", "updatedAt"),
 		});
 
+		const updateUserExperienceEvaluationResolvedAt = SqlSchema.void({
+			execute: (request) => sql`
+				UPDATE ${sql("userExperienceEvaluation")}
+				SET
+					${sql.update(request, ["id"])}
+				WHERE
+					${sql("id")} = ${request.id};
+			`,
+			Request: UserExperienceEvaluationModel.update.pick("id", "resolvedAt"),
+		});
+
 		return {
 			getMessageStatus: Effect.fn("Bella/Repository/getMessageStatus")(function* (
 				messageId: AssistantMessageModel["id"] | UserMessageModel["id"],
@@ -317,6 +328,11 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 					| { id: UserMessageModel["id"]; status: UserMessageModel["status"] },
 			) {
 				yield* updateMessageStatus(data);
+			}),
+			updateUserExperienceEvaluationResolvedAt: Effect.fn("Bella/updateUserExperienceEvaluationResolvedAt")(function* (
+				data: Pick<UserExperienceEvaluationModel, "id" | "resolvedAt">,
+			) {
+				yield* updateUserExperienceEvaluationResolvedAt(data);
 			}),
 		};
 	}),

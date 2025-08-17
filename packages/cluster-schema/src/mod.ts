@@ -8,6 +8,7 @@ import {
 	ConversationModel,
 	TextMessagePartModel,
 	TransactionId,
+	UserExperienceEvaluationModel,
 	UserMessageModel,
 } from "@bella/core/database-schema";
 
@@ -21,7 +22,13 @@ const AssistantMessage = Schema.Struct({ id: AssistantMessageModel.insert.fields
 export class ConversationFlowError extends Schema.TaggedError<ConversationFlowError>(
 	"@bella/core/ConversationFlowError",
 )("ConversationFlowError", {
-	type: Schema.Literal("GENERATION_ERROR", "DATA_ACCESS_ERROR", "STOPPING_IDLE", "CLASSIFICATION_ERROR", "EVALUATION_ERROR"),
+	type: Schema.Literal(
+		"GENERATION_ERROR",
+		"DATA_ACCESS_ERROR",
+		"STOPPING_IDLE",
+		"CLASSIFICATION_ERROR",
+		"EVALUATION_ERROR",
+	),
 }) {
 	override get message() {
 		return `Conversation flow failed with type "${this.type}"`;
@@ -42,6 +49,13 @@ export const Conversation = Entity.make("Conversation", [
 	Rpc.make("StopGeneration", {
 		error: ConversationFlowError,
 		payload: { assistantMessage: AssistantMessage },
+		success: TransactionId,
+	}),
+	// NOTE This shouldn't be there in reality, but it's a shortcut I'm willing to take for now
+	// eslint-disable-next-line no-secrets/no-secrets -- that's real name
+	Rpc.make("ChangeUserExperienceEvaluationResolvedStatus", {
+		error: ConversationFlowError,
+		payload: { evaluationId: UserExperienceEvaluationModel.select.fields.id, isResolved: Schema.Boolean },
 		success: TransactionId,
 	}),
 ]);

@@ -13,6 +13,19 @@ export const ConversationLive = Conversation.toLayer(
 		const conversationId = ConversationModel.fields.id.make(entityAddress.entityId);
 
 		return {
+			ChangeUserExperienceEvaluationResolvedStatus: Effect.fn(
+				// eslint-disable-next-line no-secrets/no-secrets -- that's a real name
+				"Conversation/ChangeUserExperienceEvaluationResolvedStatus",
+			)(function* (envelope) {
+				const transactionId = yield* bella
+					.changeUserExperienceEvaluationResolvedStatus({
+						id: envelope.payload.evaluationId,
+						isResolved: envelope.payload.isResolved,
+					})
+					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
+
+				return transactionId;
+			}),
 			Continue: Effect.fn("Conversation/Continue")(function* (envelope) {
 				const transactionId = yield* bella
 					.continueConversation({

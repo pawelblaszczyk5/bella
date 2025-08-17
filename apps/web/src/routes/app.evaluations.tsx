@@ -32,7 +32,7 @@ const Search = Schema.Struct({
 	severity: Schema.NonEmptyArray(UserExperienceEvaluationShape.fields.severity)
 		.pipe(Schema.optionalWith({ default: () => SEARCH_DEFAULTS.severity, exact: true }))
 		.annotations({ decodingFallback: () => Effect.succeed(SEARCH_DEFAULTS.severity) }),
-	sort: Schema.Literal("createdAt", "resolvedAt", "category", "severity")
+	sort: Schema.Literal("createdAt", "category", "severity")
 		.pipe(Schema.optionalWith({ default: () => SEARCH_DEFAULTS.sort, exact: true }))
 		.annotations({ decodingFallback: () => Effect.succeed(SEARCH_DEFAULTS.sort) }),
 });
@@ -78,14 +78,19 @@ const RouteComponent = () => {
 						search.order === "ascending" ? "asc" : "desc",
 					)
 				:	query
-						.orderBy(
-							({ userExperienceEvaluationCollection }) => userExperienceEvaluationCollection[search.sort],
-							search.order === "ascending" ? "asc" : "desc",
-						)
+						.orderBy(({ userExperienceEvaluationCollection }) => userExperienceEvaluationCollection[search.sort], {
+							direction: search.order === "ascending" ? "asc" : "desc",
+						})
 						.orderBy(
 							({ userExperienceEvaluationCollection }) => userExperienceEvaluationCollection.createdAt.epochMillis,
 							"desc",
 						);
+
+			if (search.hideResolved) {
+				query = query.where(({ userExperienceEvaluationCollection }) =>
+					eq(userExperienceEvaluationCollection.resolvedAt, null),
+				);
+			}
 
 			return query.select(({ messagesWithConversationTitle, userExperienceEvaluationCollection }) => ({
 				category: userExperienceEvaluationCollection.category,

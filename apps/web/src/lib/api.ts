@@ -7,6 +7,7 @@ import {
 	AssistantMessageModel,
 	ConversationModel,
 	TextMessagePartModel,
+	UserExperienceEvaluationModel,
 	UserMessageModel,
 } from "@bella/core/database-schema";
 import { IdGenerator } from "@bella/id-generator/effect";
@@ -29,10 +30,20 @@ export type ConversationActionData = Schema.Schema.Type<typeof ConversationActio
 
 export const StopGenerationData = Schema.Struct({
 	assistantMessage: AssistantMessage,
-	conversationId: ConversationModel.insert.fields.id,
+	conversationId: ConversationModel.select.fields.id,
 });
 
 export type StopGenerationData = Schema.Schema.Type<typeof StopGenerationData>;
+
+export const ChangeUserExperienceEvaluationResolvedStatusData = Schema.Struct({
+	conversationId: ConversationModel.select.fields.id,
+	evaluationId: UserExperienceEvaluationModel.select.fields.id,
+	isResolved: Schema.Boolean,
+});
+
+export type ChangeUserExperienceEvaluationResolvedStatusData = Schema.Schema.Type<
+	typeof ChangeUserExperienceEvaluationResolvedStatusData
+>;
 
 class Api extends Effect.Service<Api>()("@bella/web/Api", {
 	dependencies: [FetchHttpClient.layer, IdGenerator.Default],
@@ -56,6 +67,19 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 		});
 
 		return {
+			// eslint-disable-next-line no-secrets/no-secrets -- that's a function name
+			changeUserExperienceEvaluationResolvedStatus: Effect.fn("Api/changeUserExperienceEvaluationResolvedStatus")(
+				function* (changeUserExperienceEvaluationResolvedStatusData: ChangeUserExperienceEvaluationResolvedStatusData) {
+					yield* Effect.log("Changing evaluation resolved status", ChangeUserExperienceEvaluationResolvedStatusData);
+
+					const transactionId = yield* clusterHttpClient.conversation.ChangeUserExperienceEvaluationResolvedStatus({
+						path: { entityId: changeUserExperienceEvaluationResolvedStatusData.conversationId },
+						payload: Struct.omit(changeUserExperienceEvaluationResolvedStatusData, "conversationId"),
+					});
+
+					return transactionId;
+				},
+			),
 			continueConversation: Effect.fn("Api/continueConversation")(function* (
 				conversationActionData: ConversationActionData,
 			) {
@@ -138,6 +162,20 @@ export const stopGenerationProcedure = createServerFn({ method: "POST" })
 				const api = yield* Api;
 
 				return yield* api.stopGeneration(ctx.data);
+			}),
+		);
+
+		return value;
+	});
+
+export const changeUserExperienceEvaluationResolvedStatusProcedure = createServerFn({ method: "POST" })
+	.validator(Schema.standardSchemaV1(ChangeUserExperienceEvaluationResolvedStatusData))
+	.handler(async (ctx) => {
+		const value = await runtime.runPromise(
+			Effect.gen(function* () {
+				const api = yield* Api;
+
+				return yield* api.changeUserExperienceEvaluationResolvedStatus(ctx.data);
 			}),
 		);
 

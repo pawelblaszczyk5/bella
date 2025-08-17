@@ -40,6 +40,7 @@ import type { IconName } from "#src/lib/icon.js";
 import { UserExperienceEvaluationShape } from "#src/lib/collections.js";
 import { Icon } from "#src/lib/icon.js";
 import { Link } from "#src/lib/link.js";
+import { useChangeUserExperienceEvaluationResolvedStatus } from "#src/lib/mutations.js";
 
 const SEVERITY_TEXT: Record<UserExperienceEvaluationShape["severity"], MessageDescriptor> = {
 	HIGH: msg`High`,
@@ -355,6 +356,8 @@ export const Evaluations = ({
 	const { t } = useLingui();
 	const navigate = useNavigate();
 
+	const changeUserExperienceEvaluationResolvedStatus = useChangeUserExperienceEvaluationResolvedStatus();
+
 	const searchParams = useSearch({ from: "/app/evaluations" });
 	const headingId = useId();
 
@@ -384,10 +387,7 @@ export const Evaluations = ({
 					const newColumn = sort.column;
 
 					assert(
-						newColumn === "category"
-							|| newColumn === "resolvedAt"
-							|| newColumn === "createdAt"
-							|| newColumn === "severity",
+						newColumn === "category" || newColumn === "createdAt" || newColumn === "severity",
 						"Sorting is only allowed for few selected columns",
 					);
 
@@ -456,17 +456,9 @@ export const Evaluations = ({
 					</Column>
 					<Column
 						id="resolvedAt"
-						allowsSorting
 						{...stylex.props(styles.column, styles.columnResolvedState, ring.focusVisible, typography[1])}
 					>
-						{({ sortDirection }) => (
-							<div {...stylex.props(styles.columnWithSortingContainer)}>
-								<Trans>Resolved</Trans>
-								{sortDirection ?
-									<Icon name={sortDirection === "ascending" ? "24-chevron-down" : "24-chevron-up"} />
-								:	null}
-							</div>
-						)}
+						<Trans>Resolved</Trans>
 					</Column>
 				</TableHeader>
 				<TableBody
@@ -507,7 +499,17 @@ export const Evaluations = ({
 							<Cell {...stylex.props(styles.cell, typography[2], ring.focusVisible)}>{item.description}</Cell>
 							<Cell {...stylex.props(styles.cell, typography[2])}>
 								<div {...stylex.props(styles.resolvedState)}>
-									<Checkbox {...stylex.props(styles.checkbox, ring.focusVisible)}>
+									<Checkbox
+										onChange={(isSelected) =>
+											changeUserExperienceEvaluationResolvedStatus({
+												conversationId: item.conversationId,
+												evaluationId: item.id,
+												isResolved: isSelected,
+											})
+										}
+										isSelected={Boolean(item.resolvedAt)}
+										{...stylex.props(styles.checkbox, ring.focusVisible)}
+									>
 										{({ isSelected }) => (
 											<>
 												<Icon name="24-check" {...stylex.props(styles.check, isSelected ? null : styles.checkHidden)} />
