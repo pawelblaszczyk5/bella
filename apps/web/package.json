@@ -12,7 +12,7 @@
 		"i18n:extract": "lingui extract",
 		"lint": "eslint",
 		"lint:fix": "eslint --fix",
-		"preview": "node .output/server/index.mjs",
+		"preview": "node --env-file=.env .output/server/index.mjs",
 		"typecheck": "tsc --build --noEmit"
 	},
 	"dependencies": {
