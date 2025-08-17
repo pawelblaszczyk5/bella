@@ -28,6 +28,10 @@
 			"default": "./dist/src/theme/radii.stylex.js",
 			"types": "./dist/src/theme/radii.stylex.d.ts"
 		},
+		"./theme/shadow.stylex": {
+			"default": "./dist/src/theme/shadow.stylex.js",
+			"types": "./dist/src/theme/shadow.stylex.d.ts"
+		},
 		"./theme/spacing.stylex": {
 			"default": "./dist/src/theme/spacing.stylex.js",
 			"types": "./dist/src/theme/spacing.stylex.d.ts"
