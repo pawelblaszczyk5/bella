@@ -59,7 +59,7 @@ const styles = stylex.create({
 		overflowY: "auto",
 	},
 	conversationTitle: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
-	heading: { alignItems: "center", color: violet[12], display: "flex", fontWeight: fontWeight.medium, gap: spacing[3] },
+	heading: { alignItems: "center", color: violet[11], display: "flex", fontWeight: fontWeight.medium, gap: spacing[3] },
 	hiddenSyncIcon: { opacity: 0 },
 	main: { blockSize: "100vh", contain: "strict", isolation: "isolate", overflowY: "auto", padding: spacing[6] },
 	mainLink: {
