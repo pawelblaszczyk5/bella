@@ -1,6 +1,6 @@
 import { FetchHttpClient, HttpApiClient } from "@effect/platform";
 import { createServerFn } from "@tanstack/react-start";
-import { Config, Effect, Layer, ManagedRuntime, Schema, Struct } from "effect";
+import { Config, Effect, Layer, Logger, ManagedRuntime, Schema, Struct } from "effect";
 
 import { ClusterApi } from "@bella/cluster-api";
 import {
@@ -59,11 +59,7 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 			continueConversation: Effect.fn("Api/continueConversation")(function* (
 				conversationActionData: ConversationActionData,
 			) {
-				yield* Effect.annotateCurrentSpan({
-					assistantMessageId: conversationActionData.assistantMessage.id,
-					conversationId: conversationActionData.conversationId,
-					userMessageId: conversationActionData.userMessage.id,
-				});
+				yield* Effect.log("Requesting conversation continuing", conversationActionData);
 
 				yield* verifyConversationActionData(conversationActionData);
 
@@ -77,11 +73,7 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 			startNewConversation: Effect.fn("Api/startNewConversation")(function* (
 				conversationActionData: ConversationActionData,
 			) {
-				yield* Effect.annotateCurrentSpan({
-					assistantMessageId: conversationActionData.assistantMessage.id,
-					conversationId: conversationActionData.conversationId,
-					userMessageId: conversationActionData.userMessage.id,
-				});
+				yield* Effect.log("Requesting new conversation start", conversationActionData);
 
 				yield* verifyConversationActionData(conversationActionData);
 
@@ -93,10 +85,7 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 				return transactionId;
 			}),
 			stopGeneration: Effect.fn("Api/stopGeneration")(function* (stopGenerationData: StopGenerationData) {
-				yield* Effect.annotateCurrentSpan({
-					assistantMessageId: stopGenerationData.assistantMessage.id,
-					conversationId: stopGenerationData.conversationId,
-				});
+				yield* Effect.log("Requesting generation stopping", stopGenerationData);
 
 				const transactionId = yield* clusterHttpClient.conversation.StopGeneration({
 					path: { entityId: stopGenerationData.conversationId },
@@ -109,7 +98,7 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 	}),
 }) {}
 
-const EnvironmentLive = Layer.mergeAll(Api.Default).pipe(Layer.provide(OpentelemetryLive));
+const EnvironmentLive = Layer.mergeAll(Api.Default, Logger.pretty).pipe(Layer.provide(OpentelemetryLive));
 
 const runtime = ManagedRuntime.make(EnvironmentLive);
 

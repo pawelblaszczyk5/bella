@@ -114,25 +114,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 			}) {
 				const messages = yield* repository.getMessagesWithParts(conversationId);
 
-				yield* Match.value(responsePlan).pipe(
-					Match.tag("ResponseFulfillment", (responseFulfillment) =>
-						Effect.annotateCurrentSpan({
-							answerStyle: responseFulfillment.answerStyle,
-							language: responseFulfillment.language,
-							model: responseFulfillment.model,
-							reasoningEnabled: responseFulfillment.reasoningEnabled,
-							type: responseFulfillment._tag,
-						}),
-					),
-					Match.tag("ResponseRefusal", (responseRefusal) =>
-						Effect.annotateCurrentSpan({
-							language: responseRefusal.language,
-							reason: responseRefusal.reason,
-							type: responseRefusal._tag,
-						}),
-					),
-					Match.exhaustive,
-				);
+				yield* Effect.log("Generating new message with given response plan", responsePlan);
 
 				yield* responseTotal.pipe(
 					Metric.tagged("type", responsePlan._tag === "ResponseFulfillment" ? "fulfillment" : "refusal"),
