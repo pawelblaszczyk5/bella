@@ -9,13 +9,6 @@
 				></path>
 			</g>
 		</symbol>
-		<symbol viewBox="0 0 24 24" id="24-todo">
-			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
-			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-				<rect width="6" height="6" x="3" y="5" rx="1"></rect>
-				<path d="m3 17l2 2l4-4m4-9h8m-8 6h8m-8 6h8"></path>
-			</g>
-		</symbol>
 		<symbol viewBox="0 0 24 24" id="24-shell">
 			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
 			<path
@@ -115,6 +108,99 @@
 				<rect width="20" height="14" x="2" y="3" rx="2"></rect>
 				<path d="M8 21h8m-4-4v4"></path>
 			</g>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-signal-low">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<path
+				fill="none"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M2 20h.01M7 20v-4"
+			></path>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-signal-medium">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<path
+				fill="none"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M2 20h.01M7 20v-4m5 4v-8"
+			></path>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-signal-high">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<path
+				fill="none"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M2 20h.01M7 20v-4m5 4v-8m5 8V8"
+			></path>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-badge-japanese-yen">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+				<path
+					d="M3.85 8.62a4 4 0 0 1 4.78-4.77a4 4 0 0 1 6.74 0a4 4 0 0 1 4.78 4.78a4 4 0 0 1 0 6.74a4 4 0 0 1-4.77 4.78a4 4 0 0 1-6.75 0a4 4 0 0 1-4.78-4.77a4 4 0 0 1 0-6.76"
+				></path>
+				<path d="m9 8l3 3v7m0-7l3-3m-6 4h6m-6 4h6"></path>
+			</g>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-badge">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<path
+				fill="none"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M3.85 8.62a4 4 0 0 1 4.78-4.77a4 4 0 0 1 6.74 0a4 4 0 0 1 4.78 4.78a4 4 0 0 1 0 6.74a4 4 0 0 1-4.77 4.78a4 4 0 0 1-6.75 0a4 4 0 0 1-4.78-4.77a4 4 0 0 1 0-6.76"
+			></path>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-badge-x">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<path
+				fill="none"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M3.85 8.62a4 4 0 0 1 4.78-4.77a4 4 0 0 1 6.74 0a4 4 0 0 1 4.78 4.78a4 4 0 0 1 0 6.74a4 4 0 0 1-4.77 4.78a4 4 0 0 1-6.75 0a4 4 0 0 1-4.78-4.77a4 4 0 0 1 0-6.76M15 9l-6 6m0-6l6 6"
+			></path>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-badge-swiss-franc">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+				<path
+					d="M3.85 8.62a4 4 0 0 1 4.78-4.77a4 4 0 0 1 6.74 0a4 4 0 0 1 4.78 4.78a4 4 0 0 1 0 6.74a4 4 0 0 1-4.77 4.78a4 4 0 0 1-6.75 0a4 4 0 0 1-4.78-4.77a4 4 0 0 1 0-6.76"
+				></path>
+				<path d="M11 17V8h4m-4 4h3m-5 4h4"></path>
+			</g>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-badge-help">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+				<path
+					d="M3.85 8.62a4 4 0 0 1 4.78-4.77a4 4 0 0 1 6.74 0a4 4 0 0 1 4.78 4.78a4 4 0 0 1 0 6.74a4 4 0 0 1-4.77 4.78a4 4 0 0 1-6.75 0a4 4 0 0 1-4.78-4.77a4 4 0 0 1 0-6.76"
+				></path>
+				<path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3m.08 4h.01"></path>
+			</g>
+		</symbol>
+		<symbol viewBox="0 0 24 24" id="24-check">
+			<!-- Icon from Lucide by Lucide Contributors - https://github.com/lucide-icons/lucide/blob/main/LICENSE -->
+			<path
+				fill="none"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M20 6L9 17l-5-5"
+			></path>
 		</symbol>
 	</defs>
 </svg>

@@ -2,7 +2,21 @@ import { AiInput, AiLanguageModel } from "@effect/ai";
 import { AnthropicClient, AnthropicLanguageModel } from "@effect/ai-anthropic";
 import { GoogleAiClient, GoogleAiLanguageModel } from "@effect/ai-google";
 import { FetchHttpClient } from "@effect/platform";
-import { Array, Config, Duration, Effect, Layer, LayerMap, Match, Option, Schema, Stream, String } from "effect";
+import {
+	Array,
+	Config,
+	Duration,
+	Effect,
+	ExecutionPlan,
+	Layer,
+	LayerMap,
+	Match,
+	Option,
+	Schedule,
+	Schema,
+	Stream,
+	String,
+} from "effect";
 
 import type { ReasoningMessagePartModel, TextMessagePartModel } from "#src/database/schema.js";
 import type { MessagesWithParts, ResponseFulfillment, ResponsePlan, ResponseRefusal } from "#src/shared.js";
@@ -21,6 +35,33 @@ const QuestionClassification = Schema.Struct({
 	topicsMentioned: Schema.Array(Schema.Literal("PROGRAMMING", "POLITICS")).annotations({
 		description: "List of topics from predetermined list that user question is related to. Can be empty",
 	}),
+});
+
+const ExperienceClassification = Schema.Struct({
+	result: Schema.Struct({
+		category: Schema.Literal(
+			"FACTUAL_ERROR",
+			"UNNECESSARY_REFUSAL",
+			"CONTEXT_IGNORED",
+			"IRRELEVANT",
+			"UNCLASSIFIED",
+		).annotations({
+			description:
+				"Category of negative experience. FACTUAL_ERROR means user points out there were some incorrect information. UNNECESSARY_REFUSAL means user isn't happy and doesn't understand why his generation was refused. CONTEXT_IGNORED means user points out that message doesn't properly refer previously established facts. IRRELEVANT is an umbrella for any misunderstanding, off-topic or too generic, vague answers. Fallback to UNCLASSIFIED if experience is negative but doesn't fit any other category",
+		}),
+		description: Schema.NonEmptyTrimmedString.annotations({
+			description: "Short, non-formatted description summarizing what went wrong. Max 1-2 sentences, keep it concise",
+		}),
+		severity: Schema.Literal("LOW", "MEDIUM", "HIGH").annotations({
+			description:
+				"Severity of user's negative experience. The higher the severity the less likely user is to try to continue the conversation or the issue is more serious",
+		}),
+	})
+		.pipe(Schema.NullOr)
+		.annotations({
+			description:
+				"Result is either null, when user experience wasn't negative or some basic diagnostics matching the provided schema when negative experience was detected",
+		}),
 });
 
 const GoogleAiClientLive = GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") }).pipe(
@@ -59,10 +100,17 @@ class AiLanguageModelMap extends LayerMap.Service<AiLanguageModelMap>()("AiLangu
 		),
 }) {}
 
+const ClassificationPlan = ExecutionPlan.make({
+	attempts: 3,
+	provide: AiLanguageModelMap.get("ANTHROPIC:CLAUDE-3.5-HAIKU"),
+	schedule: Schedule.jittered(Schedule.exponential(Duration.millis(150), 1.2)),
+});
+
 export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 	dependencies: [AiLanguageModelMap.Default],
 	effect: Effect.gen(function* () {
 		const aiLanguageModelMap = yield* AiLanguageModelMap;
+		const executionPlan = yield* ClassificationPlan.withRequirements;
 
 		const mapMessagePart = Match.type<Omit<ReasoningMessagePartModel | TextMessagePartModel, "createdAt">>().pipe(
 			Match.when({ type: "text" }, (part) => Option.some(AiInput.TextPart.make({ text: part.data.text }))),
@@ -179,17 +227,33 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 		return {
 			classifyIncomingMessage: Effect.fn("Bella/Ai/classifyIncomingMessage")(function* (messages: MessagesWithParts) {
 				const response = yield* AiLanguageModel.generateObject({
-					prompt: mapMessagesWithPartsToPrompt(messages.slice(-3)),
+					prompt: mapMessagesWithPartsToPrompt(messages),
 					schema: QuestionClassification,
 					system: String.stripMargin(`
 						|<task>
 						|	You're a helpful assistant tasked with classifying user messages before your colleague will answer to them. Your job is to characterize incoming message according to provided schema. Focus on the last message, but few past messages are provided if additional context is needed.
-						|</task
+						|</task>
 						|<style>
 						|	Be accurate. Don't make mistakes. Another colleague job is dependant on yours one. The output must be valid according to passed schema.
 						|</style>
 					`),
-				}).pipe(Effect.provide(aiLanguageModelMap.get("ANTHROPIC:CLAUDE-3.5-HAIKU")));
+				}).pipe(Effect.withExecutionPlan(executionPlan));
+
+				return response.value;
+			}),
+			classifyUserExperience: Effect.fn("Bella/Ai/classifyUserExperience")(function* (messages: MessagesWithParts) {
+				const response = yield* AiLanguageModel.generateObject({
+					prompt: mapMessagesWithPartsToPrompt(messages),
+					schema: ExperienceClassification,
+					system: String.stripMargin(`
+						|<task>
+						|	You're a helpful assistant tasked with evaluating user experience in this conversation. You're getting a part of conversation. Based on user latest answer you must catch all negative experiences. If negative experience is detected you must categorize it and provide basic description. Everything, whether it's positive or negative experience must be fitting schema. Result can be null in cases where there's no negative experience.
+						|</task>
+						|<style>
+						|	Be accurate. Don't make mistakes. Another colleague job is dependant on yours one. The output must be valid according to passed schema. Always answer in english, regardless of the actual conversation language
+						|</style>
+					`),
+				}).pipe(Effect.withExecutionPlan(executionPlan));
 
 				return response.value;
 			}),

@@ -7,6 +7,7 @@ import {
 	ConversationModel,
 	ReasoningMessagePartModel,
 	TextMessagePartModel,
+	UserExperienceEvaluationModel,
 	UserMessageModel,
 } from "@bella/core/database-schema";
 
@@ -112,5 +113,29 @@ export const userPreferencesCollection = createCollection(
 		storage: globalThis.localStorage ?? {},
 		storageEventApi: globalThis,
 		storageKey: "bella-user-preferences",
+	}),
+);
+
+export const UserExperienceEvaluationShape = Schema.Struct({
+	category: UserExperienceEvaluationModel.select.fields.category,
+	createdAt: Schema.DateTimeUtcFromSelf,
+	description: UserExperienceEvaluationModel.select.fields.description,
+	id: UserExperienceEvaluationModel.select.fields.id,
+	messageId: UserExperienceEvaluationModel.select.fields.messageId,
+	resolvedAt: Schema.NullOr(Schema.DateTimeUtcFromSelf),
+	severity: UserExperienceEvaluationModel.select.fields.severity,
+});
+
+export type UserExperienceEvaluationShape = Schema.Schema.Type<typeof UserExperienceEvaluationShape>;
+
+export const userExperienceEvaluationCollection = createCollection(
+	electricCollectionOptions({
+		getKey: (userExperienceEvaluation) => userExperienceEvaluation.id,
+		id: "userExperienceEvaluation",
+		schema: Schema.standardSchemaV1(UserExperienceEvaluationShape),
+		shapeOptions: {
+			parser: { timestamptz: (date: string) => DateTime.unsafeMake(date) },
+			url: new URL("/api/user-experience-evaluations", import.meta.env.VITE_WEB_BASE_URL).toString(),
+		},
 	}),
 );

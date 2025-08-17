@@ -56,5 +56,15 @@ export const GenerateMessageLive = GenerateMessage.toLayer(
 			}),
 			name: "generateAnswerContent",
 		});
+
+		yield* Activity.make({
+			error: ConversationFlowError,
+			execute: Effect.gen(function* () {
+				yield* bella
+					.evaluateUserExperience(payload.conversationId)
+					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "EVALUATION_ERROR" })));
+			}),
+			name: "performExperienceEvaluation",
+		});
 	}),
 );

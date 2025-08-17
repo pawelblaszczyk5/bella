@@ -1,7 +1,7 @@
 import type { AiResponse } from "@effect/ai";
 
 import { PgClient } from "@effect/sql-pg";
-import { Effect, Match, Metric } from "effect";
+import { Array, Effect, Match, Metric } from "effect";
 
 import type {
 	AssistantMessageModel,
@@ -105,6 +105,38 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 				return transactionId;
 			}),
+			evaluateUserExperience: Effect.fn("Bella/Core/evaluateUserExperience")(function* (
+				conversationId: ConversationModel["id"],
+			) {
+				const messages = yield* repository.getMessagesWithParts(conversationId);
+
+				if (messages.length <= 2) {
+					return;
+				}
+
+				const classification = yield* ai.classifyUserExperience(messages.slice(-3, -1));
+
+				yield* Effect.log("User experience classification performed", classification);
+
+				if (!classification.result) {
+					return;
+				}
+
+				const message = yield* Array.get(messages, messages.length - 2);
+
+				if (message.role === "ASSISTANT") {
+					return yield* Effect.dieMessage("Second-last message can't be assistant one");
+				}
+
+				const evaluation = classification.result;
+
+				yield* repository.insertUserExperienceEvaluation({
+					category: evaluation.category,
+					description: evaluation.description,
+					messageId: message.id,
+					severity: evaluation.severity,
+				});
+			}),
 			getNewMessageStream: Effect.fn("Bella/Core/getNewMessageStream")(function* ({
 				conversationId,
 				responsePlan,
@@ -131,7 +163,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 			getResponsePlan: Effect.fn("Bella/Core/getResponsePlan")(function* (conversationId: ConversationModel["id"]) {
 				const messages = yield* repository.getMessagesWithParts(conversationId);
 
-				const classification = yield* ai.classifyIncomingMessage(messages);
+				const classification = yield* ai.classifyIncomingMessage(messages.slice(-3));
 
 				if (classification.tone === "HOSTILE") {
 					return ResponseRefusal.make({ language: classification.language, reason: "USER_HOSTILITY" });

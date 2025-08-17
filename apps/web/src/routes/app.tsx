@@ -8,7 +8,15 @@ import { assert } from "@bella/assert";
 import { typography } from "@bella/design-system/styles/typography";
 import { ring } from "@bella/design-system/styles/utilities";
 import { duration } from "@bella/design-system/theme/animation.stylex";
-import { cyanDark, mauve, mauveDark, violet, violetDark } from "@bella/design-system/theme/color.stylex";
+import {
+	amberDark,
+	cyanDark,
+	mauve,
+	mauveDark,
+	tomatoDark,
+	violet,
+	violetDark,
+} from "@bella/design-system/theme/color.stylex";
 import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import { fontWeight } from "@bella/design-system/theme/typography.stylex";
@@ -132,7 +140,12 @@ const AppLayoutRoute = () => {
 
 	return (
 		<I18nProvider i18n={i18n}>
-			<div {...stylex.props(styles.root, colorMode.calculated === "DARK" && [cyanDark, violetDark, mauveDark])}>
+			<div
+				{...stylex.props(
+					styles.root,
+					colorMode.calculated === "DARK" && [cyanDark, violetDark, mauveDark, amberDark, tomatoDark],
+				)}
+			>
 				<nav {...stylex.props(styles.nav)}>
 					<h1 {...stylex.props(styles.heading, typography[8])}>
 						Bella <Icon name="24-shell" />
@@ -146,23 +159,9 @@ const AppLayoutRoute = () => {
 							<Icon name="24-home" />
 							<Trans>Home</Trans>
 						</Link>
-						<Link
-							activeOptions={{ exact: true }}
-							// @ts-expect-error -- purposefully broken link for now
-							to="/todo"
-							{...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}
-						>
-							<Icon name="24-todo" />
-							<Trans>Todos</Trans>
-						</Link>
-						<Link
-							activeOptions={{ exact: true }}
-							// @ts-expect-error -- purposefully broken link for now
-							to="/judgments"
-							{...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}
-						>
+						<Link to="/app/evaluations" {...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}>
 							<Icon name="24-hammer" />
-							<Trans>Judgments</Trans>
+							<Trans>Evaluations</Trans>
 						</Link>
 					</div>
 					<div {...stylex.props(styles.conversationsSection)}>

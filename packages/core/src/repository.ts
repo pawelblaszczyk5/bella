@@ -13,6 +13,7 @@ import {
 	ReasoningMessagePartModel,
 	TextMessagePartModel,
 	TransactionId,
+	UserExperienceEvaluationModel,
 	UserMessageModel,
 } from "#src/database/schema.js";
 
@@ -45,6 +46,14 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 					${sql("messagePart")} ${sql.insert({ ...request, data: sql.json(request.data) })};
 			`,
 			Request: Model.Union(TextMessagePartModel, ReasoningMessagePartModel).insert,
+		});
+
+		const insertUserExperienceEvaluation = SqlSchema.void({
+			execute: (request) => sql`
+				INSERT INTO
+					${sql("userExperienceEvaluation")} ${sql.insert(request)};
+			`,
+			Request: UserExperienceEvaluationModel.insert,
 		});
 
 		const updateMessageStatus = SqlSchema.void({
@@ -267,6 +276,24 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 				const textMessagePartId = id ?? TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
 
 				yield* insertMessagePart({ createdAt: undefined, data, id: textMessagePartId, messageId, type: "text" });
+			}),
+			insertUserExperienceEvaluation: Effect.fn("Bella/Repository/insertUserExperienceEvaluation")(function* (
+				userExperienceEvaluation: Pick<
+					UserExperienceEvaluationModel,
+					"category" | "description" | "messageId" | "severity"
+				>,
+			) {
+				const id = UserExperienceEvaluationModel.fields.id.make(yield* idGenerator.generate());
+
+				yield* insertUserExperienceEvaluation({
+					category: userExperienceEvaluation.category,
+					createdAt: undefined,
+					description: userExperienceEvaluation.description,
+					id,
+					messageId: userExperienceEvaluation.messageId,
+					resolvedAt: Option.none(),
+					severity: userExperienceEvaluation.severity,
+				});
 			}),
 			insertUserMessage: Effect.fn("Bella/Repository/insertUserMessage")(function* (
 				message: Pick<UserMessageModel, "conversationId" | "id" | "status">,

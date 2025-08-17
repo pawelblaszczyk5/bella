@@ -14,7 +14,9 @@ import { Route as rootRouteImport } from './routes/__root.tsx'
 import { Route as AppRouteImport } from './routes/app.tsx'
 import { Route as IndexRouteImport } from './routes/index.tsx'
 import { Route as AppIndexRouteImport } from './routes/app.index.tsx'
+import { Route as AppEvaluationsRouteImport } from './routes/app.evaluations.tsx'
 import { Route as AppConversationIdRouteImport } from './routes/app.$conversation-id.tsx'
+import { ServerRoute as ApiUserExperienceEvaluationsServerRouteImport } from './routes/api.user-experience-evaluations.ts'
 import { ServerRoute as ApiMessagesServerRouteImport } from './routes/api.messages.ts'
 import { ServerRoute as ApiMessagePartsServerRouteImport } from './routes/api.message-parts.ts'
 import { ServerRoute as ApiConversationsServerRouteImport } from './routes/api.conversations.ts'
@@ -36,11 +38,22 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEvaluationsRoute = AppEvaluationsRouteImport.update({
+  id: '/evaluations',
+  path: '/evaluations',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppConversationIdRoute = AppConversationIdRouteImport.update({
   id: '/$conversation-id',
   path: '/$conversation-id',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiUserExperienceEvaluationsServerRoute =
+  ApiUserExperienceEvaluationsServerRouteImport.update({
+    id: '/api/user-experience-evaluations',
+    path: '/api/user-experience-evaluations',
+    getParentRoute: () => rootServerRouteImport,
+  } as any)
 const ApiMessagesServerRoute = ApiMessagesServerRouteImport.update({
   id: '/api/messages',
   path: '/api/messages',
@@ -61,11 +74,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/$conversation-id': typeof AppConversationIdRoute
+  '/app/evaluations': typeof AppEvaluationsRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app/$conversation-id': typeof AppConversationIdRoute
+  '/app/evaluations': typeof AppEvaluationsRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -73,14 +88,26 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/app/$conversation-id': typeof AppConversationIdRoute
+  '/app/evaluations': typeof AppEvaluationsRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/app/$conversation-id' | '/app/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/app/$conversation-id'
+    | '/app/evaluations'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app/$conversation-id' | '/app'
-  id: '__root__' | '/' | '/app' | '/app/$conversation-id' | '/app/'
+  to: '/' | '/app/$conversation-id' | '/app/evaluations' | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/app/$conversation-id'
+    | '/app/evaluations'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -91,30 +118,47 @@ export interface FileServerRoutesByFullPath {
   '/api/conversations': typeof ApiConversationsServerRoute
   '/api/message-parts': typeof ApiMessagePartsServerRoute
   '/api/messages': typeof ApiMessagesServerRoute
+  '/api/user-experience-evaluations': typeof ApiUserExperienceEvaluationsServerRoute
 }
 export interface FileServerRoutesByTo {
   '/api/conversations': typeof ApiConversationsServerRoute
   '/api/message-parts': typeof ApiMessagePartsServerRoute
   '/api/messages': typeof ApiMessagesServerRoute
+  '/api/user-experience-evaluations': typeof ApiUserExperienceEvaluationsServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
   '/api/conversations': typeof ApiConversationsServerRoute
   '/api/message-parts': typeof ApiMessagePartsServerRoute
   '/api/messages': typeof ApiMessagesServerRoute
+  '/api/user-experience-evaluations': typeof ApiUserExperienceEvaluationsServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/conversations' | '/api/message-parts' | '/api/messages'
+  fullPaths:
+    | '/api/conversations'
+    | '/api/message-parts'
+    | '/api/messages'
+    | '/api/user-experience-evaluations'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/conversations' | '/api/message-parts' | '/api/messages'
-  id: '__root__' | '/api/conversations' | '/api/message-parts' | '/api/messages'
+  to:
+    | '/api/conversations'
+    | '/api/message-parts'
+    | '/api/messages'
+    | '/api/user-experience-evaluations'
+  id:
+    | '__root__'
+    | '/api/conversations'
+    | '/api/message-parts'
+    | '/api/messages'
+    | '/api/user-experience-evaluations'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
   ApiConversationsServerRoute: typeof ApiConversationsServerRoute
   ApiMessagePartsServerRoute: typeof ApiMessagePartsServerRoute
   ApiMessagesServerRoute: typeof ApiMessagesServerRoute
+  ApiUserExperienceEvaluationsServerRoute: typeof ApiUserExperienceEvaluationsServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -140,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/evaluations': {
+      id: '/app/evaluations'
+      path: '/evaluations'
+      fullPath: '/app/evaluations'
+      preLoaderRoute: typeof AppEvaluationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/$conversation-id': {
       id: '/app/$conversation-id'
       path: '/$conversation-id'
@@ -151,6 +202,13 @@ declare module '@tanstack/react-router' {
 }
 declare module '@tanstack/react-start/server' {
   interface ServerFileRoutesByPath {
+    '/api/user-experience-evaluations': {
+      id: '/api/user-experience-evaluations'
+      path: '/api/user-experience-evaluations'
+      fullPath: '/api/user-experience-evaluations'
+      preLoaderRoute: typeof ApiUserExperienceEvaluationsServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
     '/api/messages': {
       id: '/api/messages'
       path: '/api/messages'
@@ -177,11 +235,13 @@ declare module '@tanstack/react-start/server' {
 
 interface AppRouteChildren {
   AppConversationIdRoute: typeof AppConversationIdRoute
+  AppEvaluationsRoute: typeof AppEvaluationsRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppConversationIdRoute: AppConversationIdRoute,
+  AppEvaluationsRoute: AppEvaluationsRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -198,6 +258,8 @@ const rootServerRouteChildren: RootServerRouteChildren = {
   ApiConversationsServerRoute: ApiConversationsServerRoute,
   ApiMessagePartsServerRoute: ApiMessagePartsServerRoute,
   ApiMessagesServerRoute: ApiMessagesServerRoute,
+  ApiUserExperienceEvaluationsServerRoute:
+    ApiUserExperienceEvaluationsServerRoute,
 }
 export const serverRouteTree = rootServerRouteImport
   ._addFileChildren(rootServerRouteChildren)
