@@ -18,7 +18,7 @@ const styles = stylex.create({
 	action: {
 		aspectRatio: "1/1",
 		backgroundColor: { ":is([data-hovered])": violet[4], default: violet[3] },
-		borderColor: mauve[7],
+		borderColor: { ":is([data-hovered])": mauve[8], default: mauve[7] },
 		borderRadius: radii[4],
 		borderStyle: "solid",
 		borderWidth: 1,
@@ -31,7 +31,7 @@ const styles = stylex.create({
 		scale: { ":is([data-pressed])": 0.98, default: null },
 		transform: "translateY(-50%)",
 		transitionDuration: duration[2],
-		transitionProperty: "background-color, scale",
+		transitionProperty: "background-color, border-color, scale",
 		transitionTimingFunction: "ease-in-out",
 	},
 	form: { blockSize: "fit-content", inlineSize: "fit-content", position: "relative" },
