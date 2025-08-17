@@ -33,6 +33,7 @@
 		"@tanstack/react-router": "^1.131.14",
 		"@tanstack/react-start": "^1.131.15",
 		"effect": "catalog:",
+		"jsurl2": "^2.2.0",
 		"motion": "^12.23.12",
 		"react": "catalog:",
 		"react-aria-components": "^1.11.0",

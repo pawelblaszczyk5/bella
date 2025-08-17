@@ -308,6 +308,9 @@ importers:
       effect:
         specifier: 'catalog:'
         version: 3.17.7
+      jsurl2:
+        specifier: ^2.2.0
+        version: 2.2.0
       motion:
         specifier: ^12.23.12
         version: 12.23.12(react-dom@0.0.0-experimental-f1222f76-20250812(react@0.0.0-experimental-f1222f76-20250812))(react@0.0.0-experimental-f1222f76-20250812)
@@ -5494,6 +5497,9 @@ packages:
   jsox@1.2.123:
     resolution: {integrity: sha512-LYordXJ/0Q4G8pUE1Pvh4fkfGvZY7lRe4WIJKl0wr0rtFDVw9lcdNW95GH0DceJ6E9xh41zJNW0vreEz7xOxCw==}
     hasBin: true
+
+  jsurl2@2.2.0:
+    resolution: {integrity: sha512-jFwgc2G7eVMF6/uyxsF+7DbNEg7fj7SRWmJuVfu/SAOK0iIH9gOpLK9FL1jLvENCXS7kYsYcmFxRFQFyQEb7jg==}
 
   jsx-ast-utils@3.3.5:
     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
@@ -13330,6 +13336,8 @@ snapshots:
   json5@2.2.3: {}
 
   jsox@1.2.123: {}
+
+  jsurl2@2.2.0: {}
 
   jsx-ast-utils@3.3.5:
     dependencies:
