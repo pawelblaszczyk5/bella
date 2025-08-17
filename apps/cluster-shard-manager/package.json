@@ -10,7 +10,7 @@
 		"dev": "wait-on tcp:54321 && node --env-file=.env --import=tsx --watch ./src/mod.ts",
 		"lint": "eslint",
 		"lint:fix": "eslint --fix",
-		"preview": "node --import=tsx --watch ./src/mod.ts",
+		"preview": "node --env-file=.env --import=tsx --watch ./src/mod.ts",
 		"typecheck": "tsc --build --noEmit"
 	},
 	"dependencies": {
