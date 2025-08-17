@@ -135,7 +135,7 @@ const ViewSettings = () => {
 		<MenuTrigger>
 			<Button {...stylex.props(viewSettingsStyles.trigger, ring.focusVisible)}>
 				<Icon name="24-gallery-vertical-end" />
-				<Trans>Settings</Trans>
+				<Trans>View settings</Trans>
 			</Button>
 			<Popover placement="bottom end">
 				<Menu {...stylex.props(viewSettingsStyles.menu, ring.focusVisible)}>
@@ -377,8 +377,8 @@ export const Evaluations = ({
 				<ViewSettings />
 				<p {...stylex.props(styles.description)}>
 					<Trans>
-						While you're talking with AI, we're constantly trying to check whether your experience is great! Here, you
-						can find list of occurrences, where we think it didn't do as well as we wish for 🙈
+						While you're talking with Bella, we're constantly trying to check whether your experience is great! Here,
+						you can find list of occurrences, where we think it didn't do as well as we wish for 🙈
 					</Trans>
 				</p>
 			</header>

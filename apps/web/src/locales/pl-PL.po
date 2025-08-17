@@ -13,7 +13,16 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/routes/app.tsx:170
+#: src/components/evaluations.tsx:175
+#: src/components/evaluations.tsx:436
+msgid "Category"
+msgstr "Kategoria"
+
+#: src/components/evaluations.tsx:427
+msgid "Conversation"
+msgstr "Konwersacja"
+
+#: src/routes/app.tsx:177
 msgid "Conversations"
 msgstr "Konwersacje"
 
@@ -25,25 +34,66 @@ msgstr "Ciemny motyw"
 msgid "English"
 msgstr "Angielski"
 
-#: src/routes/app.tsx:147
+#: src/components/evaluations.tsx:375
+#: src/routes/app.tsx:172
+msgid "Evaluations"
+msgstr "Ewaluacje"
+
+#: src/routes/app.evaluations.tsx:120
+msgid "Evaluations | Bella"
+msgstr "Ewaluacje | Bella"
+
+#: src/components/evaluations.tsx:59
+msgid "Factual error"
+msgstr "Błędna informacja"
+
+#: src/components/evaluations.tsx:263
+msgid "Hide resolved"
+msgstr "Ukryj rozwiązane"
+
+#: src/components/evaluations.tsx:46
+msgid "High"
+msgstr "Wysoka"
+
+#: src/routes/app.tsx:168
 msgid "Home"
 msgstr "Strona główna"
+
+#: src/components/evaluations.tsx:416
+msgid "ID"
+msgstr "ID"
+
+#: src/components/evaluations.tsx:58
+msgid "Ignored context"
+msgstr "Zignorowany kontekst"
 
 #: src/components/message-addons.tsx:51
 msgid "Inspect reasoning  💡"
 msgstr "Sprawdź rozumowanie  💡"
 
-#: src/routes/app.tsx:165
-msgid "Judgments"
-msgstr "Osądy"
+#: src/components/evaluations.tsx:60
+msgid "Irrelevant"
+msgstr "Nie pasująca"
+
+#: src/components/evaluations.tsx:478
+msgid "It seems like we either don't have any evaluations ready yet, or the setting you've chosen doesn't match any of them 😞"
+msgstr "Wygląda jakby jeszcze nie było żadnych ewaluacji, lub kryteria które wybrałeś nie pasują do istniejących 😞"
 
 #: src/components/user-preferences.tsx:74
 msgid "Light mode"
 msgstr "Jasny motyw"
 
+#: src/components/evaluations.tsx:47
+msgid "Low"
+msgstr "Niska"
+
 #: src/components/user-preferences.tsx:87
 msgid "Match system"
 msgstr "Dopasuj do urządzenia"
+
+#: src/components/evaluations.tsx:48
+msgid "Medium"
+msgstr "Średnia"
 
 #: src/components/composer.tsx:92
 msgid "Message content"
@@ -53,9 +103,18 @@ msgstr "Treść wiadomości"
 msgid "Polish"
 msgstr "Polski"
 
+#: src/components/evaluations.tsx:467
+msgid "Resolved"
+msgstr "Rozwiązane"
+
 #: src/components/composer.tsx:126
 msgid "Send message"
 msgstr "Wyślij wiadomość"
+
+#: src/components/evaluations.tsx:226
+#: src/components/evaluations.tsx:450
+msgid "Severity"
+msgstr "Dotkliwość"
 
 #: src/components/composer.tsx:118
 msgid "Stop generation"
@@ -69,10 +128,22 @@ msgstr "Ta wiadomość została zatrzymana zanim zdążyliśmy wygenerować wła
 msgid "This message was stopped mid-generation, don't be surprised if content is cut-off 😉"
 msgstr "Ta wiadomość została zatrzymana w środku generowania, nie bądź zdziwiony jeśli brakuje części 😉"
 
-#: src/routes/app.tsx:156
-msgid "Todos"
-msgstr "Zadania"
+#: src/components/evaluations.tsx:61
+msgid "Unclassified"
+msgstr "Niesklasyfikowana"
+
+#: src/components/evaluations.tsx:62
+msgid "Unnecessary refusal"
+msgstr "Zbędna odmowa"
+
+#: src/components/evaluations.tsx:138
+msgid "View settings"
+msgstr "Ustawienia widoku"
 
 #: src/components/new-conversation.tsx:37
 msgid "What are you up to today?"
 msgstr "Co tam słychać?"
+
+#: src/components/evaluations.tsx:379
+msgid "While you're talking with Bella, we're constantly trying to check whether your experience is great! Here, you can find list of occurrences, where we think it didn't do as well as we wish for 🙈"
+msgstr "Podczas gdy Ty gawędzisz z Bellą, my ciągle staramy się upewniać, że Twoje konwersacje idą bez problemów! Tu znajdziesz listę wszystkich sytuacji, w których zdaje się nam, że nie poszło tak dobrze jakbyśmy chcieli 🙈"
