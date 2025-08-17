@@ -387,7 +387,10 @@ export const Evaluations = ({
 					const newColumn = sort.column;
 
 					assert(
-						newColumn === "category" || newColumn === "createdAt" || newColumn === "severity",
+						newColumn === "category"
+							|| newColumn === "resolvedAt"
+							|| newColumn === "createdAt"
+							|| newColumn === "severity",
 						"Sorting is only allowed for few selected columns",
 					);
 
@@ -456,9 +459,17 @@ export const Evaluations = ({
 					</Column>
 					<Column
 						id="resolvedAt"
+						allowsSorting
 						{...stylex.props(styles.column, styles.columnResolvedState, ring.focusVisible, typography[1])}
 					>
-						<Trans>Resolved</Trans>
+						{({ sortDirection }) => (
+							<div {...stylex.props(styles.columnWithSortingContainer)}>
+								<Trans>Resolved</Trans>
+								{sortDirection ?
+									<Icon name={sortDirection === "ascending" ? "24-chevron-down" : "24-chevron-up"} />
+								:	null}
+							</div>
+						)}
 					</Column>
 				</TableHeader>
 				<TableBody
@@ -473,7 +484,7 @@ export const Evaluations = ({
 					items={evaluations}
 				>
 					{(item) => (
-						<Row {...stylex.props(styles.row, ring.focusVisible)}>
+						<Row id={item.id} key={item.id} {...stylex.props(styles.row, ring.focusVisible)}>
 							<Cell {...stylex.props(styles.cell, styles.id, ring.focusVisible, typography[1])}>{item.id}</Cell>
 							<Cell {...stylex.props(styles.cell, typography[2])}>
 								<Link

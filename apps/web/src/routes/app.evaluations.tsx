@@ -32,7 +32,7 @@ const Search = Schema.Struct({
 	severity: Schema.NonEmptyArray(UserExperienceEvaluationShape.fields.severity)
 		.pipe(Schema.optionalWith({ default: () => SEARCH_DEFAULTS.severity, exact: true }))
 		.annotations({ decodingFallback: () => Effect.succeed(SEARCH_DEFAULTS.severity) }),
-	sort: Schema.Literal("createdAt", "category", "severity")
+	sort: Schema.Literal("createdAt", "resolvedAt", "category", "severity")
 		.pipe(Schema.optionalWith({ default: () => SEARCH_DEFAULTS.sort, exact: true }))
 		.annotations({ decodingFallback: () => Effect.succeed(SEARCH_DEFAULTS.sort) }),
 });
@@ -71,6 +71,12 @@ const RouteComponent = () => {
 				inArray(userExperienceEvaluationCollection.severity, search.severity),
 			);
 
+			let nulls: "first" | "last" = "last";
+
+			if (search.sort === "resolvedAt") {
+				nulls = search.order === "ascending" ? "last" : "first";
+			}
+
 			query =
 				search.sort === "createdAt" ?
 					query.orderBy(
@@ -80,6 +86,7 @@ const RouteComponent = () => {
 				:	query
 						.orderBy(({ userExperienceEvaluationCollection }) => userExperienceEvaluationCollection[search.sort], {
 							direction: search.order === "ascending" ? "asc" : "desc",
+							nulls,
 						})
 						.orderBy(
 							({ userExperienceEvaluationCollection }) => userExperienceEvaluationCollection.createdAt.epochMillis,
