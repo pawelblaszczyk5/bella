@@ -317,6 +317,9 @@ importers:
       react:
         specifier: 0.0.0-experimental-f1222f76-20250812
         version: 0.0.0-experimental-f1222f76-20250812
+      react-aria:
+        specifier: ^3.42.0
+        version: 3.42.0(react-dom@0.0.0-experimental-f1222f76-20250812(react@0.0.0-experimental-f1222f76-20250812))(react@0.0.0-experimental-f1222f76-20250812)
       react-aria-components:
         specifier: ^1.11.0
         version: 1.11.0(react-dom@0.0.0-experimental-f1222f76-20250812(react@0.0.0-experimental-f1222f76-20250812))(react@0.0.0-experimental-f1222f76-20250812)

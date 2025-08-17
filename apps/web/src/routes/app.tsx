@@ -3,6 +3,8 @@ import { I18nProvider } from "@lingui/react";
 import { Trans } from "@lingui/react/macro";
 import { useLiveQuery } from "@tanstack/react-db";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { useRef } from "react";
+import { UNSAFE_PortalProvider as PortalProvider } from "react-aria";
 
 import { assert } from "@bella/assert";
 import { typography } from "@bella/design-system/styles/typography";
@@ -69,7 +71,14 @@ const styles = stylex.create({
 	conversationTitle: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
 	heading: { alignItems: "center", color: violet[11], display: "flex", fontWeight: fontWeight.medium, gap: spacing[3] },
 	hiddenSyncIcon: { opacity: 0 },
-	main: { blockSize: "100vh", contain: "strict", isolation: "isolate", overflowY: "auto", padding: spacing[6] },
+	main: {
+		blockSize: "100vh",
+		contain: "strict",
+		isolation: "isolate",
+		overflowY: "auto",
+		paddingBlock: spacing[6],
+		paddingInline: spacing[8],
+	},
 	mainLink: {
 		alignItems: "center",
 		backgroundColor: { ":is([data-hovered])": violet[4], default: null },
@@ -128,6 +137,8 @@ const AppLayoutRoute = () => {
 	const colorMode = useColorMode();
 	const language = useLanguage();
 
+	const portalContainerRef = useRef<HTMLDivElement>(null);
+
 	const { data: conversations } = useLiveQuery((q) =>
 		q
 			.from({ conversationsCollection })
@@ -139,48 +150,48 @@ const AppLayoutRoute = () => {
 	}
 
 	return (
-		<I18nProvider i18n={i18n}>
-			<div
-				{...stylex.props(
-					styles.root,
-					colorMode.calculated === "DARK" && [cyanDark, violetDark, mauveDark, amberDark, tomatoDark],
-				)}
-			>
-				<nav {...stylex.props(styles.nav)}>
-					<h1 {...stylex.props(styles.heading, typography[8])}>
-						Bella <Icon name="24-shell" />
-					</h1>
-					<div {...stylex.props(styles.mainLinks)}>
-						<Link
-							activeOptions={{ exact: true }}
-							to="/app"
-							{...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}
-						>
-							<Icon name="24-home" />
-							<Trans>Home</Trans>
-						</Link>
-						<Link to="/app/evaluations" {...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}>
-							<Icon name="24-hammer" />
-							<Trans>Evaluations</Trans>
-						</Link>
+		<div {...stylex.props(colorMode.calculated === "DARK" && [cyanDark, violetDark, mauveDark, amberDark, tomatoDark])}>
+			<PortalProvider getContainer={() => portalContainerRef.current}>
+				<I18nProvider i18n={i18n}>
+					<div {...stylex.props(styles.root)}>
+						<nav {...stylex.props(styles.nav)}>
+							<h1 {...stylex.props(styles.heading, typography[8])}>
+								Bella <Icon name="24-shell" />
+							</h1>
+							<div {...stylex.props(styles.mainLinks)}>
+								<Link
+									activeOptions={{ exact: true }}
+									to="/app"
+									{...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}
+								>
+									<Icon name="24-home" />
+									<Trans>Home</Trans>
+								</Link>
+								<Link to="/app/evaluations" {...stylex.props(styles.mainLink, ring.focusVisible, typography[4])}>
+									<Icon name="24-hammer" />
+									<Trans>Evaluations</Trans>
+								</Link>
+							</div>
+							<div {...stylex.props(styles.conversationsSection)}>
+								<p {...stylex.props(styles.conversationSectionTitle, typography[4])}>
+									<Trans>Conversations</Trans>
+								</p>
+								<ul>
+									{conversations.map((conversation) => (
+										<ConversationLink conversation={conversation} key={conversation.id} />
+									))}
+								</ul>
+							</div>
+							<UserPreferences />
+						</nav>
+						<main {...stylex.props(styles.main)}>
+							<Outlet />
+						</main>
 					</div>
-					<div {...stylex.props(styles.conversationsSection)}>
-						<p {...stylex.props(styles.conversationSectionTitle, typography[4])}>
-							<Trans>Conversations</Trans>
-						</p>
-						<ul>
-							{conversations.map((conversation) => (
-								<ConversationLink conversation={conversation} key={conversation.id} />
-							))}
-						</ul>
-					</div>
-					<UserPreferences />
-				</nav>
-				<main {...stylex.props(styles.main)}>
-					<Outlet />
-				</main>
-			</div>
-		</I18nProvider>
+				</I18nProvider>
+				<div ref={portalContainerRef} />
+			</PortalProvider>
+		</div>
 	);
 };
 

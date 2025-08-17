@@ -36,6 +36,7 @@
 		"jsurl2": "^2.2.0",
 		"motion": "^12.23.12",
 		"react": "catalog:",
+		"react-aria": "^3.42.0",
 		"react-aria-components": "^1.11.0",
 		"react-dom": "catalog:",
 		"react-markdown": "^10.1.0",
