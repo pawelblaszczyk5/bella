@@ -1,8 +1,0 @@
-diff --git a/dist/esm/index.d.ts b/dist/esm/index.d.ts
-index ff1fd4f1c9063e998a077e0debb46ca2423a86f7..d4ebc37a7902235ddfbd36e506e893648756a8ca 100644
---- a/dist/esm/index.d.ts
-+++ b/dist/esm/index.d.ts
-@@ -1,2 +1,2 @@
--export { electricCollectionOptions, type ElectricCollectionConfig, type ElectricCollectionUtils, type Txid, } from './electric.js';
-+export { electricCollectionOptions, type ElectricCollectionConfig, type ElectricCollectionUtils, type Txid, type AwaitTxIdFn } from './electric.js';
- export * from './errors.js';
