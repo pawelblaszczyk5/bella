@@ -13,12 +13,12 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/components/evaluations.tsx:175
-#: src/components/evaluations.tsx:436
+#: src/components/evaluations.tsx:176
+#: src/components/evaluations.tsx:437
 msgid "Category"
 msgstr "Category"
 
-#: src/components/evaluations.tsx:427
+#: src/components/evaluations.tsx:428
 msgid "Conversation"
 msgstr "Conversation"
 
@@ -34,7 +34,7 @@ msgstr "Dark mode"
 msgid "English"
 msgstr "English"
 
-#: src/components/evaluations.tsx:375
+#: src/components/evaluations.tsx:376
 #: src/routes/app.tsx:172
 msgid "Evaluations"
 msgstr "Evaluations"
@@ -47,7 +47,7 @@ msgstr "Evaluations | Bella"
 msgid "Factual error"
 msgstr "Factual error"
 
-#: src/components/evaluations.tsx:263
+#: src/components/evaluations.tsx:264
 msgid "Hide resolved"
 msgstr "Hide resolved"
 
@@ -59,7 +59,7 @@ msgstr "High"
 msgid "Home"
 msgstr "Home"
 
-#: src/components/evaluations.tsx:416
+#: src/components/evaluations.tsx:417
 msgid "ID"
 msgstr "ID"
 
@@ -75,7 +75,7 @@ msgstr "Inspect reasoning  💡"
 msgid "Irrelevant"
 msgstr "Irrelevant"
 
-#: src/components/evaluations.tsx:478
+#: src/components/evaluations.tsx:479
 msgid "It seems like we either don't have any evaluations ready yet, or the setting you've chosen doesn't match any of them 😞"
 msgstr "It seems like we either don't have any evaluations ready yet, or the setting you've chosen doesn't match any of them 😞"
 
@@ -103,7 +103,7 @@ msgstr "Message content"
 msgid "Polish"
 msgstr "Polish"
 
-#: src/components/evaluations.tsx:467
+#: src/components/evaluations.tsx:468
 msgid "Resolved"
 msgstr "Resolved"
 
@@ -111,8 +111,8 @@ msgstr "Resolved"
 msgid "Send message"
 msgstr "Send message"
 
-#: src/components/evaluations.tsx:226
-#: src/components/evaluations.tsx:450
+#: src/components/evaluations.tsx:227
+#: src/components/evaluations.tsx:451
 msgid "Severity"
 msgstr "Severity"
 
@@ -136,7 +136,7 @@ msgstr "Unclassified"
 msgid "Unnecessary refusal"
 msgstr "Unnecessary refusal"
 
-#: src/components/evaluations.tsx:138
+#: src/components/evaluations.tsx:139
 msgid "View settings"
 msgstr "View settings"
 
@@ -144,6 +144,6 @@ msgstr "View settings"
 msgid "What are you up to today?"
 msgstr "What are you up to today?"
 
-#: src/components/evaluations.tsx:379
+#: src/components/evaluations.tsx:380
 msgid "While you're talking with Bella, we're constantly trying to check whether your experience is great! Here, you can find list of occurrences, where we think it didn't do as well as we wish for 🙈"
 msgstr "While you're talking with Bella, we're constantly trying to check whether your experience is great! Here, you can find list of occurrences, where we think it didn't do as well as we wish for 🙈"
