@@ -95,7 +95,7 @@ msgstr "Match system"
 msgid "Medium"
 msgstr "Medium"
 
-#: src/components/composer.tsx:92
+#: src/components/composer.tsx:93
 msgid "Message content"
 msgstr "Message content"
 
@@ -107,7 +107,7 @@ msgstr "Polish"
 msgid "Resolved"
 msgstr "Resolved"
 
-#: src/components/composer.tsx:126
+#: src/components/composer.tsx:128
 msgid "Send message"
 msgstr "Send message"
 
@@ -116,7 +116,7 @@ msgstr "Send message"
 msgid "Severity"
 msgstr "Severity"
 
-#: src/components/composer.tsx:118
+#: src/components/composer.tsx:120
 msgid "Stop generation"
 msgstr "Stop generation"
 
