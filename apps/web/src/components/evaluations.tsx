@@ -90,6 +90,7 @@ const viewSettingsStyles = stylex.create({
 		boxShadow: shadow.base,
 		display: "grid",
 		gap: spacing[3],
+		inlineSize: 250,
 		justifyItems: "center",
 		paddingBlock: spacing[2],
 	},

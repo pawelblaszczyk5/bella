@@ -223,7 +223,7 @@ export const useChangeUserExperienceEvaluationResolvedStatus = () => {
 				// NOTE this should be resolved after this https://github.com/TanStack/db/issues/407
 				const mutableDraft = draft as WritableDeep<typeof draft>;
 
-				mutableDraft.resolvedAt = DateTime.unsafeNow();
+				mutableDraft.resolvedAt = data.isResolved ? DateTime.unsafeNow() : null;
 			});
 		},
 	});
