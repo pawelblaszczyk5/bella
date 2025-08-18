@@ -85,6 +85,7 @@ export const Composer = ({
 				onChange={(value) => {
 					setMessageContent(value);
 				}}
+				autoFocus={!isGenerationInProgress}
 				value={messageContent}
 				isRequired
 			>
@@ -112,6 +113,7 @@ export const Composer = ({
 						onStopGeneration();
 					}}
 					type="button"
+					autoFocus
 					{...stylex.props(styles.action, ring.focusVisible)}
 				>
 					<span {...stylex.props(accessibility.srOnly)}>
