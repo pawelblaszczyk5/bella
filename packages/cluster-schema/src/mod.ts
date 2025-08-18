@@ -35,6 +35,14 @@ export class ConversationFlowError extends Schema.TaggedError<ConversationFlowEr
 	}
 }
 
+export class CoppermindIngestionError extends Schema.TaggedError<CoppermindIngestionError>(
+	"@bella/core/CoppermindIngestionError",
+)("CoppermindIngestionError", { cause: Schema.Defect }) {
+	override get message() {
+		return `Coppermind ingestion failed`;
+	}
+}
+
 export const Conversation = Entity.make("Conversation", [
 	Rpc.make("Start", {
 		error: ConversationFlowError,
@@ -66,4 +74,11 @@ export const GenerateMessage = Workflow.make({
 	name: "GenerateMessage",
 	payload: { assistantMessage: AssistantMessage, conversationId: ConversationModel.select.fields.id },
 	success: Schema.Void,
+});
+
+export const IngestCoppermind = Workflow.make({
+	error: CoppermindIngestionError,
+	idempotencyKey: (payload) => payload.time.epochMillis.toString(),
+	name: "IngestCoppermind",
+	payload: { time: Schema.DateTimeUtc },
 });

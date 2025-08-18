@@ -1,5 +1,5 @@
 import { Entity } from "@effect/cluster";
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 
 import { Conversation, ConversationFlowError, GenerateMessage } from "@bella/cluster-schema";
 import { Bella } from "@bella/core";
@@ -74,4 +74,4 @@ export const ConversationLive = Conversation.toLayer(
 			}),
 		};
 	}),
-);
+).pipe(Layer.provide(Bella.Default));

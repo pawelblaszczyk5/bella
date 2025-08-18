@@ -11,6 +11,10 @@
 			"default": "./dist/src/mod.js",
 			"types": "./dist/src/mod.d.ts"
 		},
+		"./coppermind": {
+			"default": "./dist/src/coppermind.js",
+			"types": "./dist/src/coppermind.d.ts"
+		},
 		"./database-schema": {
 			"default": "./dist/src/database/schema.js",
 			"types": "./dist/src/database/schema.d.ts"
@@ -33,6 +37,7 @@
 		"@effect/platform-node": "catalog:",
 		"@effect/sql": "catalog:",
 		"@effect/sql-pg": "catalog:",
+		"cheerio": "^1.1.2",
 		"effect": "catalog:"
 	},
 	"devDependencies": {

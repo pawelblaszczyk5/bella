@@ -1,5 +1,5 @@
 import { Activity } from "@effect/workflow";
-import { Duration, Effect, Stream } from "effect";
+import { Duration, Effect, Layer, Stream } from "effect";
 
 import { ConversationFlowError, GenerateMessage } from "@bella/cluster-schema";
 import { Bella, ResponsePlan } from "@bella/core";
@@ -67,4 +67,4 @@ export const GenerateMessageLive = GenerateMessage.toLayer(
 			name: "performExperienceEvaluation",
 		});
 	}),
-);
+).pipe(Layer.provide(Bella.Default));
