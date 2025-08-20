@@ -10,5 +10,6 @@ export default tseslint.config({
 		"lingui/no-single-variables-to-translate": "error",
 		"lingui/no-trans-inside-trans": "error",
 		"lingui/no-expression-in-message": "error",
+		"lingui/consistent-plural-format": "error",
 	},
 });
