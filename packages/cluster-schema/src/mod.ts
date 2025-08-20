@@ -35,11 +35,11 @@ export class ConversationFlowError extends Schema.TaggedError<ConversationFlowEr
 	}
 }
 
-export class CoppermindIngestionError extends Schema.TaggedError<CoppermindIngestionError>(
-	"@bella/core/CoppermindIngestionError",
-)("CoppermindIngestionError", { cause: Schema.Defect }) {
+export class KnowledgeIngestionError extends Schema.TaggedError<KnowledgeIngestionError>(
+	"@bella/core/KnowledgeIngestionError",
+)("KnowledgeIngestionError", { cause: Schema.Defect }) {
 	override get message() {
-		return `Coppermind ingestion failed`;
+		return `Knowledge ingestion failed`;
 	}
 }
 
@@ -76,9 +76,9 @@ export const GenerateMessage = Workflow.make({
 	success: Schema.Void,
 });
 
-export const IngestCoppermind = Workflow.make({
-	error: CoppermindIngestionError,
+export const IngestKnowledge = Workflow.make({
+	error: KnowledgeIngestionError,
 	idempotencyKey: (payload) => payload.time.epochMillis.toString(),
-	name: "IngestCoppermind",
+	name: "IngestKnowledge",
 	payload: { time: Schema.DateTimeUtc },
 });

@@ -13,18 +13,20 @@ import type {
 import type { ResponsePlan } from "#src/shared.js";
 
 import { Ai } from "#src/ai.js";
+import { Coppermind } from "#src/coppermind/mod.js";
 import { DatabaseDefault } from "#src/database/mod.js";
 import { modelUsageTotal, responseTotal } from "#src/metrics.js";
 import { Repository } from "#src/repository.js";
 import { ResponseFulfillment, ResponseRefusal } from "#src/shared.js";
 
 export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
-	dependencies: [DatabaseDefault, Repository.Default, Ai.Default],
+	dependencies: [DatabaseDefault, Repository.Default, Ai.Default, Coppermind.Default],
 	effect: Effect.gen(function* () {
 		const sql = yield* PgClient.PgClient;
 
 		const ai = yield* Ai;
 		const repository = yield* Repository;
+		const coppermind = yield* Coppermind;
 
 		return {
 			changeUserExperienceEvaluationResolvedStatus: Effect.fn(function* ({
@@ -180,6 +182,9 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 
 				return stream;
 			}),
+			getPagesForIngestion: Effect.fn("Bella/Core/getPagesForIngestion")(function* () {
+				return yield* coppermind.getPagesIds();
+			}),
 			getResponsePlan: Effect.fn("Bella/Core/getResponsePlan")(function* (conversationId: ConversationModel["id"]) {
 				const messages = yield* repository.getMessagesWithParts(conversationId);
 
@@ -267,6 +272,9 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					Match.orElse(() => Effect.void),
 				);
 			}),
+			ingestPagesKnowledge: Effect.fn("Bella/Core/ingestPagesKnowledge")(function* (pagesIds: Array<string>) {
+				yield* coppermind.embedPages(pagesIds);
+			}),
 			markMessageAsCompleted: Effect.fn("Bella/Core/markMessageAsCompleted")(function* (
 				assistantMessageId: AssistantMessageModel["id"],
 			) {
@@ -288,6 +296,9 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				}).pipe(sql.withTransaction);
 
 				return transactionId;
+			}),
+			setupStorageForKnowledgeIngestion: Effect.fn("Bella/Core/setupStorageForKnowledgeIngestion")(function* () {
+				yield* coppermind.flushStorage();
 			}),
 		};
 	}),

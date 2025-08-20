@@ -41,6 +41,14 @@ services:
     volumes:
       - otel_data:/data
 
+  qdrant:
+    image: qdrant/qdrant:v1.15.3
+    ports:
+      - 63331:6333
+    volumes:
+      - qdrant_data:/qdrant/storage
+
 volumes:
   postgres_data:
   otel_data:
+  qdrant_data:

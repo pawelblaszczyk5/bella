@@ -6,20 +6,20 @@ import { Config, Effect, Layer, Option } from "effect";
 import { createServer } from "node:http";
 
 import { ClusterApi } from "@bella/cluster-api";
-import { Conversation, IngestCoppermind } from "@bella/cluster-schema";
+import { Conversation, IngestKnowledge } from "@bella/cluster-schema";
 import { ClusterStorageLayer } from "@bella/cluster-storage";
 import { OpentelemetryLive } from "@bella/opentelemetry";
 
 import { ConversationLive } from "#src/conversation.js";
-import { IngestCoppermindLive } from "#src/coppermind.js";
 import { GenerateMessageLive } from "#src/generate-message.js";
+import { IngestKnowledgeLive } from "#src/ingest-knowledge.js";
 
 const ClusterApiLive = HttpApiBuilder.serve(HttpMiddleware.logger).pipe(
 	Layer.provide(HttpApiSwagger.layer({ path: "/docs" })),
 	Layer.provide(
 		HttpApiBuilder.api(ClusterApi).pipe(
 			Layer.provide(EntityProxyServer.layerHttpApi(ClusterApi, "conversation", Conversation)),
-			Layer.provide(WorkflowProxyServer.layerHttpApi(ClusterApi, "workflow", [IngestCoppermind])),
+			Layer.provide(WorkflowProxyServer.layerHttpApi(ClusterApi, "workflow", [IngestKnowledge])),
 		),
 	),
 	Layer.provide(
@@ -58,7 +58,7 @@ const WorkflowEngineLive = ClusterWorkflowEngine.layer.pipe(
 
 const EntitiesLive = Layer.mergeAll(ConversationLive);
 
-const WorkflowsLive = Layer.mergeAll(GenerateMessageLive, IngestCoppermindLive);
+const WorkflowsLive = Layer.mergeAll(GenerateMessageLive, IngestKnowledgeLive);
 
 const EnvironmentLive = Layer.mergeAll(
 	EntitiesLive.pipe(Layer.provide(WorkflowsLive), Layer.provide(WorkflowEngineLive)),
