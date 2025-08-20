@@ -120,7 +120,7 @@ export class Embedder extends Effect.Service<Embedder>()("@bella/core/Embedder",
 					}),
 				);
 			}),
-			rerankPointsForQuery: Effect.fn("Bella/Embedder/embedQuery")(function* ({
+			rerankPointsForQuery: Effect.fn("Bella/Embedder/rerankPointsForQuery")(function* ({
 				points,
 				query,
 			}: {
