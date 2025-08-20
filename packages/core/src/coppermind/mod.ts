@@ -1,4 +1,4 @@
-import { Array, Effect } from "effect";
+import { Array, Effect, Option } from "effect";
 
 import { IdGenerator } from "@bella/id-generator/effect";
 
@@ -142,6 +142,8 @@ const SUMMARIES_PAGES_IDS = Array.make(
 
 // cspell:enable
 
+const POINT_RELEVANCE_THRESHOLD = 0.5;
+
 export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Coppermind", {
 	dependencies: [Extractor.Default, Embedder.Default, Storage.Default, IdGenerator.Default],
 	effect: Effect.gen(function* () {
@@ -150,27 +152,22 @@ export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Copper
 		const storage = yield* Storage;
 
 		return {
-			embedPages: Effect.fn("Bella/Coppermind/embedPages")(function* (pagesIds: ReadonlyArray<string>) {
-				const chunkedPagesContents = yield* Effect.forEach(
-					pagesIds,
-					Effect.fn(function* (pageId) {
-						return yield* extractor.extractChunkedPageContent(pageId);
-					}),
-				);
+			embedPage: Effect.fn("Bella/Coppermind/embedPage")(function* (pageId: string) {
+				const chunks = yield* extractor.extractChunkedPageContent(pageId);
 
-				const vectors = yield* embedder.embedDocumentsWithContext(chunkedPagesContents);
+				const chunkedChunks = Array.chunksOf(chunks, 60);
+
+				const vectors = yield* embedder.embedDocumentsWithContext(chunkedChunks);
 
 				const points = yield* Effect.forEach(
 					vectors,
 					Effect.fn(function* (vectorsForPage, index) {
-						const pageId = yield* Array.get(pagesIds, index);
-
-						const chunkedContentsPerPage = yield* Array.get(chunkedPagesContents, index);
+						const chunkedContentsPerChunk = yield* Array.get(chunkedChunks, index);
 
 						return yield* Effect.forEach(
 							vectorsForPage,
 							Effect.fn(function* (vector, index) {
-								const content = yield* Array.get(chunkedContentsPerPage, index);
+								const content = yield* Array.get(chunkedContentsPerChunk, index);
 
 								const id = crypto.randomUUID();
 
@@ -185,14 +182,17 @@ export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Copper
 			flushStorage: Effect.fn("Bella/Coppermind/flushStorage")(function* () {
 				yield* storage.flushStorage();
 			}),
-			getContentForQueries: Effect.fn("Bella/Coppermind/getContentForQueries")(function* ({
-				query,
+			getPagesIds: Effect.fn("Bella/Coppermind/getPagesIds")(function* () {
+				return Array.appendAll(BOOKS_PAGES_IDS, Array.appendAll(CHARACTERS_PAGES_IDS, SUMMARIES_PAGES_IDS));
+			}),
+			getRelatedDataForQueries: Effect.fn("Bella/Coppermind/getRelatedDataForQueries")(function* ({
 				subqueries,
+				summarizedQuery,
 			}: {
-				query: string;
 				subqueries: ReadonlyArray<string>;
+				summarizedQuery: string;
 			}) {
-				const embeddedQueries = yield* embedder.embedQueries(subqueries);
+				const embeddedQueries = yield* embedder.embedQueriesWithContext(subqueries);
 
 				const nearestPoints = yield* Effect.forEach(
 					embeddedQueries,
@@ -205,12 +205,19 @@ export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Copper
 					Effect.map(Array.dedupeWith((firstPoint, secondPoint) => firstPoint.id === secondPoint.id)),
 				);
 
-				const rerankedPoints = yield* embedder.rerankPointsForQuery({ points: nearestPoints, query });
+				const rerankedPoints = yield* embedder.rerankPointsForQuery({ points: nearestPoints, query: summarizedQuery });
 
-				yield* Effect.log(rerankedPoints);
-			}),
-			getPagesIds: Effect.fn("Bella/Coppermind/getPagesIds")(function* () {
-				return BOOKS_PAGES_IDS;
+				return Array.filterMap(rerankedPoints, (point) => {
+					if (point.relevance < POINT_RELEVANCE_THRESHOLD) {
+						return Option.none();
+					}
+
+					return Option.some({
+						content: point.payload.content,
+						pageId: point.payload.pageId,
+						relevance: point.relevance,
+					});
+				});
 			}),
 		};
 	}),

@@ -178,7 +178,23 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					yield* modelUsageTotal.pipe(Metric.tagged("model", responsePlan.model))(Effect.succeed(1));
 				}
 
-				const stream = yield* ai.generateAnswer({ messages, responsePlan });
+				let additionalContext: Option.Option<string> = Option.none();
+
+				if (responsePlan._tag === "ResponseFulfillment" && responsePlan.availableKnowledge.includes("COPPERMIND")) {
+					const coppermindQueries = yield* ai.generateCoppermindQueries(messages);
+
+					const relatedData = yield* coppermind.getRelatedDataForQueries(coppermindQueries);
+
+					yield* Effect.log("Retrieved related data for queries", coppermindQueries, relatedData);
+
+					const stringifiedContent = relatedData
+						.map((data, index) => `${index.toString()}. "${data.content}" quote from ${data.pageId}`)
+						.join("\n");
+
+					additionalContext = Option.some(stringifiedContent);
+				}
+
+				const stream = yield* ai.generateAnswer({ additionalContext, messages, responsePlan });
 
 				return stream;
 			}),
@@ -210,6 +226,7 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				if (isProgrammingRelated) {
 					return ResponseFulfillment.make({
 						answerStyle,
+						availableKnowledge: [],
 						language: classification.language,
 						model: "ANTHROPIC:CLAUDE-4-SONNET",
 						reasoningEnabled: true,
@@ -236,7 +253,16 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					Match.orElseAbsurd,
 				);
 
-				return ResponseFulfillment.make({ answerStyle, language: classification.language, model, reasoningEnabled });
+				const availableKnowledge =
+					classification.topicsMentioned.includes("BRANDON_SANDERSON_BOOKS") ? (["COPPERMIND"] as const) : [];
+
+				return ResponseFulfillment.make({
+					answerStyle,
+					availableKnowledge,
+					language: classification.language,
+					model,
+					reasoningEnabled,
+				});
 			}),
 			handleStreamedPart: Effect.fn("Bella/Core/handleStreamedPart")(function* ({
 				assistantMessageId,
@@ -272,8 +298,8 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 					Match.orElse(() => Effect.void),
 				);
 			}),
-			ingestPagesKnowledge: Effect.fn("Bella/Core/ingestPagesKnowledge")(function* (pagesIds: Array<string>) {
-				yield* coppermind.embedPages(pagesIds);
+			ingestPageKnowledge: Effect.fn("Bella/Core/ingestPageKnowledge")(function* (pagesId: string) {
+				yield* coppermind.embedPage(pagesId);
 			}),
 			markMessageAsCompleted: Effect.fn("Bella/Core/markMessageAsCompleted")(function* (
 				assistantMessageId: AssistantMessageModel["id"],

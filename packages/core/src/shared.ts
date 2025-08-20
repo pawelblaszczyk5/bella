@@ -32,6 +32,7 @@ export class ResponseFulfillment extends Schema.TaggedClass<ResponseFulfillment>
 	"ResponseFulfillment",
 	{
 		answerStyle: Schema.Literal("FORMAL", "FRIENDLY"),
+		availableKnowledge: Schema.Array(Schema.Literal("COPPERMIND")),
 		language: Schema.NonEmptyTrimmedString,
 		model: Schema.Literal(
 			"GOOGLE:GEMINI-2.5-PRO",

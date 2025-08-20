@@ -32,8 +32,8 @@ const QuestionClassification = Schema.Struct({
 	tone: Schema.Literal("FRIENDLY", "FORMAL", "PLAYFUL", "HOSTILE", "UNCLASSIFIED").annotations({
 		description: "User tone, fallback to UNCLASSIFIED if can't match",
 	}),
-	topicsMentioned: Schema.Array(Schema.Literal("PROGRAMMING", "POLITICS")).annotations({
-		description: "List of topics from predetermined list that user question is related to. Can be empty",
+	topicsMentioned: Schema.Array(Schema.Literal("PROGRAMMING", "POLITICS", "BRANDON_SANDERSON_BOOKS")).annotations({
+		description: `List of topics from predetermined list that user question is related to. "BRANDON_SANDERSON_BOOKS" relates to any of his books, whether it's Cosmere, Mistborn, Stormlight Archive or some specific question about any of these or other ones. Can be empty`,
 	}),
 });
 
@@ -62,6 +62,11 @@ const ExperienceClassification = Schema.Struct({
 			description:
 				"Result is either null, when user experience wasn't negative or some basic diagnostics matching the provided schema when negative experience was detected",
 		}),
+});
+
+const CoppermindQueries = Schema.Struct({
+	subqueries: Schema.Array(Schema.NonEmptyString),
+	summarizedQuery: Schema.NonEmptyString,
 });
 
 const GoogleAiClientLive = GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") }).pipe(
@@ -161,9 +166,11 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 		});
 
 		const generateFulfillmentAnswer = Effect.fn(function* ({
+			additionalContext,
 			messages,
 			responseFulfillment,
 		}: {
+			additionalContext: Option.Option<string>;
 			messages: MessagesWithParts;
 			responseFulfillment: ResponseFulfillment;
 		}) {
@@ -206,6 +213,18 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 				Match.exhaustive,
 			);
 
+			const additionalContextPromptPart = Option.match(additionalContext, {
+				onNone: () => "",
+				onSome: (value) =>
+					String.stripMargin(`
+				|<additional_context>
+				|	Some additional context was provided to you by experts of the question niche, you should prioritize using it to answer user question:
+				| 
+				| ${value}
+				|</additional_context>
+				`),
+			});
+
 			const stream = AiLanguageModel.streamText({
 				prompt: mapMessagesWithPartsToPrompt(messages),
 				system: String.stripMargin(`
@@ -216,6 +235,7 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 						|	Output language must be "${responseFulfillment.language}". Regardless of anything other. It must be this language.
 						|</output_language>
 						|<style>
+						|${additionalContextPromptPart}
 						|	Be kind and respectful, no matter what happens you're supposed to be nice for the user. Don't always agree with him, you're welcome to challenge his ideas if you have a better one. Structure your answer hierarchically, use headings, list, tables where necessary. ${answerStylePromptPart}
 						|</style>
 						`),
@@ -258,21 +278,41 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 				return response.value;
 			}),
 			generateAnswer: Effect.fn("Bella/Ai/generateAnswer")(function* ({
+				additionalContext,
 				messages,
 				responsePlan,
 			}: {
+				additionalContext: Option.Option<string>;
 				messages: MessagesWithParts;
 				responsePlan: ResponsePlan;
 			}) {
 				const stream = yield* Match.value(responsePlan).pipe(
 					Match.tag("ResponseFulfillment", (responseFulfillment) =>
-						generateFulfillmentAnswer({ messages, responseFulfillment }),
+						generateFulfillmentAnswer({ additionalContext, messages, responseFulfillment }),
 					),
 					Match.tag("ResponseRefusal", (responseRefusal) => generateRefusalAnswer({ messages, responseRefusal })),
 					Match.exhaustive,
 				);
 
 				return stream;
+			}),
+			generateCoppermindQueries: Effect.fn("Bella/Ai/generateCoppermindQueries")(function* (
+				messages: MessagesWithParts,
+			) {
+				const response = yield* AiLanguageModel.generateObject({
+					prompt: mapMessagesWithPartsToPrompt(messages),
+					schema: CoppermindQueries,
+					system: String.stripMargin(`
+						|<task>
+						|	You're a helpful assistant being a specialist in Brandon Sanderson books. Everything that spans from Cosmere, Stormlight Archive, Mistborn or any of his other books. You've read all of them and know details about any of these and its characters and all lore and fan content around it. Your job is to help your colleague find relevant information for answering question related to your niche. To do this properly you receive conversation history and you must respond with two things according to specified schema. 1. Summarized query - since your colleague can only process one message, you must summarize all past conversation and if it contained any relevant information you must enhance user question with the data. Try to not change user question too much semantically. 2. Generate list of subqueries, which can be smaller questions that could be helpful to answer. Try these to be as much different from each other as possible. But they should be always helpful for answering original question. Don't make anything up. If someone is asking about books, or characters, try to use book titles, alternative nicknames, everything that can clarify the question and make the folk searching for information more possible to find it. Don't skip any relevant context from this questions, they still must be fully sensible on standalone. If question is complex you can just use it to break it down to separate questions.
+						|</task>
+						|<style>
+						|	Be accurate. Don't make mistakes. Another colleague job is dependant on yours one. The output must be valid according to passed schema. Always answer in english, regardless of the actual conversation language
+						|</style>
+					`),
+				}).pipe(Effect.withExecutionPlan(executionPlan));
+
+				return response.value;
 			}),
 			generateTitle: Effect.fn("Bella/Ai/generateTitle")(function* (
 				textMessagePartContentToGenerateTitleFrom: TextMessagePartModel["data"]["text"],

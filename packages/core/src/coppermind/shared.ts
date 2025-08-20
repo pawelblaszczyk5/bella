@@ -8,7 +8,7 @@ export const Point = Schema.Struct({
 
 export type Point = Schema.Schema.Type<typeof Point>;
 
-export const PointWithScore = Schema.Struct({ ...Point.fields, score: Schema.Number });
+export const PointWithScore = Schema.Struct({ ...Point.omit("vector").fields, score: Schema.Number });
 
 export type PointWithScore = Schema.Schema.Type<typeof PointWithScore>;
 

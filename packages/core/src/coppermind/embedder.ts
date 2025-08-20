@@ -94,9 +94,11 @@ export class Embedder extends Effect.Service<Embedder>()("@bella/core/Embedder",
 
 				return Array.map(response.data, ({ data }) => data.map(({ embedding }) => embedding));
 			}),
-			embedQueries: Effect.fn("Bella/Embedder/embedQueries")(function* (queries: ReadonlyArray<string>) {
+			embedQueriesWithContext: Effect.fn("Bella/Embedder/embedQueriesWithContext")(function* (
+				queries: ReadonlyArray<string>,
+			) {
 				const body = yield* HttpBody.jsonSchema(ContextualizedEmbeddingsRequest)({
-					inputs: [queries],
+					inputs: queries.map((query) => [query]),
 					inputType: Option.some("query"),
 					model: "voyage-context-3",
 				});
@@ -108,12 +110,11 @@ export class Embedder extends Effect.Service<Embedder>()("@bella/core/Embedder",
 
 				const allEmbeddings = Array.map(response.data, ({ data }) => data.map(({ embedding }) => embedding));
 
-				const embeddingsForQueries = yield* Array.get(allEmbeddings, 0);
-
 				return yield* Effect.forEach(
 					queries,
 					Effect.fn(function* (query, index) {
-						const embedding = yield* Array.get(embeddingsForQueries, index);
+						const embeddings = yield* Array.get(allEmbeddings, index);
+						const embedding = yield* Array.get(embeddings, 0);
 
 						return { embedding, query };
 					}),
@@ -144,7 +145,6 @@ export class Embedder extends Effect.Service<Embedder>()("@bella/core/Embedder",
 							payload: originalPoint.payload,
 							relevance: result.relevanceScore,
 							score: originalPoint.score,
-							vector: originalPoint.vector,
 						});
 					}),
 				);

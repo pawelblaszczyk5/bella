@@ -1,6 +1,7 @@
 import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform";
 import * as cheerio from "cheerio";
 import { Config, Effect, Schema } from "effect";
+import { writeFile } from "node:fs";
 
 const PageContent = Schema.Struct({
 	parse: Schema.Struct({
@@ -190,6 +191,15 @@ export class Extractor extends Effect.Service<Extractor>()("@bella/core/Extracto
 							chunks.push(`${subsectionPrefix} ${accumulator}`);
 						}
 					});
+				});
+
+				// eslint-disable-next-line n/prefer-promises/fs -- that's for testing purposes
+				writeFile(`${id}-embeddings.txt`, chunks.join("\n\n"), { encoding: "utf8" }, () => {
+					void null;
+				});
+				// eslint-disable-next-line n/prefer-promises/fs -- that's for testing purposes
+				writeFile(`${id}-embeddings-html.txt`, $.html(), { encoding: "utf8" }, () => {
+					void null;
 				});
 
 				return chunks;

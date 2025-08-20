@@ -1,5 +1,5 @@
 import { Activity } from "@effect/workflow";
-import { Array, Effect, Layer, Schema } from "effect";
+import { Effect, Layer, Schema } from "effect";
 
 import { IngestKnowledge } from "@bella/cluster-schema";
 import { Bella } from "@bella/core";
@@ -23,16 +23,15 @@ export const IngestKnowledgeLive = IngestKnowledge.toLayer(
 			success: Schema.NonEmptyArray(Schema.NonEmptyString),
 		});
 
-		const pagesIdsChunks = Array.chunksOf(pagesIds, 5);
-
-		yield* Effect.forEach(pagesIdsChunks, (pagesIds, index) =>
+		yield* Effect.forEach(pagesIds, (pageId) =>
 			Activity.make({
 				execute: Effect.gen(function* () {
-					yield* bella.ingestPagesKnowledge(pagesIds).pipe(Effect.orDie);
+					yield* Effect.log("Ingesting knowledge for", pageId);
+					yield* bella.ingestPageKnowledge(pageId).pipe(Effect.orDie);
 
 					yield* Effect.sleep("5 seconds");
 				}),
-				name: `ingestsPagesChunk/${index.toString()}`,
+				name: `ingestsPage/${pageId}`,
 			}),
 		);
 	}),
