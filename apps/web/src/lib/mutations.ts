@@ -1,6 +1,3 @@
-import type { DeepMutable } from "effect/Types";
-import type { WritableDeep } from "type-fest";
-
 import { createOptimisticAction } from "@tanstack/react-db";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -125,9 +122,7 @@ export const useContinueConversation = () => {
 			const now = DateTime.unsafeNow();
 
 			conversationsCollection.update(data.conversationId, (draft) => {
-				const mutableDraft = draft as DeepMutable<typeof draft>;
-
-				mutableDraft.updatedAt = now;
+				draft.updatedAt = now;
 			});
 
 			messagesCollection.insert({
@@ -192,10 +187,7 @@ export const useStopGeneration = () => {
 		},
 		onMutate: (data: StopGenerationData) => {
 			messagesCollection.update(data.assistantMessage.id, (draft) => {
-				// NOTE this should be resolved after this https://github.com/TanStack/db/issues/407
-				const mutableDraft = draft as WritableDeep<typeof draft>;
-
-				mutableDraft.status = "INTERRUPTED";
+				draft.status = "INTERRUPTED";
 			});
 		},
 	});
@@ -228,10 +220,7 @@ export const useChangeUserExperienceEvaluationResolvedStatus = () => {
 		},
 		onMutate: (data: ChangeUserExperienceEvaluationResolvedStatusData) => {
 			userExperienceEvaluationCollection.update(data.evaluationId, (draft) => {
-				// NOTE this should be resolved after this https://github.com/TanStack/db/issues/407
-				const mutableDraft = draft as WritableDeep<typeof draft>;
-
-				mutableDraft.resolvedAt = data.isResolved ? DateTime.unsafeNow() : null;
+				draft.resolvedAt = data.isResolved ? DateTime.unsafeNow() : null;
 			});
 		},
 	});

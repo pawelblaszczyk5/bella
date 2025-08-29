@@ -130,15 +130,8 @@ export default tseslint.config(
 			"stylistic/jsx-self-closing-comp": ["error"],
 		},
 	},
-	{
-		name: "react-hooks",
-		plugins: { "react-hooks": reactHooks },
-		rules: {
-			"react-hooks/exhaustive-deps": "error",
-			"react-hooks/rules-of-hooks": "error",
-			"react-hooks/react-compiler": "error",
-		},
-	},
+	reactHooks.configs["recommended-latest"],
+	{ name: "react-hooks overrides", rules: { "react-hooks/exhaustive-deps": "error" } },
 	{
 		name: "react-refresh",
 		plugins: { "react-refresh": reactRefresh },
