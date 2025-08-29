@@ -13,7 +13,7 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/components/evaluations.tsx:176
+#: src/components/evaluations.tsx:182
 #: src/components/evaluations.tsx:437
 msgid "Category"
 msgstr "Kategoria"
@@ -43,15 +43,15 @@ msgstr "Ewaluacje"
 msgid "Evaluations | Bella"
 msgstr "Ewaluacje | Bella"
 
-#: src/components/evaluations.tsx:59
+#: src/components/evaluations.tsx:65
 msgid "Factual error"
 msgstr "Błędna informacja"
 
-#: src/components/evaluations.tsx:264
+#: src/components/evaluations.tsx:270
 msgid "Hide resolved"
 msgstr "Ukryj rozwiązane"
 
-#: src/components/evaluations.tsx:46
+#: src/components/evaluations.tsx:52
 msgid "High"
 msgstr "Wysoka"
 
@@ -63,7 +63,7 @@ msgstr "Strona główna"
 msgid "ID"
 msgstr "ID"
 
-#: src/components/evaluations.tsx:58
+#: src/components/evaluations.tsx:64
 msgid "Ignored context"
 msgstr "Zignorowany kontekst"
 
@@ -71,7 +71,7 @@ msgstr "Zignorowany kontekst"
 msgid "Inspect reasoning  💡"
 msgstr "Sprawdź rozumowanie  💡"
 
-#: src/components/evaluations.tsx:60
+#: src/components/evaluations.tsx:66
 msgid "Irrelevant"
 msgstr "Nie pasująca"
 
@@ -83,7 +83,7 @@ msgstr "Wygląda jakby jeszcze nie było żadnych ewaluacji, lub kryteria które
 msgid "Light mode"
 msgstr "Jasny motyw"
 
-#: src/components/evaluations.tsx:47
+#: src/components/evaluations.tsx:53
 msgid "Low"
 msgstr "Niska"
 
@@ -91,7 +91,7 @@ msgstr "Niska"
 msgid "Match system"
 msgstr "Dopasuj do urządzenia"
 
-#: src/components/evaluations.tsx:48
+#: src/components/evaluations.tsx:54
 msgid "Medium"
 msgstr "Średnia"
 
@@ -111,7 +111,7 @@ msgstr "Rozwiązane"
 msgid "Send message"
 msgstr "Wyślij wiadomość"
 
-#: src/components/evaluations.tsx:227
+#: src/components/evaluations.tsx:233
 #: src/components/evaluations.tsx:451
 msgid "Severity"
 msgstr "Dotkliwość"
@@ -128,15 +128,15 @@ msgstr "Ta wiadomość została zatrzymana zanim zdążyliśmy wygenerować wła
 msgid "This message was stopped mid-generation, don't be surprised if content is cut-off 😉"
 msgstr "Ta wiadomość została zatrzymana w środku generowania, nie bądź zdziwiony jeśli brakuje części 😉"
 
-#: src/components/evaluations.tsx:61
+#: src/components/evaluations.tsx:67
 msgid "Unclassified"
 msgstr "Niesklasyfikowana"
 
-#: src/components/evaluations.tsx:62
+#: src/components/evaluations.tsx:68
 msgid "Unnecessary refusal"
 msgstr "Zbędna odmowa"
 
-#: src/components/evaluations.tsx:139
+#: src/components/evaluations.tsx:145
 msgid "View settings"
 msgstr "Ustawienia widoku"
 
