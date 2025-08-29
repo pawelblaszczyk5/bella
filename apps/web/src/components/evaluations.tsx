@@ -42,6 +42,12 @@ import { Icon } from "#src/lib/icon.js";
 import { Link } from "#src/lib/link.js";
 import { useChangeUserExperienceEvaluationResolvedStatus } from "#src/lib/mutations.js";
 
+const severityColorStyles = stylex.create({
+	HIGH: { color: tomato[11] },
+	LOW: { color: cyan[11] },
+	MEDIUM: { color: amber[11] },
+});
+
 const SEVERITY_TEXT: Record<UserExperienceEvaluationShape["severity"], MessageDescriptor> = {
 	HIGH: msg`High`,
 	LOW: msg`Low`,
@@ -230,7 +236,7 @@ const ViewSettings = () => {
 							<MenuItem id={value} key={value} {...stylex.props(viewSettingsStyles.menuItem, ring.focusVisible)}>
 								{({ isSelected }) => (
 									<>
-										<Icon name={SEVERITY_ICON[value]} />
+										<Icon name={SEVERITY_ICON[value]} {...stylex.props(severityColorStyles[value])} />
 										{t(SEVERITY_TEXT[value])}
 										<Icon
 											name="24-check"
@@ -361,12 +367,6 @@ export const Evaluations = ({
 
 	const searchParams = useSearch({ from: "/app/evaluations" });
 	const headingId = useId();
-
-	const SEVERITY_STYLES = {
-		HIGH: styles.severityHigh,
-		LOW: styles.severityLow,
-		MEDIUM: styles.severityMedium,
-	} satisfies Record<UserExperienceEvaluationShape["severity"], unknown>;
 
 	return (
 		<div {...stylex.props(styles.root)}>
@@ -503,7 +503,7 @@ export const Evaluations = ({
 								</div>
 							</Cell>
 							<Cell {...stylex.props(styles.cell, ring.focusVisible, typography[2])}>
-								<div {...stylex.props(styles.severity, SEVERITY_STYLES[item.severity])}>
+								<div {...stylex.props(styles.severity, severityColorStyles[item.severity])}>
 									<Icon name={SEVERITY_ICON[item.severity]} />
 									<span {...stylex.props(accessibility.srOnly)}>{t(SEVERITY_TEXT[item.severity])}</span>
 								</div>
