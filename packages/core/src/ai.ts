@@ -218,7 +218,7 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 				onSome: (value) =>
 					String.stripMargin(`
 				|<additional_context>
-				|	Some additional context was provided to you by experts of the question niche, you should prioritize using it to answer user question:
+				|	Some additional context was provided to you by experts of the question niche, you should prioritize using it to answer user question. If using parts of it, please provide direct quotes without any modifications/translations:
 				| 
 				| ${value}
 				|</additional_context>
