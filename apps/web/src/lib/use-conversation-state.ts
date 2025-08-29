@@ -25,7 +25,11 @@ export const useConversationState = (conversationId: ConversationShape["id"]) =>
 
 	const message = messages.at(0);
 
-	assert(message, "At least one message must exist in each conversation");
+	// NOTE In theory this shouldn't happen, because message is always inserted with conversation in one transaction. However, electric syncs itself by doing multiple long polling requests so in theory I can get brief moments of invalid state. How to fix that? Idk yet.
+	if (!message) {
+		return "GENERATING" as const;
+	}
+
 	assert(message.role === "ASSISTANT", "Assistant message must always be latest");
 
 	return Match.value(message.status).pipe(
