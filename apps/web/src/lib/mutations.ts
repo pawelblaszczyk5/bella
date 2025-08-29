@@ -3,6 +3,7 @@ import type { WritableDeep } from "type-fest";
 
 import { createOptimisticAction } from "@tanstack/react-db";
 import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { DateTime, Duration } from "effect";
 
 import type {
@@ -30,11 +31,13 @@ import {
 import { generateId } from "#src/lib/id-pool.js";
 
 export const useStartNewConversation = () => {
+	const startNewConversation = useServerFn(startNewConversationProcedure);
+
 	const navigate = useNavigate();
 
 	const action = createOptimisticAction({
 		mutationFn: async (data) => {
-			const transactionId = await startNewConversationProcedure({ data });
+			const transactionId = await startNewConversation({ data });
 
 			await Promise.all([
 				conversationsCollection.utils.awaitTxId(transactionId),
@@ -105,11 +108,12 @@ export const useStartNewConversation = () => {
 	return handler;
 };
 
-// eslint-disable-next-line react-hooks-extra/no-redundant-custom-hook, react-hooks-extra/no-useless-custom-hooks -- let me live like this for now
 export const useContinueConversation = () => {
+	const continueConversation = useServerFn(continueConversationProcedure);
+
 	const action = createOptimisticAction({
 		mutationFn: async (data) => {
-			const transactionId = await continueConversationProcedure({ data });
+			const transactionId = await continueConversation({ data });
 
 			await Promise.all([
 				conversationsCollection.utils.awaitTxId(transactionId),
@@ -177,11 +181,12 @@ export const useContinueConversation = () => {
 	return handler;
 };
 
-// eslint-disable-next-line react-hooks-extra/no-redundant-custom-hook, react-hooks-extra/no-useless-custom-hooks -- let me live like this for now
 export const useStopGeneration = () => {
+	const stopGeneration = useServerFn(stopGenerationProcedure);
+
 	const action = createOptimisticAction({
 		mutationFn: async (data) => {
-			const transactionId = await stopGenerationProcedure({ data });
+			const transactionId = await stopGeneration({ data });
 
 			await messagesCollection.utils.awaitTxId(transactionId);
 		},
@@ -210,11 +215,14 @@ export const useStopGeneration = () => {
 	return handler;
 };
 
-// eslint-disable-next-line react-hooks-extra/no-redundant-custom-hook, react-hooks-extra/no-useless-custom-hooks -- let me live like this for now
 export const useChangeUserExperienceEvaluationResolvedStatus = () => {
+	const changeUserExperienceEvaluationResolvedStatus = useServerFn(
+		changeUserExperienceEvaluationResolvedStatusProcedure,
+	);
+
 	const action = createOptimisticAction({
 		mutationFn: async (data) => {
-			const transactionId = await changeUserExperienceEvaluationResolvedStatusProcedure({ data });
+			const transactionId = await changeUserExperienceEvaluationResolvedStatus({ data });
 
 			await userExperienceEvaluationCollection.utils.awaitTxId(transactionId);
 		},
