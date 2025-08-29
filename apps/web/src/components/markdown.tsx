@@ -113,6 +113,15 @@ const HighlightedCode = ({
 
 const styles = stylex.create({
 	a: { color: violet[11], fontWeight: fontWeight.medium, textDecoration: "underline", textUnderlineOffset: 2 },
+	blockquote: {
+		borderColor: mauve[6],
+		borderInlineStartWidth: 2,
+		borderStyle: "solid",
+		fontStyle: "italic",
+		marginBlock: spacing[5],
+		paddingBlock: spacing[1],
+		paddingInline: spacing[4],
+	},
 	h1: { fontWeight: fontWeight.medium, marginBlock: spacing[5] },
 	h2: { fontWeight: fontWeight.medium, marginBlock: spacing[4] },
 	h3: { fontWeight: fontWeight.medium, marginBlockEnd: spacing[3], marginBlockStart: spacing[4] },
@@ -158,7 +167,7 @@ export const Markdown = ({ children }: Readonly<{ children: string }>) => {
 			</a>
 		),
 		b: ({ children }) => <b>{children}</b>,
-		blockquote: ({ children }) => <blockquote>{children}</blockquote>,
+		blockquote: ({ children }) => <blockquote {...stylex.props(styles.blockquote)}>{children}</blockquote>,
 		code: ({ children, className }) => (
 			// eslint-disable-next-line react/no-children-prop -- this is expected because children here can be string and we don't want to serialize it as a JSX
 			<HighlightedCode children={children} className={className} />
