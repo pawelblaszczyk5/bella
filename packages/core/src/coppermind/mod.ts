@@ -146,7 +146,7 @@ const SUMMARIES_PAGES_IDS = Array.make(
 const POINT_RELEVANCE_THRESHOLD = 0.5;
 
 export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Coppermind", {
-	dependencies: [Extractor.Default, Embedder.Default, Storage.Default, IdGenerator.Default, Reranker.Default],
+	dependencies: [Extractor.Default, Embedder.Live, Storage.Default, IdGenerator.Default, Reranker.Default],
 	effect: Effect.gen(function* () {
 		const extractor = yield* Extractor;
 		const embedder = yield* Embedder;
@@ -157,27 +157,22 @@ export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Copper
 			embedPage: Effect.fn("Bella/Coppermind/embedPage")(function* (pageId: string) {
 				const chunks = yield* extractor.extractChunkedPageContent(pageId);
 
-				const chunkedChunks = Array.chunksOf(chunks, 60);
+				const chunksOfDocumentChunks = Array.chunksOf(chunks, 60);
 
-				const vectors = yield* embedder.embedDocumentsWithContext(chunkedChunks);
+				const points = yield* Effect.forEach(chunksOfDocumentChunks, embedder.embedDocument).pipe(
+					Effect.map(Array.flatten),
+					Effect.map((embeddedDocumentChunks) =>
+						Array.map(embeddedDocumentChunks, (embeddedDocumentChunk) => {
+							const id = crypto.randomUUID();
 
-				const points = yield* Effect.forEach(
-					vectors,
-					Effect.fn(function* (vectorsForPage, index) {
-						const chunkedContentsPerChunk = yield* Array.get(chunkedChunks, index);
-
-						return yield* Effect.forEach(
-							vectorsForPage,
-							Effect.fn(function* (vector, index) {
-								const content = yield* Array.get(chunkedContentsPerChunk, index);
-
-								const id = crypto.randomUUID();
-
-								return Point.make({ id, payload: { content, pageId }, vector });
-							}),
-						);
-					}),
-				).pipe(Effect.map((pointsGroupedByPage) => Array.flatten(pointsGroupedByPage)));
+							return Point.make({
+								id,
+								payload: { content: embeddedDocumentChunk.chunk, pageId },
+								vector: embeddedDocumentChunk.embedding,
+							});
+						}),
+					),
+				);
 
 				yield* storage.insertPoints(points);
 			}),
@@ -194,7 +189,7 @@ export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Copper
 				subqueries: ReadonlyArray<string>;
 				summarizedQuery: string;
 			}) {
-				const embeddedQueries = yield* embedder.embedQueriesWithContext(subqueries);
+				const embeddedQueries = yield* embedder.embedQueries(subqueries);
 
 				const nearestPoints = yield* Effect.forEach(
 					embeddedQueries,

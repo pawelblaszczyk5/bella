@@ -71,9 +71,10 @@ export class Storage extends Effect.Service<Storage>()("@bella/core/Storage", {
 			insertPoints: Effect.fn("Bella/Storage/insertPoints")(function* (points: ReadonlyArray<Point>) {
 				const body = yield* HttpBody.jsonSchema(UpsertPointsRequest)({ points });
 
-				yield* httpClient
-					.put(`/collections/${COLLECTION_NAME}/points`, { body, urlParams: { wait: true } })
-					.pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(UpsertPointsResponse)));
+				yield* httpClient.put(`/collections/${COLLECTION_NAME}/points`, { body, urlParams: { wait: true } }).pipe(
+					Effect.tapErrorTag("ResponseError", (error) => error.response.json.pipe(Effect.tap(Effect.log))),
+					Effect.flatMap(HttpClientResponse.schemaBodyJson(UpsertPointsResponse)),
+				);
 			}),
 			queryPoints: Effect.fn("Bella/Storage/queryPoints")(function* (vector: ReadonlyArray<number>) {
 				const body = yield* HttpBody.jsonSchema(QueryPointsRequest)({
