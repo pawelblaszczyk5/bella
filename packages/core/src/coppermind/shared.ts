@@ -1,4 +1,7 @@
-import { Schema } from "effect";
+import type { HttpClientError } from "@effect/platform";
+
+import { FetchHttpClient, HttpClient, HttpClientRequest } from "@effect/platform";
+import { Config, Context, Effect, Layer, Schema } from "effect";
 
 export const Point = Schema.Struct({
 	id: Schema.String.pipe(Schema.length(36)),
@@ -15,3 +18,33 @@ export type PointWithScore = Schema.Schema.Type<typeof PointWithScore>;
 export const PointWithScoreAndRelevance = Schema.Struct({ ...PointWithScore.fields, relevance: Schema.Number });
 
 export type PointWithScoreAndRelevance = Schema.Schema.Type<typeof PointWithScoreAndRelevance>;
+
+export const Usage = Schema.Struct({
+	totalTokens: Schema.Number.pipe(Schema.propertySignature, Schema.fromKey("total_tokens")),
+});
+
+export class VoyageHttpClient extends Context.Tag("@bella/core/VoyageHttpClient")<
+	VoyageHttpClient,
+	HttpClient.HttpClient.With<HttpClientError.HttpClientError>
+>() {
+	static Live = Layer.effect(
+		this,
+		Effect.gen(function* () {
+			const API_KEY = yield* Config.redacted("VOYAGE_API_KEY");
+			const BASE_URL = yield* Config.string("VOYAGE_API_BASE_URL");
+
+			const httpClient = (yield* HttpClient.HttpClient).pipe(
+				HttpClient.mapRequest((request) =>
+					request.pipe(
+						HttpClientRequest.prependUrl(BASE_URL),
+						HttpClientRequest.bearerToken(API_KEY),
+						HttpClientRequest.acceptJson,
+					),
+				),
+				HttpClient.filterStatusOk,
+			);
+
+			return httpClient;
+		}),
+	).pipe(Layer.provide(FetchHttpClient.layer));
+}

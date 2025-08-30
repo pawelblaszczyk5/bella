@@ -1,13 +1,7 @@
-import { FetchHttpClient, HttpBody, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform";
-import { Array, Config, Effect, Option, Schema } from "effect";
+import { HttpBody, HttpClientResponse } from "@effect/platform";
+import { Array, Effect, Option, Schema } from "effect";
 
-import type { PointWithScore } from "#src/coppermind/shared.js";
-
-import { PointWithScoreAndRelevance } from "#src/coppermind/shared.js";
-
-const Usage = Schema.Struct({
-	totalTokens: Schema.Number.pipe(Schema.propertySignature, Schema.fromKey("total_tokens")),
-});
+import { Usage, VoyageHttpClient } from "#src/coppermind/shared.js";
 
 const ContextualizedEmbeddingsModel = Schema.Literal("voyage-context-3");
 
@@ -40,42 +34,10 @@ const ContextualizedEmbeddingsResponse = Schema.Struct({
 	usage: Usage,
 });
 
-const RerankModel = Schema.Literal("rerank-2.5");
-
-const RerankRequest = Schema.Struct({
-	documents: Schema.Array(Schema.String),
-	model: RerankModel,
-	query: Schema.String,
-});
-
-const RerankResponse = Schema.Struct({
-	data: Schema.Array(
-		Schema.Struct({
-			index: Schema.Number,
-			relevanceScore: Schema.Number.pipe(Schema.propertySignature, Schema.fromKey("relevance_score")),
-		}),
-	),
-	model: RerankModel,
-	object: Schema.Literal("list"),
-	usage: Usage,
-});
-
 export class Embedder extends Effect.Service<Embedder>()("@bella/core/Embedder", {
-	dependencies: [FetchHttpClient.layer],
+	dependencies: [VoyageHttpClient.Live],
 	effect: Effect.gen(function* () {
-		const API_KEY = yield* Config.redacted("VOYAGE_API_KEY");
-		const BASE_URL = yield* Config.string("VOYAGE_API_BASE_URL");
-
-		const httpClient = (yield* HttpClient.HttpClient).pipe(
-			HttpClient.mapRequest((request) =>
-				request.pipe(
-					HttpClientRequest.prependUrl(BASE_URL),
-					HttpClientRequest.bearerToken(API_KEY),
-					HttpClientRequest.acceptJson,
-				),
-			),
-			HttpClient.filterStatusOk,
-		);
+		const voyageHttpClient = yield* VoyageHttpClient;
 
 		return {
 			embedDocumentsWithContext: Effect.fn("Bella/Embedder/embedDocumentsWithContext")(function* (
@@ -88,7 +50,7 @@ export class Embedder extends Effect.Service<Embedder>()("@bella/core/Embedder",
 				});
 
 				// cspell:ignore contextualizedembeddings
-				const response = yield* httpClient
+				const response = yield* voyageHttpClient
 					.post("contextualizedembeddings", { body })
 					.pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(ContextualizedEmbeddingsResponse)));
 
@@ -104,7 +66,7 @@ export class Embedder extends Effect.Service<Embedder>()("@bella/core/Embedder",
 				});
 
 				// cspell:ignore contextualizedembeddings
-				const response = yield* httpClient
+				const response = yield* voyageHttpClient
 					.post("contextualizedembeddings", { body })
 					.pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(ContextualizedEmbeddingsResponse)));
 
@@ -119,37 +81,6 @@ export class Embedder extends Effect.Service<Embedder>()("@bella/core/Embedder",
 						return { embedding, query };
 					}),
 				);
-			}),
-			rerankPointsForQuery: Effect.fn("Bella/Embedder/rerankPointsForQuery")(function* ({
-				points,
-				query,
-			}: {
-				points: Array<PointWithScore>;
-				query: string;
-			}) {
-				const documents = Array.map(points, (point) => point.payload.content);
-
-				const body = yield* HttpBody.jsonSchema(RerankRequest)({ documents, model: "rerank-2.5", query });
-
-				const response = yield* httpClient
-					.post("rerank", { body })
-					.pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(RerankResponse)));
-
-				const pointsWithScoreAndRelevance = yield* Effect.forEach(
-					response.data,
-					Effect.fn(function* (result) {
-						const originalPoint = yield* Array.get(points, result.index);
-
-						return PointWithScoreAndRelevance.make({
-							id: originalPoint.id,
-							payload: originalPoint.payload,
-							relevance: result.relevanceScore,
-							score: originalPoint.score,
-						});
-					}),
-				);
-
-				return pointsWithScoreAndRelevance;
 			}),
 		};
 	}),

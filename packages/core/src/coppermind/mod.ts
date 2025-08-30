@@ -4,6 +4,7 @@ import { IdGenerator } from "@bella/id-generator/effect";
 
 import { Embedder } from "#src/coppermind/embedder.js";
 import { Extractor } from "#src/coppermind/extractor.js";
+import { Reranker } from "#src/coppermind/reranker.js";
 import { Point } from "#src/coppermind/shared.js";
 import { Storage } from "#src/coppermind/storage.js";
 
@@ -145,11 +146,12 @@ const SUMMARIES_PAGES_IDS = Array.make(
 const POINT_RELEVANCE_THRESHOLD = 0.5;
 
 export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Coppermind", {
-	dependencies: [Extractor.Default, Embedder.Default, Storage.Default, IdGenerator.Default],
+	dependencies: [Extractor.Default, Embedder.Default, Storage.Default, IdGenerator.Default, Reranker.Default],
 	effect: Effect.gen(function* () {
 		const extractor = yield* Extractor;
 		const embedder = yield* Embedder;
 		const storage = yield* Storage;
+		const reranker = yield* Reranker;
 
 		return {
 			embedPage: Effect.fn("Bella/Coppermind/embedPage")(function* (pageId: string) {
@@ -205,7 +207,7 @@ export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Copper
 					Effect.map(Array.dedupeWith((firstPoint, secondPoint) => firstPoint.id === secondPoint.id)),
 				);
 
-				const rerankedPoints = yield* embedder.rerankPointsForQuery({ points: nearestPoints, query: summarizedQuery });
+				const rerankedPoints = yield* reranker.rerankForQuery({ points: nearestPoints, query: summarizedQuery });
 
 				return Array.filterMap(rerankedPoints, (point) => {
 					if (point.relevance < POINT_RELEVANCE_THRESHOLD) {
