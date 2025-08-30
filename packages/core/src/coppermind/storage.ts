@@ -77,7 +77,7 @@ export class Storage extends Effect.Service<Storage>()("@bella/core/Storage", {
 			}),
 			queryPoints: Effect.fn("Bella/Storage/queryPoints")(function* (vector: ReadonlyArray<number>) {
 				const body = yield* HttpBody.jsonSchema(QueryPointsRequest)({
-					limit: Option.some(5),
+					limit: Option.some(20),
 					query: vector,
 					withPayload: true,
 				});

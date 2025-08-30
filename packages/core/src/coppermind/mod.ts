@@ -1,4 +1,4 @@
-import { Array, Effect, Option } from "effect";
+import { Array, Effect, Option, Order, pipe } from "effect";
 
 import { IdGenerator } from "@bella/id-generator/effect";
 
@@ -204,17 +204,20 @@ export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Copper
 
 				const rerankedPoints = yield* reranker.rerankForQuery({ points: nearestPoints, query: summarizedQuery });
 
-				return Array.filterMap(rerankedPoints, (point) => {
-					if (point.relevance < POINT_RELEVANCE_THRESHOLD) {
-						return Option.none();
-					}
+				return pipe(
+					Array.filterMap(rerankedPoints, (point) => {
+						if (point.relevance < POINT_RELEVANCE_THRESHOLD) {
+							return Option.none();
+						}
 
-					return Option.some({
-						content: point.payload.content,
-						pageId: point.payload.pageId,
-						relevance: point.relevance,
-					});
-				});
+						return Option.some({
+							content: point.payload.content,
+							pageId: point.payload.pageId,
+							relevance: point.relevance,
+						});
+					}),
+					Array.sortWith((point) => point.relevance, Order.reverse(Order.number)),
+				);
 			}),
 		};
 	}),
