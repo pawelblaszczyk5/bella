@@ -143,7 +143,7 @@ const SUMMARIES_PAGES_IDS = Array.make(
 
 // cspell:enable
 
-const POINT_RELEVANCE_THRESHOLD = 0.5;
+const POINT_RELEVANCE_THRESHOLD = 0.65;
 
 export class Coppermind extends Effect.Service<Coppermind>()("@bella/core/Coppermind", {
 	dependencies: [Extractor.Default, Embedder.Live, Storage.Default, IdGenerator.Default, Reranker.Default],
