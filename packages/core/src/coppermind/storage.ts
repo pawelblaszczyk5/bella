@@ -1,7 +1,7 @@
 import { FetchHttpClient, HttpBody, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform";
 import { Config, Effect, Option, Schema } from "effect";
 
-import { Point, PointWithScore } from "#src/coppermind/shared.js";
+import { COPPERMIND_COLLECTION_NAME, Point, PointWithScore } from "#src/coppermind/shared.js";
 
 const CollectionDetailsResponse = Schema.Struct({
 	result: Schema.Struct({ status: Schema.Literal("green", "yellow", "grey", "red") }),
@@ -34,12 +34,11 @@ const QueryPointsResponse = Schema.Struct({
 	status: Schema.Literal("ok"),
 });
 
-const COLLECTION_NAME = "coppermind";
-
 export class Storage extends Effect.Service<Storage>()("@bella/core/Storage", {
 	dependencies: [FetchHttpClient.layer],
 	effect: Effect.gen(function* () {
 		const BASE_URL = yield* Config.string("QDRANT_API_BASE_URL");
+		const COLLECTION_NAME = yield* COPPERMIND_COLLECTION_NAME;
 
 		const httpClient = (yield* HttpClient.HttpClient).pipe(
 			HttpClient.mapRequest((request) =>

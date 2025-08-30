@@ -1,7 +1,7 @@
 import type { HttpClientError } from "@effect/platform";
 
 import { FetchHttpClient, HttpClient, HttpClientRequest } from "@effect/platform";
-import { Config, Context, Effect, Layer, Schema } from "effect";
+import { Config, Context, Effect, Layer, Match, Schema } from "effect";
 
 export const Point = Schema.Struct({
 	id: Schema.String.pipe(Schema.length(36)),
@@ -48,3 +48,16 @@ export class VoyageHttpClient extends Context.Tag("@bella/core/VoyageHttpClient"
 		}),
 	).pipe(Layer.provide(FetchHttpClient.layer));
 }
+
+export const COPPERMIND_EMBEDDINGS_TYPE = Schema.Config(
+	"COPPERMIND_EMBEDDINGS_TYPE",
+	Schema.Literal("STANDARD", "CONTEXTUALIZED"),
+);
+
+export const COPPERMIND_COLLECTION_NAME = Config.map(COPPERMIND_EMBEDDINGS_TYPE, (embeddingsType) =>
+	Match.value(embeddingsType).pipe(
+		Match.when("CONTEXTUALIZED", () => "coppermind_contextualized"),
+		Match.when("STANDARD", () => "coppermind_standard"),
+		Match.exhaustive,
+	),
+);
