@@ -131,7 +131,14 @@ export default tseslint.config(
 		},
 	},
 	reactHooks.configs["recommended-latest"],
-	{ name: "react-hooks overrides", rules: { "react-hooks/exhaustive-deps": "error" } },
+	{
+		name: "react-hooks overrides",
+		rules: {
+			"react-hooks/exhaustive-deps": "error",
+			// NOTE this is enabled, because otherwise it allows for silently skipping lint rules, I'm not 100% sure about this, but let it be this way for now
+			"react-hooks/todo": "error",
+		},
+	},
 	{
 		name: "react-refresh",
 		plugins: { "react-refresh": reactRefresh },
