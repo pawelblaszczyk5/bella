@@ -119,7 +119,6 @@ const styles = stylex.create({
 		borderStyle: "solid",
 		fontStyle: "italic",
 		marginBlock: spacing[5],
-		paddingBlock: spacing[1],
 		paddingInline: spacing[4],
 	},
 	h1: { fontWeight: fontWeight.medium, marginBlock: spacing[5] },
