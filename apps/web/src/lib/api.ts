@@ -67,7 +67,6 @@ class Api extends Effect.Service<Api>()("@bella/web/Api", {
 		});
 
 		return {
-			// eslint-disable-next-line no-secrets/no-secrets -- that's a function name
 			changeUserExperienceEvaluationResolvedStatus: Effect.fn("Api/changeUserExperienceEvaluationResolvedStatus")(
 				function* (changeUserExperienceEvaluationResolvedStatusData: ChangeUserExperienceEvaluationResolvedStatusData) {
 					yield* Effect.log("Changing evaluation resolved status", changeUserExperienceEvaluationResolvedStatusData);
