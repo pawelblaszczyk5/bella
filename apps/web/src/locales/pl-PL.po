@@ -13,6 +13,14 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
+#: src/components/message-addons.tsx:163
+msgid "🌀 Performing Coppermind search"
+msgstr "🌀 Przeszukuję Coppermind"
+
+#: src/components/message-addons.tsx:162
+msgid "🔍 Performed Coppermind search"
+msgstr "🔍 Przeszukano Coppermind"
+
 #: src/components/evaluations.tsx:182
 #: src/components/evaluations.tsx:437
 msgid "Category"
@@ -67,7 +75,7 @@ msgstr "ID"
 msgid "Ignored context"
 msgstr "Zignorowany kontekst"
 
-#: src/components/message-addons.tsx:51
+#: src/components/message-addons.tsx:55
 msgid "Inspect reasoning  💡"
 msgstr "Sprawdź rozumowanie  💡"
 
@@ -120,11 +128,11 @@ msgstr "Dotkliwość"
 msgid "Stop generation"
 msgstr "Zatrzymaj generowanie"
 
-#: src/components/message-addons.tsx:120
+#: src/components/message-addons.tsx:218
 msgid "This message was stopped before we could generate any meaningful content 😞"
 msgstr "Ta wiadomość została zatrzymana zanim zdążyliśmy wygenerować właściwą treść 😞"
 
-#: src/components/message-addons.tsx:115
+#: src/components/message-addons.tsx:213
 msgid "This message was stopped mid-generation, don't be surprised if content is cut-off 😉"
 msgstr "Ta wiadomość została zatrzymana w środku generowania, nie bądź zdziwiony jeśli brakuje części 😉"
 
