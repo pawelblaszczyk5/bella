@@ -308,5 +308,9 @@ export default tseslint.config(
 	},
 	regexpPlugin.configs["flat/recommended"],
 	promise.configs["flat/recommended"],
-	{ name: "no-secrets", plugins: { "no-secrets": noSecrets }, rules: { "no-secrets/no-secrets": "error" } },
+	{
+		name: "no-secrets",
+		plugins: { "no-secrets": noSecrets },
+		rules: { "no-secrets/no-secrets": ["error", { tolerance: 4.25 }] },
+	},
 );

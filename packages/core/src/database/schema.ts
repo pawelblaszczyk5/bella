@@ -61,7 +61,6 @@ export class UserExperienceEvaluationModel extends Model.Class<UserExperienceEva
 	category: Schema.Literal("FACTUAL_ERROR", "UNNECESSARY_REFUSAL", "CONTEXT_IGNORED", "IRRELEVANT", "UNCLASSIFIED"),
 	createdAt: Model.DateTimeInsertFromDate,
 	description: Schema.NonEmptyTrimmedString,
-	// eslint-disable-next-line no-secrets/no-secrets -- that's a name of a variable
 	id: Model.GeneratedByApp(Id.pipe(Schema.brand("UserExperienceEvaluationId"))),
 	messageId: UserMessageModel.fields.id,
 	resolvedAt: Model.DateTimeFromDate.pipe(Model.FieldOption),

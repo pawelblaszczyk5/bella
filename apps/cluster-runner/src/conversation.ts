@@ -14,7 +14,6 @@ export const ConversationLive = Conversation.toLayer(
 
 		return {
 			ChangeUserExperienceEvaluationResolvedStatus: Effect.fn(
-				// eslint-disable-next-line no-secrets/no-secrets -- that's a real name
 				"Conversation/ChangeUserExperienceEvaluationResolvedStatus",
 			)(function* (envelope) {
 				const transactionId = yield* bella

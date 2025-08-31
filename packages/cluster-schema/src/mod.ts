@@ -60,7 +60,6 @@ export const Conversation = Entity.make("Conversation", [
 		success: TransactionId,
 	}),
 	// NOTE This shouldn't be there in reality, but it's a shortcut I'm willing to take for now
-	// eslint-disable-next-line no-secrets/no-secrets -- that's real name
 	Rpc.make("ChangeUserExperienceEvaluationResolvedStatus", {
 		error: ConversationFlowError,
 		payload: { evaluationId: UserExperienceEvaluationModel.select.fields.id, isResolved: Schema.Boolean },
