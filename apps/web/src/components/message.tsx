@@ -10,13 +10,19 @@ import stylex from "@bella/stylex";
 
 import type {
 	AssistantMessageShape,
+	CoppermindSearchMessagePartShape,
 	ReasoningMessagePartShape,
 	TextMessagePartShape,
 	UserMessageShape,
 } from "#src/lib/collections.js";
 
 import { Markdown } from "#src/components/markdown.js";
-import { InterruptionNotification, MessageLoader, ReasoningDisclosure } from "#src/components/message-addons.js";
+import {
+	CoppermindSearch,
+	InterruptionNotification,
+	MessageLoader,
+	ReasoningDisclosure,
+} from "#src/components/message-addons.js";
 import { messagePartsCollection, messagesCollection } from "#src/lib/collections.js";
 
 const styles = stylex.create({
@@ -33,25 +39,36 @@ const styles = stylex.create({
 	},
 });
 
-const mergeMessageParts = (messageParts: Array<ReasoningMessagePartShape | TextMessagePartShape>) =>
-	messageParts.reduce<Array<ReasoningMessagePartShape | TextMessagePartShape>>((accumulator, messagePart) => {
-		const lastPart = accumulator.at(-1);
+const mergeMessageParts = (
+	messageParts: Array<CoppermindSearchMessagePartShape | ReasoningMessagePartShape | TextMessagePartShape>,
+) =>
+	messageParts.reduce<Array<CoppermindSearchMessagePartShape | ReasoningMessagePartShape | TextMessagePartShape>>(
+		(accumulator, messagePart) => {
+			if (messagePart.type === "coppermindSearch") {
+				accumulator.push(messagePart);
 
-		if (lastPart?.type !== messagePart.type) {
-			const clonedPart = structuredClone(messagePart);
+				return accumulator;
+			}
 
-			accumulator.push(clonedPart);
+			const lastPart = accumulator.at(-1);
+
+			if (lastPart?.type !== messagePart.type) {
+				const clonedPart = structuredClone(messagePart);
+
+				accumulator.push(clonedPart);
+
+				return accumulator;
+			}
+
+			// NOTE: That's a little hacky, maybe I could do it prettier
+			const writableLastPart = lastPart as WritableDeep<typeof lastPart>;
+
+			writableLastPart.data.text += messagePart.data.text;
 
 			return accumulator;
-		}
-
-		// NOTE: That's a little hacky, maybe I could do it prettier
-		const writableLastPart = lastPart as WritableDeep<typeof lastPart>;
-
-		writableLastPart.data.text += messagePart.data.text;
-
-		return accumulator;
-	}, []);
+		},
+		[],
+	);
 
 const UserMessage = ({
 	messageParts,
@@ -66,7 +83,7 @@ const AssistantMessage = ({
 	messageParts,
 }: Readonly<{
 	message: AssistantMessageShape;
-	messageParts: Array<ReasoningMessagePartShape | TextMessagePartShape>;
+	messageParts: Array<CoppermindSearchMessagePartShape | ReasoningMessagePartShape | TextMessagePartShape>;
 }>) => {
 	const mergedMessageParts = mergeMessageParts(messageParts);
 
@@ -87,13 +104,19 @@ const AssistantMessage = ({
 	}
 
 	const hasTextContent = mergedMessageParts.some((messagePart) => messagePart.type === "text");
-	const hasReasoning = mergedMessageParts.some((messagePart) => messagePart.type === "reasoning");
+	const hasFullWidthPart = mergedMessageParts.some(
+		(messagePart) => messagePart.type === "reasoning" || messagePart.type === "coppermindSearch",
+	);
 
 	return (
-		<div {...stylex.props(styles.base, styles.assistantMessage, hasReasoning && styles.assistantMessageStretched)}>
+		<div {...stylex.props(styles.base, styles.assistantMessage, hasFullWidthPart && styles.assistantMessageStretched)}>
 			{mergedMessageParts.map((messagePart) => {
 				if (messagePart.type === "text") {
 					return <Markdown key={messagePart.id}>{messagePart.data.text}</Markdown>;
+				}
+
+				if (messagePart.type === "coppermindSearch") {
+					return <CoppermindSearch data={messagePart.data} key={messagePart.id} />;
 				}
 
 				return <ReasoningDisclosure key={messagePart.id} text={messagePart.data.text} />;

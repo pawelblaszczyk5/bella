@@ -1,7 +1,10 @@
+import type { DistributedPick } from "type-fest";
+
 import { Schema } from "effect";
 
 import type {
 	AssistantMessageModel,
+	CoppermindSearchMessagePartModel,
 	ReasoningMessagePartModel,
 	TextMessagePartModel,
 	UserMessageModel,
@@ -11,8 +14,10 @@ export type MessagesWithParts = Array<
 	| {
 			id: AssistantMessageModel["id"];
 			parts: Array<
-				| Pick<ReasoningMessagePartModel, "data" | "id" | "messageId" | "type">
-				| Pick<TextMessagePartModel, "data" | "id" | "messageId" | "type">
+				DistributedPick<
+					CoppermindSearchMessagePartModel | ReasoningMessagePartModel | TextMessagePartModel,
+					"data" | "id" | "messageId" | "type"
+				>
 			>;
 			role: AssistantMessageModel["role"];
 	  }

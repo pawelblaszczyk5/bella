@@ -1,7 +1,7 @@
 import type { AiResponse } from "@effect/ai";
 
 import { PgClient } from "@effect/sql-pg";
-import { Array, DateTime, Effect, Match, Metric, Option } from "effect";
+import { Array, DateTime, Effect, Match, Metric, Option, Struct } from "effect";
 
 import type {
 	AssistantMessageModel,
@@ -160,9 +160,11 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				});
 			}),
 			getNewMessageStream: Effect.fn("Bella/Core/getNewMessageStream")(function* ({
+				assistantMessageId,
 				conversationId,
 				responsePlan,
 			}: {
+				assistantMessageId: AssistantMessageModel["id"];
 				conversationId: ConversationModel["id"];
 				responsePlan: ResponsePlan;
 			}) {
@@ -183,9 +185,21 @@ export class Bella extends Effect.Service<Bella>()("@bella/core/Bella", {
 				if (responsePlan._tag === "ResponseFulfillment" && responsePlan.availableKnowledge.includes("COPPERMIND")) {
 					const coppermindQueries = yield* ai.generateCoppermindQueries(messages);
 
+					const messagePartId = yield* repository.insertCoppermindSearchMessagePart({
+						data: { queries: coppermindQueries.subqueries, results: Option.none() },
+						id: undefined,
+						messageId: assistantMessageId,
+					});
+
 					const relatedData = yield* coppermind.getRelatedDataForQueries(coppermindQueries);
 
-					yield* Effect.log("Retrieved related data for queries", coppermindQueries, relatedData);
+					yield* repository.addResultsToCoppermindSearch({
+						data: {
+							queries: coppermindQueries.subqueries,
+							results: Option.some(relatedData.map((data) => Struct.pick(data, "content", "pageId"))),
+						},
+						id: messagePartId,
+					});
 
 					const stringifiedContent = relatedData
 						.map((data, index) => `${index.toString()}. "${data.content}" quote from ${data.pageId}`)

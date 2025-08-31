@@ -1,6 +1,8 @@
 import { Trans } from "@lingui/react/macro";
 import { Button, Disclosure, DisclosurePanel, Heading } from "react-aria-components";
 
+import type { CoppermindSearchResult } from "@bella/core/database-schema";
+
 import { typography } from "@bella/design-system/styles/typography";
 import { ring } from "@bella/design-system/styles/utilities";
 import { duration } from "@bella/design-system/theme/animation.stylex";
@@ -9,6 +11,8 @@ import { radii } from "@bella/design-system/theme/radii.stylex";
 import { spacing } from "@bella/design-system/theme/spacing.stylex";
 import { fontWeight } from "@bella/design-system/theme/typography.stylex";
 import stylex from "@bella/stylex";
+
+import type { CoppermindSearchMessagePartShape } from "#src/lib/collections.js";
 
 import { Markdown } from "#src/components/markdown.js";
 import { Icon } from "#src/lib/icon.js";
@@ -64,9 +68,11 @@ const shimmerKeyframes = stylex.keyframes({
 	"100%": { backgroundPosition: "-200% 0" },
 });
 
-const messageLoaderStyles = stylex.create({
-	root: { display: "grid", gap: spacing[2] },
-	shimmerPart: {
+const shimmerStyles = stylex.create({
+	higher: { blockSize: 18 },
+	medium: { inlineSize: 320 },
+	narrow: { inlineSize: 256 },
+	root: {
 		animationDuration: "2000ms",
 		animationIterationCount: "infinite",
 		animationName: shimmerKeyframes,
@@ -76,16 +82,108 @@ const messageLoaderStyles = stylex.create({
 		blockSize: 16,
 		borderRadius: radii[3],
 	},
-	shimmerPartMedium: { inlineSize: 320 },
-	shimmerPartNarrow: { inlineSize: 256 },
-	shimmerPartWide: { inlineSize: 480 },
+	wide: { inlineSize: 480 },
 });
+
+const searchResultStyles = stylex.create({
+	content: {
+		display: "-webkit-box",
+		fontStyle: "italic",
+		overflow: "hidden",
+		textOverflow: "ellipsis",
+		WebkitBoxOrient: "vertical",
+		WebkitLineClamp: 6,
+	},
+	contentSkeleton: { display: "grid", gap: spacing[2] },
+	pageId: { fontWeight: fontWeight.medium },
+	root: {
+		borderColor: mauve[6],
+		borderRadius: radii[4],
+		borderStyle: "solid",
+		borderWidth: 1,
+		display: "grid",
+		flexShrink: 0,
+		gap: spacing[2],
+		gridTemplateRows: "auto minmax(0, 1fr)",
+		inlineSize: 360,
+		paddingBlock: spacing[4],
+		paddingInline: spacing[5],
+		scrollSnapAlign: "start",
+	},
+	rootSkeleton: { gap: spacing[5] },
+});
+
+const SearchResultLoader = () => (
+	<li {...stylex.props(searchResultStyles.root, searchResultStyles.rootSkeleton)}>
+		<p {...stylex.props(shimmerStyles.root, shimmerStyles.narrow, shimmerStyles.higher)} />
+		<blockquote {...stylex.props(searchResultStyles.contentSkeleton)}>
+			<p {...stylex.props(shimmerStyles.root, shimmerStyles.medium)} />
+			<p {...stylex.props(shimmerStyles.root, shimmerStyles.medium)} />
+			<p {...stylex.props(shimmerStyles.root, shimmerStyles.narrow)} />
+			<p {...stylex.props(shimmerStyles.root, shimmerStyles.medium)} />
+			<p {...stylex.props(shimmerStyles.root, shimmerStyles.medium)} />
+			<p {...stylex.props(shimmerStyles.root, shimmerStyles.medium)} />
+		</blockquote>
+	</li>
+);
+
+const SearchResultCard = ({ result }: Readonly<{ result: CoppermindSearchResult }>) => (
+	<li {...stylex.props(searchResultStyles.root)}>
+		<p {...stylex.props(searchResultStyles.pageId, typography[4])}>{result.pageId}</p>
+		<blockquote {...stylex.props(searchResultStyles.content)}>{result.content}</blockquote>
+	</li>
+);
+
+const coppermindSearchStyles = stylex.create({
+	info: { fontWeight: fontWeight.medium },
+	queriesList: {
+		display: "flex",
+		flexDirection: "column",
+		gap: spacing[1],
+		listStylePosition: "inside",
+		listStyleType: "disc",
+	},
+	query: { fontStyle: "italic", fontWeight: fontWeight.light },
+	results: {
+		display: "flex",
+		gap: spacing[4],
+		overflowX: "auto",
+		paddingBottom: spacing[4],
+		scrollbarGutter: "stable",
+		scrollSnapType: "inline mandatory",
+	},
+	root: { display: "grid", gap: spacing[5] },
+});
+
+export const CoppermindSearch = ({ data }: Readonly<{ data: CoppermindSearchMessagePartShape["data"] }>) => (
+	<div {...stylex.props(coppermindSearchStyles.root)}>
+		<p {...stylex.props(coppermindSearchStyles.info, typography[4])}>
+			{data.results ?
+				<Trans>🔍 Performed Coppermind search</Trans>
+			:	<Trans>🌀 Performing Coppermind search</Trans>}
+		</p>
+		<ul {...stylex.props(coppermindSearchStyles.queriesList)}>
+			{data.queries.map((query) => (
+				<li key={query} {...stylex.props(coppermindSearchStyles.query)}>
+					{query}
+				</li>
+			))}
+		</ul>
+		<ul {...stylex.props(coppermindSearchStyles.results)}>
+			{(data.results ?? Array.from({ length: 6 }, () => null)).map((maybeResult, index) =>
+				maybeResult ? <SearchResultCard key={index} result={maybeResult} /> : <SearchResultLoader key={index} />,
+			)}
+		</ul>
+	</div>
+);
+
+const messageLoaderStyles = stylex.create({ root: { display: "grid", gap: spacing[2] } });
 
 export const MessageLoader = () => (
 	<div {...stylex.props(messageLoaderStyles.root)}>
-		<p {...stylex.props(messageLoaderStyles.shimmerPart, messageLoaderStyles.shimmerPartMedium)} />
-		<p {...stylex.props(messageLoaderStyles.shimmerPart, messageLoaderStyles.shimmerPartNarrow)} />
-		<p {...stylex.props(messageLoaderStyles.shimmerPart, messageLoaderStyles.shimmerPartWide)} />
+		<p {...stylex.props(shimmerStyles.root, shimmerStyles.medium)} />
+		<p {...stylex.props(shimmerStyles.root, shimmerStyles.narrow)} />
+		<p {...stylex.props(shimmerStyles.root, shimmerStyles.wide)} />
 	</div>
 );
 
@@ -100,7 +198,7 @@ const interruptionNotificationStyles = stylex.create({
 		color: mauve[11],
 		display: "flex",
 		gap: spacing[3],
-		inlineSize: 720,
+		inlineSize: 736,
 		maxInlineSize: "100%",
 		paddingBlock: spacing[3],
 		paddingInline: spacing[4],

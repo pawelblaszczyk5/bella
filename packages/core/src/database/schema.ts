@@ -55,6 +55,23 @@ export class ReasoningMessagePartModel extends Model.Class<ReasoningMessagePartM
 	type: Schema.Literal("reasoning"),
 }) {}
 
+export class CoppermindSearchResult extends Schema.Class<CoppermindSearchResult>(
+	"@bella/core/database/schema/CoppermindSearchResult",
+)({ content: Schema.NonEmptyString, pageId: Schema.NonEmptyString }) {}
+
+export class CoppermindSearchMessagePartModel extends Model.Class<CoppermindSearchMessagePartModel>(
+	"@bella/core/database/schema/CoppermindSearchMessagePartModel",
+)({
+	...BaseMessagePartFields,
+	data: Schema.Struct({
+		queries: Schema.NonEmptyArray(Schema.NonEmptyString),
+		results: Schema.Array(CoppermindSearchResult).pipe(Schema.OptionFromNullOr),
+	}),
+	id: Model.GeneratedByApp(Id.pipe(Schema.brand("CoppermindSearchMessagePartId"))),
+	messageId: AssistantMessageModel.fields.id,
+	type: Schema.Literal("coppermindSearch"),
+}) {}
+
 export class UserExperienceEvaluationModel extends Model.Class<UserExperienceEvaluationModel>(
 	"@bella/core/database/schema/UserExperienceEvaluationModel",
 )({

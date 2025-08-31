@@ -18,7 +18,7 @@ import {
 	String,
 } from "effect";
 
-import type { ReasoningMessagePartModel, TextMessagePartModel } from "#src/database/schema.js";
+import type { AssistantMessageModel, TextMessagePartModel } from "#src/database/schema.js";
 import type { MessagesWithParts, ResponseFulfillment, ResponsePlan, ResponseRefusal } from "#src/shared.js";
 
 const QuestionClassification = Schema.Struct({
@@ -65,7 +65,7 @@ const ExperienceClassification = Schema.Struct({
 });
 
 const CoppermindQueries = Schema.Struct({
-	subqueries: Schema.Array(Schema.NonEmptyString).annotations({
+	subqueries: Schema.NonEmptyArray(Schema.NonEmptyString).annotations({
 		description: "All relevant queries that will find information required to answer original question to the fullest.",
 	}),
 	summarizedQuery: Schema.NonEmptyString.annotations({
@@ -122,9 +122,11 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 		const aiLanguageModelMap = yield* AiLanguageModelMap;
 		const executionPlan = yield* ClassificationPlan.withRequirements;
 
-		const mapMessagePart = Match.type<Omit<ReasoningMessagePartModel | TextMessagePartModel, "createdAt">>().pipe(
+		const mapMessagePart = Match.type<
+			Extract<MessagesWithParts[number], { role: AssistantMessageModel["role"] }>["parts"][number]
+		>().pipe(
 			Match.when({ type: "text" }, (part) => Option.some(AiInput.TextPart.make({ text: part.data.text }))),
-			Match.when({ type: "reasoning" }, () => Option.none()),
+			Match.whenOr({ type: "reasoning" }, { type: "coppermindSearch" }, () => Option.none()),
 			Match.exhaustive,
 		);
 

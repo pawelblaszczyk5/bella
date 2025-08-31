@@ -25,7 +25,11 @@ export const GenerateMessageLive = GenerateMessage.toLayer(
 			error: ConversationFlowError,
 			execute: Effect.gen(function* () {
 				const messageStream = yield* bella
-					.getNewMessageStream({ conversationId: payload.conversationId, responsePlan })
+					.getNewMessageStream({
+						assistantMessageId: payload.assistantMessage.id,
+						conversationId: payload.conversationId,
+						responsePlan,
+					})
 					.pipe(Effect.mapError(() => new ConversationFlowError({ type: "DATA_ACCESS_ERROR" })));
 
 				const cachedIsMessageInterrupted = yield* Effect.cachedWithTTL(

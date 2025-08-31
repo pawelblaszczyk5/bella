@@ -10,6 +10,7 @@ import { DatabaseDefault } from "#src/database/mod.js";
 import {
 	AssistantMessageModel,
 	ConversationModel,
+	CoppermindSearchMessagePartModel,
 	ReasoningMessagePartModel,
 	TextMessagePartModel,
 	TransactionId,
@@ -45,7 +46,7 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 				INSERT INTO
 					${sql("messagePart")} ${sql.insert({ ...request, data: sql.json(request.data) })};
 			`,
-			Request: Model.Union(TextMessagePartModel, ReasoningMessagePartModel).insert,
+			Request: Model.Union(TextMessagePartModel, ReasoningMessagePartModel, CoppermindSearchMessagePartModel).insert,
 		});
 
 		const insertUserExperienceEvaluation = SqlSchema.void({
@@ -132,6 +133,7 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 			Result: Schema.Union(
 				TextMessagePartModel.select.pick("id", "messageId", "type", "data"),
 				ReasoningMessagePartModel.select.pick("id", "messageId", "type", "data"),
+				CoppermindSearchMessagePartModel.select.pick("id", "messageId", "type", "data"),
 			),
 		});
 
@@ -170,7 +172,23 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 			Request: UserExperienceEvaluationModel.update.pick("id", "resolvedAt"),
 		});
 
+		const addResultsToCoppermindSearch = SqlSchema.void({
+			execute: (request) => sql`
+				UPDATE ${sql("messagePart")}
+				SET
+					${sql.update({ data: sql.json(request.data) })}
+				WHERE
+					${sql("id")} = ${request.id};
+			`,
+			Request: CoppermindSearchMessagePartModel.update.pick("data", "id"),
+		});
+
 		return {
+			addResultsToCoppermindSearch: Effect.fn("Bella/Repository/addResultsToCoppermindSearch")(function* (
+				data: Pick<CoppermindSearchMessagePartModel, "data" | "id">,
+			) {
+				yield* addResultsToCoppermindSearch(data);
+			}),
 			getMessageStatus: Effect.fn("Bella/Repository/getMessageStatus")(function* (
 				messageId: AssistantMessageModel["id"] | UserMessageModel["id"],
 			) {
@@ -262,6 +280,28 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 					updatedAt: undefined,
 				});
 			}),
+			insertCoppermindSearchMessagePart: Effect.fn("Bella/Repository/insertCoppermindSearchMessagePart")(function* ({
+				data,
+				id,
+				messageId,
+			}: {
+				data: CoppermindSearchMessagePartModel["data"];
+				id: CoppermindSearchMessagePartModel["id"] | undefined;
+				messageId: CoppermindSearchMessagePartModel["messageId"];
+			}) {
+				const coppermindSearchMessagePartId =
+					id ?? CoppermindSearchMessagePartModel.fields.id.make(yield* idGenerator.generate());
+
+				yield* insertMessagePart({
+					createdAt: undefined,
+					data,
+					id: coppermindSearchMessagePartId,
+					messageId,
+					type: "coppermindSearch",
+				});
+
+				return coppermindSearchMessagePartId;
+			}),
 			insertReasoningMessagePart: Effect.fn("Bella/Repository/insertReasoningMessagePart")(function* ({
 				data,
 				id,
@@ -271,9 +311,17 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 				id: ReasoningMessagePartModel["id"] | undefined;
 				messageId: ReasoningMessagePartModel["messageId"];
 			}) {
-				const textMessagePartId = id ?? ReasoningMessagePartModel.fields.id.make(yield* idGenerator.generate());
+				const reasoningMessagePartId = id ?? ReasoningMessagePartModel.fields.id.make(yield* idGenerator.generate());
 
-				yield* insertMessagePart({ createdAt: undefined, data, id: textMessagePartId, messageId, type: "reasoning" });
+				yield* insertMessagePart({
+					createdAt: undefined,
+					data,
+					id: reasoningMessagePartId,
+					messageId,
+					type: "reasoning",
+				});
+
+				return reasoningMessagePartId;
 			}),
 			insertTextMessagePart: Effect.fn("Bella/Repository/insertTextMessagePart")(function* ({
 				data,
@@ -287,6 +335,8 @@ export class Repository extends Effect.Service<Repository>()("@bella/core/Reposi
 				const textMessagePartId = id ?? TextMessagePartModel.fields.id.make(yield* idGenerator.generate());
 
 				yield* insertMessagePart({ createdAt: undefined, data, id: textMessagePartId, messageId, type: "text" });
+
+				return textMessagePartId;
 			}),
 			insertUserExperienceEvaluation: Effect.fn("Bella/Repository/insertUserExperienceEvaluation")(function* (
 				userExperienceEvaluation: Pick<

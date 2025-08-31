@@ -5,6 +5,8 @@ import { DateTime, Schema } from "effect";
 import {
 	AssistantMessageModel,
 	ConversationModel,
+	CoppermindSearchMessagePartModel,
+	CoppermindSearchResult,
 	ReasoningMessagePartModel,
 	TextMessagePartModel,
 	UserExperienceEvaluationModel,
@@ -87,11 +89,26 @@ export const ReasoningMessagePartShape = Schema.Struct({
 
 export type ReasoningMessagePartShape = Schema.Schema.Type<typeof ReasoningMessagePartShape>;
 
+export const CoppermindSearchMessagePartShape = Schema.Struct({
+	...BaseMessagePartShapeFields,
+	data: Schema.Struct({
+		queries: CoppermindSearchMessagePartModel.select.fields.data.fields.queries,
+		results: Schema.Array(CoppermindSearchResult).pipe(Schema.NullOr),
+	}),
+	id: CoppermindSearchMessagePartModel.select.fields.id,
+	messageId: CoppermindSearchMessagePartModel.select.fields.messageId,
+	type: CoppermindSearchMessagePartModel.select.fields.type,
+});
+
+export type CoppermindSearchMessagePartShape = Schema.Schema.Type<typeof CoppermindSearchMessagePartShape>;
+
 export const messagePartsCollection = createCollection(
 	electricCollectionOptions({
 		getKey: (messagePart) => messagePart.id,
 		id: "messageParts",
-		schema: Schema.standardSchemaV1(Schema.Union(TextMessagePartShape, ReasoningMessagePartShape)),
+		schema: Schema.standardSchemaV1(
+			Schema.Union(TextMessagePartShape, ReasoningMessagePartShape, CoppermindSearchMessagePartShape),
+		),
 		shapeOptions: {
 			parser: { timestamptz: (date: string) => DateTime.unsafeMake(date) },
 			url: new URL("/api/message-parts", import.meta.env.VITE_WEB_BASE_URL).toString(),
