@@ -65,8 +65,13 @@ const ExperienceClassification = Schema.Struct({
 });
 
 const CoppermindQueries = Schema.Struct({
-	subqueries: Schema.Array(Schema.NonEmptyString),
-	summarizedQuery: Schema.NonEmptyString,
+	subqueries: Schema.Array(Schema.NonEmptyString).annotations({
+		description: "All relevant queries that will find information required to answer original question to the fullest.",
+	}),
+	summarizedQuery: Schema.NonEmptyString.annotations({
+		description:
+			"Summarized standalone question, based on the whole conversation, closest to user's original phrasing.",
+	}),
 });
 
 const GoogleAiClientLive = GoogleAiClient.layerConfig({ apiKey: Config.redacted("GOOGLE_AI_API_KEY") }).pipe(
@@ -304,7 +309,13 @@ export class Ai extends Effect.Service<Ai>()("@bella/core/Ai", {
 					schema: CoppermindQueries,
 					system: String.stripMargin(`
 						|<task>
-						|	You're a helpful assistant being a specialist in Brandon Sanderson books. Everything that spans from Cosmere, Stormlight Archive, Mistborn or any of his other books. You've read all of them and know details about any of these and its characters and all lore and fan content around it. Your job is to help your colleague find relevant information for answering question related to your niche. To do this properly you receive conversation history and you must respond with two things according to specified schema. 1. Summarized query - since your colleague can only process one message, you must summarize all past conversation and if it contained any relevant information you must enhance user question with the data. Try to not change user question too much semantically. 2. Generate list of subqueries, which can be smaller questions that could be helpful to answer. Try these to be as much different from each other as possible. But they should be always helpful for answering original question. Don't make anything up. If someone is asking about books, or characters, try to use book titles, alternative nicknames, everything that can clarify the question and make the folk searching for information more possible to find it. Don't skip any relevant context from this questions, they still must be fully sensible on standalone. If question is complex you can just use it to break it down to separate questions.
+						|	You're a helpful assistant being a specialist in Brandon Sanderson books. Everything that spans from Cosmere, Stormlight Archive, Mistborn or any of his other books. You've read all of them and know details about any of these and its characters and all lore and fan content around it. Your job is to help your colleague find relevant information for answering question related to your niche. To do this you need to generate two things:
+						|	<summarized_query>
+						|		Summarized query is user question extracted from the whole conversation context. It should be as close as possible to original question. If user message contains any information irrelevant to the question - filter it out. If user refers to something that was mentioned in previous messages you need to extract relevant information so the question can be processed without this context. You must extract closest representation of user question.
+						|	</summarized_query>
+						|	<subqueries>
+						|		This needs to be list of questions that can extract all information relevant to user question. Imagine you're doing a research and want to answer the user question. You want to list all "smaller questions" that you need to answer for research to be complete. Be creative, but don't make things up. For simple questions, like "What happened in chapter 28 of The Way of Kings" it'll be basically the same as the question and you don't need to provide more than one. For more complex question or when user asks for multiple questions at the same time this is useful for better information extraction. Also important is that this can include questions that have similar meanings, but are different semantically, because this will be used for semantic search. E.g. if user asks about character, using they nickname, it may be valuable to rephrase the same question with both nickname and original name, or if user asks about character looks, it may be valuable to split the question into multiple parts. This list should be the longer, the more complicated the question is. For many simple question it shouldn't be longer then 1-2 queries.
+						|	</subqueries>
 						|</task>
 						|<style>
 						|	Be accurate. Don't make mistakes. Another colleague job is dependant on yours one. The output must be valid according to passed schema. Always answer in english, regardless of the actual conversation language
