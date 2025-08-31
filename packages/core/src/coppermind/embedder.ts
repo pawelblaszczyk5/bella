@@ -93,10 +93,9 @@ export class Embedder extends Context.Tag("@bella/core/Embedder")<
 						});
 
 						// cspell:ignore contextualizedembeddings
-						const response = yield* voyageHttpClient.post("contextualizedembeddings", { body }).pipe(
-							Effect.tapErrorTag("ResponseError", (response) => response.response.json.pipe(Effect.tap(Effect.log))),
-							Effect.flatMap(HttpClientResponse.schemaBodyJson(ContextualizedEmbeddingsResponse)),
-						);
+						const response = yield* voyageHttpClient
+							.post("contextualizedembeddings", { body })
+							.pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(ContextualizedEmbeddingsResponse)));
 
 						const allEmbeddings = yield* pipe(
 							Array.map(response.data, ({ data }) => data.map(({ embedding }) => embedding)),
@@ -159,10 +158,9 @@ export class Embedder extends Context.Tag("@bella/core/Embedder")<
 							model: "voyage-3-large",
 						});
 
-						const response = yield* voyageHttpClient.post("embeddings", { body }).pipe(
-							Effect.tapErrorTag("ResponseError", (response) => response.response.json.pipe(Effect.tap(Effect.log))),
-							Effect.flatMap(HttpClientResponse.schemaBodyJson(StandardEmbeddingsResponse)),
-						);
+						const response = yield* voyageHttpClient
+							.post("embeddings", { body })
+							.pipe(Effect.flatMap(HttpClientResponse.schemaBodyJson(StandardEmbeddingsResponse)));
 
 						const allEmbeddings = Array.map(response.data, ({ embedding }) => embedding);
 
