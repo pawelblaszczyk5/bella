@@ -333,7 +333,7 @@ const styles = stylex.create({
 	emptyState: {
 		color: mauve[11],
 		marginInline: "auto",
-		maxInlineSize: 640,
+		maxInlineSize: 576,
 		paddingBlock: spacing[6],
 		paddingInline: spacing[3],
 		textAlign: "center",
@@ -475,7 +475,7 @@ export const Evaluations = ({
 				</TableHeader>
 				<TableBody
 					renderEmptyState={() => (
-						<p {...stylex.props(styles.emptyState)}>
+						<p {...stylex.props(styles.emptyState, typography[2])}>
 							<Trans>
 								It seems like we either don't have any evaluations ready yet, or the setting you've chosen doesn't match
 								any of them 😞
