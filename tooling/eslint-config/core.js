@@ -12,6 +12,7 @@ import regexpPlugin from "eslint-plugin-regexp";
 import { FlatCompat } from "@eslint/eslintrc";
 import promise from "eslint-plugin-promise";
 import noSecrets from "eslint-plugin-no-secrets";
+import deMorgan from "eslint-plugin-de-morgan";
 
 const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 
@@ -313,4 +314,5 @@ export default tseslint.config(
 		plugins: { "no-secrets": noSecrets },
 		rules: { "no-secrets/no-secrets": ["error", { tolerance: 4.25 }] },
 	},
+	deMorgan.configs.recommended,
 );
