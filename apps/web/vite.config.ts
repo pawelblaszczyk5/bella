@@ -1,6 +1,3 @@
-import type { ViteReactPluginApi } from "@vitejs/plugin-react";
-import type { Plugin } from "vite";
-
 import { lingui } from "@lingui/vite-plugin";
 import optimizeLocales from "@react-aria/optimize-locales-plugin";
 // @ts-expect-error - untyped module
@@ -36,29 +33,6 @@ const getBabelConfig = (isDevelopment: boolean) => ({
 	presets: ["@babel/preset-typescript"],
 });
 
-const disableReactCompilerInSsrContext = () =>
-	({
-		api: {
-			reactBabel: (babelConfig, context) => {
-				if (!context.ssr) {
-					return;
-				}
-
-				babelConfig.plugins = babelConfig.plugins.filter((plugin) => {
-					if (
-						plugin === "babel-plugin-react-compiler"
-						|| (Array.isArray(plugin) && plugin[0] === "babel-plugin-react-compiler")
-					) {
-						return false;
-					}
-
-					return true;
-				});
-			},
-		} satisfies ViteReactPluginApi,
-		name: "disable-react-compiler-in-ssr-context",
-	}) satisfies Plugin;
-
 export default defineConfig((environment) => {
 	const isDevelopment = environment.command === "serve";
 
@@ -79,7 +53,6 @@ export default defineConfig((environment) => {
 			{ ...optimizeLocales.vite({ locales: ["en-US"] }), enforce: "pre" },
 			tanstackStart({ customViteReactPlugin: true, tsr: { addExtensions: true } }),
 			react({ babel: getBabelConfig(isDevelopment) }),
-			disableReactCompilerInSsrContext(),
 			lingui(),
 		],
 		server: { host: true, port: 5_821, strictPort: true },
