@@ -13,7 +13,7 @@ catalog:
   "@effect/ai-google": ^0.5.0
   "@effect/cluster": ^0.48.2
   "@effect/experimental": ^0.54.6
-  "@effect/opentelemetry": ^0.56.4
+  "@effect/opentelemetry": ^0.56.5
   "@effect/platform": ^0.90.6
   "@effect/platform-node": ^0.96.1
   "@effect/rpc": ^0.69.1

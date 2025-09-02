@@ -20,7 +20,7 @@
 		"@bella/core": "workspace:*",
 		"@bella/opentelemetry": "workspace:*",
 		"@effect/cluster": "catalog:",
-		"@effect/opentelemetry": "^0.56.4",
+		"@effect/opentelemetry": "^0.56.5",
 		"@effect/platform": "catalog:",
 		"@effect/platform-node": "catalog:",
 		"@effect/rpc": "catalog:",
