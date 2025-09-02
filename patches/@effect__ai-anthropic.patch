@@ -11,21 +11,3 @@ index 2489686702253efd9d064df7489555d1b396a88d..ce42595e743d741f65c6e6e31d4778f0
    const stream = request => Stream.suspend(() => {
      const toolCalls = {};
      let finishReason = "unknown";
-@@ -52,6 +52,9 @@ export const make = options => Effect.gen(function* () {
-       cacheWriteInputTokens: 0
-     };
-     const metadata = {};
-+
-+    let finished = false;
-+
-     return streamRequest(HttpClientRequest.post("/v1/messages", {
-       body: HttpBody.unsafeJson({
-         ...request,
-@@ -90,6 +93,7 @@ export const make = options => Effect.gen(function* () {
-           }
-         case "message_stop":
-           {
-+            finished = true;
-             parts.push(new AiResponse.FinishPart({
-               usage,
-               reason: finishReason,
